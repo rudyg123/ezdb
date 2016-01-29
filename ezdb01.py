@@ -30,29 +30,28 @@ class Database:
         self.cur = ''
         self.conn = ''
 
-    def connect_database(self):
-        #global cur, conn
-
-        conn_config = {
+        self.conn_config = {
             'user': self.user,
             'password': self.password,
             'host': self.host,
         }
 
+    def connect_database(self):
+
         if self.dbtype == 'postgres':
 
-            conn_config['dbname'] = self.dbname
+            self.conn_config['dbname'] = self.dbname
             try:
-                self.conn = psycopg2.connect(**conn_config)
+                self.conn = psycopg2.connect(**self.conn_config)
 
             except psycopg2.DatabaseError, err:
                 error_handler(self.dbname, err)
 
         elif self.dbtype == 'mysql':
 
-            conn_config['database'] = self.dbname
+            self.conn_config['database'] = self.dbname
             try:
-                self.conn = mysql.connector.connect(**conn_config)
+                self.conn = mysql.connector.connect(**self.conn_config)
 
             except mysql.connector.Error, err:
 
@@ -87,30 +86,37 @@ class Database:
             print "   ", row[0]
         print "\n"
 
-    def close_database(self):
-        self.conn.close()
-
     def create_database(self):
+        self.conn_config.clear()
+        self.conn_config = {
+            'user': self.user,
+            'password': self.password,
+            'host': self.host,
+        }
 
         if self.dbtype == "postgres":
+            self.conn_config['dbname'] = self.dbname
+
             try:
+                self.conn = psycopg2.connect(**self.conn_config)
+                self.cur = self.conn.cursor()
+
                 self.conn.set_isolation_level(psycopg2.extensions.ISOLATION_LEVEL_AUTOCOMMIT)
                 sql_string = "CREATE DATABASE %s" % self.dbname
                 self.cur.execute(sql_string)
+                print "{} postgreSQL database created.".format(self.dbname)
 
             except psycopg2.DatabaseError, e:
                 print "There was a problem creating the database"
                 print 'Error %s' % e
 
         elif self.dbtype == "mysql":
+            self.conn_config['database'] = self.dbname
+
             try:
-                conn_config = {
-                    'user': 'root',
-                    'password': 'password',
-                    'host': 'localhost',
-                    }
-                self.conn = mysql.connector.connect(**conn_config)
+                self.conn = mysql.connector.connect(**self.conn_config)
                 self.cur = self.conn.cursor()
+
                 sql_string = "CREATE DATABASE {}".format(self.dbname)
                 self.cur.execute(sql_string)
                 print "{} MySQL database created.".format(self.dbname)
@@ -122,18 +128,36 @@ class Database:
 
     def delete_database(self):
 
+        self.conn.close() #close db connection
+
+        #connect to dbms as root
+        self.conn_config.clear()
+        self.conn_config = {
+            'user': self.user,
+            'password': self.password,
+            'host': self.host,
+        }
+
+
         if self.dbtype == "postgres":
             try:
+                self.conn = psycopg2.connect(**self.conn_config)
+                self.cur = self.conn.cursor()
+
                 self.conn.set_isolation_level(psycopg2.extensions.ISOLATION_LEVEL_AUTOCOMMIT)
                 sql_string = "DROP DATABASE %s" % self.dbname
                 self.cur.execute(sql_string)
+                print "{} postgreSQL database deleted.".format(self.dbname)
 
             except psycopg2.DatabaseError, e:
-                print "There was a problem creating the database"
+                print "There was a problem deleting the database"
                 print 'Error %s' % e
 
         elif self.dbtype == "mysql":
             try:
+                self.conn = mysql.connector.connect(**self.conn_config)
+                self.cur = self.conn.cursor()
+
                 sql_string = "DROP DATABASE {}".format(self.dbname)
                 self.cur.execute(sql_string)
                 print "{} MySQL database deleted.".format(self.dbname)
@@ -147,9 +171,10 @@ def error_handler(dbname, error):
     print "There was a problem connecting to the database"
     print 'Error %s' % error
     print("Database does not exist.")
-    createdb_input = raw_input("Do want to create database {} now? Type 'yes' to confirm".format(dbname))
+    createdb_input = raw_input("Do want to create database {} now? Type 'yes' to confirm: ".format(dbname))
     if createdb_input == "yes":
         Database.create_database(mypostgres)
+
 
 
 '''
@@ -161,17 +186,21 @@ def displaytable():
         print "   ", row[0], row[1], row[2]
 '''
 #curses_setup()
-mypostgres = Database('postgres', 'baddb', 'postgres', 'password', 'localhost')
-mypostgres.connect_database()
-mypostgres.list_databases()
 
+mypostgres = Database('postgres', 'baddb', 'postgres', 'password', 'localhost')
+
+mypostgres.connect_database()
+
+mypostgres.delete_database()
+mypostgres.list_databases()
+#mypostgres.close_database()
 #my_mysql = Database('mysql', '', 'root', 'password', 'localhost')
 #my_mysql.list_databases()
 
 #mypostgres.list_databases()
 #my_mysql.list_databases()
 
-mypostgres.close_database()
+#mypostgres.close_database()
 #my_mysql.close_database()
 #createdb('mysql', 'testdb3')
 
