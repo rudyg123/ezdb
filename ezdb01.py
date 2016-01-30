@@ -1,7 +1,8 @@
 __author__ = 'rudy'
 
-import curses
+#import curses
 import psycopg2
+import psycopg2.errorcodes
 import psycopg2.extras
 import mysql.connector
 from mysql.connector import errorcode
@@ -20,9 +21,10 @@ def curses_setup():
 
 class Database:
 
-    def __init__(self, dbtype, dbname, user, password, host):
+    '''initializes database class variables and connect to root dbms'''
+    def __init__(self, dbtype, user, password, host):
         self.dbtype = dbtype
-        self.dbname = dbname
+        self.dbname = ''
         self.user = user
         self.password = password
         self.host = host
@@ -36,22 +38,56 @@ class Database:
             'host': self.host,
         }
 
-    def connect_database(self):
+        if self.dbtype == 'postgresql':
 
-        if self.dbtype == 'postgres':
-
-            self.conn_config['dbname'] = self.dbname
             try:
                 self.conn = psycopg2.connect(**self.conn_config)
+                self.cur = self.conn.cursor()
 
-            except psycopg2.DatabaseError, err:
-                error_handler(self.dbname, err)
+            except psycopg2.errorcodes, err:
+                print errorcodes.lookup(err.pgcode)
+                return
+
+        elif self.dbtype == 'mysql':
+
+            try:
+                self.conn = mysql.connector.connect(**self.conn_config)
+                self.cur = self.conn.cursor()
+
+            except mysql.connector.Error, err:
+
+                if err.errno == errorcode.ER_ACCESS_DENIED_ERROR:
+                    print("Invalid username and/or password.")
+                else:
+                    print("There was a problem connecting to the DBMS.")
+                return
+
+        print "Connected to {} DBMS.".format(self.dbtype)
+
+    '''connect to existing named database
+    -still need to implement user db authentication'''
+    def connect_database(self, dbname):
+
+        self.dbname = dbname
+
+        if self.dbtype == 'postgresql':
+
+            self.conn_config['dbname'] = self.dbname
+
+            try:
+                self.conn = psycopg2.connect(**self.conn_config)
+                self.cur = self.conn.cursor()
+
+            except psycopg2.errorcodes, err:
+                print errorcodes.lookup(err.pgcode)
+                return
 
         elif self.dbtype == 'mysql':
 
             self.conn_config['database'] = self.dbname
             try:
                 self.conn = mysql.connector.connect(**self.conn_config)
+                self.cur = self.conn.cursor()
 
             except mysql.connector.Error, err:
 
@@ -60,62 +96,57 @@ class Database:
 
                 elif err.errno == errorcode.ER_BAD_DB_ERROR:
                     print("Database does not exist.")
-                    createdb_input = raw_input("Do want to create database {} now? Type 'yes' to confirm".format(self.dbname))
-                    if createdb_input == "yes":
-                        pass
-                        #create_database()
+
                 else:
                     print(err)
 
                 return
 
-        self.cur = self.conn.cursor()
+        print "Connected to database {}.".format(self.dbname)
 
     def list_databases(self):
 
-        if self.dbtype == "postgres":
+        if self.dbtype == "postgresql":
             sql_string = "SELECT datname FROM pg_database WHERE datistemplate = false;"
+
+            try:
+                self.cur.execute(sql_string)
+            except psycopg2.errorcodes, err:
+                print errorcodes.lookup(err.pgcode)
+                return
 
         elif self.dbtype == "mysql":
             sql_string = "SHOW DATABASES;"
+            try:
+                self.cur.execute(sql_string)
+            except mysql.connector.Error, err:
+                print(err)
 
-        self.cur.execute(sql_string)
         rows = self.cur.fetchall()
         print "{} Databases:".format(self.dbtype)
         for row in rows:
             print "   ", row[0]
         print "\n"
 
-    def create_database(self):
-        self.conn_config.clear()
-        self.conn_config = {
-            'user': self.user,
-            'password': self.password,
-            'host': self.host,
-        }
+    def create_database(self, dbname):
 
-        if self.dbtype == "postgres":
-            self.conn_config['dbname'] = self.dbname
+        self.dbname = dbname
+
+        if self.dbtype == "postgresql":
 
             try:
-                self.conn = psycopg2.connect(**self.conn_config)
-                self.cur = self.conn.cursor()
-
                 self.conn.set_isolation_level(psycopg2.extensions.ISOLATION_LEVEL_AUTOCOMMIT)
-                sql_string = "CREATE DATABASE %s" % self.dbname
+                sql_string = "CREATE DATABASE {}".format(self.dbname)
                 self.cur.execute(sql_string)
                 print "{} postgreSQL database created.".format(self.dbname)
 
-            except psycopg2.DatabaseError, e:
+            except psycopg2.errorcodes, err:
                 print "There was a problem creating the database"
-                print 'Error %s' % e
+                print 'Error %s' % err
 
         elif self.dbtype == "mysql":
-            self.conn_config['database'] = self.dbname
 
             try:
-                self.conn = mysql.connector.connect(**self.conn_config)
-                self.cur = self.conn.cursor()
 
                 sql_string = "CREATE DATABASE {}".format(self.dbname)
                 self.cur.execute(sql_string)
@@ -128,7 +159,8 @@ class Database:
 
     def delete_database(self):
 
-        self.conn.close() #close db connection
+        if self.conn:
+            self.conn.close() #close db connection
 
         #connect to dbms as root
         self.conn_config.clear()
@@ -139,7 +171,7 @@ class Database:
         }
 
 
-        if self.dbtype == "postgres":
+        if self.dbtype == "postgresql":
             try:
                 self.conn = psycopg2.connect(**self.conn_config)
                 self.cur = self.conn.cursor()
@@ -166,7 +198,7 @@ class Database:
                 print "There was a problem deleting the database"
                 print 'Error %s' % err
 
-
+'''
 def error_handler(dbname, error):
     print "There was a problem connecting to the database"
     print 'Error %s' % error
@@ -174,7 +206,7 @@ def error_handler(dbname, error):
     createdb_input = raw_input("Do want to create database {} now? Type 'yes' to confirm: ".format(dbname))
     if createdb_input == "yes":
         Database.create_database(mypostgres)
-
+'''
 
 
 '''
@@ -187,22 +219,24 @@ def displaytable():
 '''
 #curses_setup()
 
-mypostgres = Database('postgres', 'baddb', 'postgres', 'password', 'localhost')
+'''postgresql test functions'''
+#mypostgres = Database('postgresql', 'postgres', 'password', 'localhost')
 
-mypostgres.connect_database()
-
-mypostgres.delete_database()
-mypostgres.list_databases()
-#mypostgres.close_database()
-#my_mysql = Database('mysql', '', 'root', 'password', 'localhost')
-#my_mysql.list_databases()
-
+#mypostgres.connect_database('testdb')
+#mypostgres.create_database('gooddb')
+#mypostgres.delete_database()
 #mypostgres.list_databases()
-#my_mysql.list_databases()
+#mypostgres.close_database()
+
+'''mysql test functions'''
+my_mysql = Database('mysql', 'root', 'password', 'localhost')
+#my_mysql.connect_database('testdb_mysql')
+my_mysql.list_databases()
 
 #mypostgres.close_database()
 #my_mysql.close_database()
-#createdb('mysql', 'testdb3')
+my_mysql.create_database('testdb4')
+my_mysql.list_databases()
 
 #deletedb('mysql', 'testdb_mysql3')
 
