@@ -45,7 +45,7 @@ class Database:
                 self.cur = self.conn.cursor()
 
             except psycopg2.errorcodes, err:
-                print errorcodes.lookup(err.pgcode)
+                print errorcode.lookup(err.pgcode)
                 return
 
         elif self.dbtype == 'mysql':
@@ -79,7 +79,7 @@ class Database:
                 self.cur = self.conn.cursor()
 
             except psycopg2.errorcodes, err:
-                print errorcodes.lookup(err.pgcode)
+                print errorcode.lookup(err.pgcode)
                 return
 
         elif self.dbtype == 'mysql':
@@ -112,7 +112,7 @@ class Database:
             try:
                 self.cur.execute(sql_string)
             except psycopg2.errorcodes, err:
-                print errorcodes.lookup(err.pgcode)
+                print errorcode.lookup(err.pgcode)
                 return
 
         elif self.dbtype == "mysql":
@@ -157,7 +157,9 @@ class Database:
                 print 'Error %s' % err
 
 
-    def delete_database(self):
+    def delete_database(self, dbname):
+
+        self.dbname = dbname
 
         if self.conn:
             self.conn.close() #close db connection
@@ -170,7 +172,6 @@ class Database:
             'host': self.host,
         }
 
-
         if self.dbtype == "postgresql":
             try:
                 self.conn = psycopg2.connect(**self.conn_config)
@@ -181,9 +182,9 @@ class Database:
                 self.cur.execute(sql_string)
                 print "{} postgreSQL database deleted.".format(self.dbname)
 
-            except psycopg2.DatabaseError, e:
+            except psycopg2.errorcodes, err:
                 print "There was a problem deleting the database"
-                print 'Error %s' % e
+                print 'Error %s' % err
 
         elif self.dbtype == "mysql":
             try:
@@ -220,24 +221,25 @@ def displaytable():
 #curses_setup()
 
 '''postgresql test functions'''
-#mypostgres = Database('postgresql', 'postgres', 'password', 'localhost')
+mypostgres = Database('postgresql', 'postgres', 'password', 'localhost')
 
 #mypostgres.connect_database('testdb')
 #mypostgres.create_database('gooddb')
-#mypostgres.delete_database()
-#mypostgres.list_databases()
+mypostgres.delete_database('gooddb')
+mypostgres.list_databases()
 #mypostgres.close_database()
 
 '''mysql test functions'''
-my_mysql = Database('mysql', 'root', 'password', 'localhost')
+#my_mysql = Database('mysql', 'root', 'password', 'localhost')
 #my_mysql.connect_database('testdb_mysql')
-my_mysql.list_databases()
+#my_mysql.list_databases()
 
 #mypostgres.close_database()
 #my_mysql.close_database()
-my_mysql.create_database('testdb4')
-my_mysql.list_databases()
+#my_mysql.create_database('testdb4')
+#my_mysql.delete_database('testdb5')
+#my_mysql.list_databases()
 
-#deletedb('mysql', 'testdb_mysql3')
+
 
 #displaytable()
