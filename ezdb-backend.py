@@ -216,6 +216,54 @@ class Database(object):
             print "   ", row[0]
         print "\n"
 
+    def display_table_struct(self, table_name):
+
+        if self.dbtype == "postgresql":
+
+            sql_string = "SELECT column_name, data_type, collation_name, is_nullable, column_default FROM information_schema.columns WHERE table_name ='{}';".format(table_name)
+
+            try:
+                self.cur.execute(sql_string)
+                self.conn.commit()
+            except psycopg2.errorcodes, err:
+                print errorcode.lookup(err.pgcode)
+                return
+
+        elif self.dbtype == "mysql":
+
+            sql_string = "DESCRIBE {};".format(table_name)
+
+            try:
+                self.cur.execute(sql_string)
+            except mysql.connector.Error, err:
+                print(err)
+
+        rows = self.cur.fetchall()
+
+        print "{} Table Structure:".format(table_name)
+        for row in rows:
+            print "   ", row[0], row[1], row[2], row[3], row[4]
+        print "\n"
+
+    def delete_table(self, table_name):
+
+        sql_string = "DROP TABLE {};".format(table_name)
+
+        if self.dbtype == "postgresql":
+
+            try:
+                self.cur.execute(sql_string)
+            except psycopg2.errorcodes, err:
+                print errorcode.lookup(err.pgcode)
+                return
+
+        elif self.dbtype == "mysql":
+
+            try:
+                self.cur.execute(sql_string)
+            except mysql.connector.Error, err:
+                print(err)
+
 
 class Table(object):
 
@@ -280,13 +328,14 @@ class Table(object):
     mysql_field_constraint_list = ['PRIMARY KEY','UNIQUE','INDEX']
     mysql_engine_list = ['InnoDB','MyISAM','MRG_MYISAM','CSV','MEMORY','BLACKHOLE','PERFORMANCE_SCHEMA','ARCHIVE']
 
-    def __init__(self, table_name):
+    def __init__(self,db,table_name, field_name, field_type):
+        self.db = db
         self.table_name = table_name
         self.table_storage_eng = 'innoDB'
         self.table_comment = ''
 
-        self.field_name = ''
-        self.field_type = ''
+        self.field_name = field_name
+        self.field_type = field_type
         self.field_length_or_val = ''
         self.field_collation = ''
         self.field_attrib = ''
@@ -298,24 +347,23 @@ class Table(object):
         self.field_index = ''
         self.field_fulltext = ''
 
-    def create_table(self):
+        sql_string = "CREATE TABLE {}({} {});".format(self.table_name, self.field_name, self.field_type)
 
-        if self.dbtype == "postgresql":
-            sql_string = "SELECT table_name FROM information_schema.tables WHERE table_schema = 'public'"
+        if self.db.dbtype == "postgresql":
 
             try:
-                self.cur.execute(sql_string)
+                self.db.cur.execute(sql_string)
+                self.db.conn.commit()
             except psycopg2.errorcodes, err:
                 print errorcode.lookup(err.pgcode)
                 return
 
-        elif self.dbtype == "mysql":
-            sql_string = "SHOW TABLES;"
+        elif self.db.dbtype == "mysql":
+
             try:
-                self.cur.execute(sql_string)
+                self.db.cur.execute(sql_string)
             except mysql.connector.Error, err:
                 print(err)
-
 
 
 '''
@@ -337,28 +385,40 @@ def displaytable():
     for row in rows:
         print "   ", row[0], row[1], row[2]
 '''
-#curses_setup()
 
 '''postgresql test functions'''
-#mypostgres = Database('postgresql', 'postgres', 'password', 'localhost')
+mypostgres = Database('postgresql', 'postgres', 'password', 'localhost')
 
-#mypostgres.connect_database('testdb')
+mypostgres.connect_database('testdb')
 #mypostgres.create_database('gooddb')
 #mypostgres.delete_database('gooddb')
-#mypostgres.list_databases()
-#mypostgres.list_database_tables()
+mypostgres.list_databases()
+mypostgres.list_database_tables()
+#producer = Table(mypostgres,'producer','id','int')
+mypostgres.display_table_struct('actor')
+#mypostgres.delete_table('producer')
+mypostgres.list_database_tables()
+
 #mypostgres.close_database()
 
 '''mysql test functions'''
 my_mysql = Database('mysql', 'root', 'password', 'localhost')
 my_mysql.connect_database('testdb_mysql')
-#my_mysql.list_databases()
+
+my_mysql.list_databases()
 my_mysql.list_database_tables()
+
 #mypostgres.close_database()
 #my_mysql.close_database()
 #my_mysql.create_database('testdb4')
 #my_mysql.delete_database('testdb02_mysql')
-my_mysql.list_databases()
+#my_mysql.list_databases()
+#actor = Table(my_mysql,'actor','id','int')
+my_mysql.display_table_struct('actor')
+#director = Table(my_mysql,'director','id','int')
+#actor.create_table()
+#my_mysql.delete_table('actor')
+#my_mysql.list_database_tables()
 
 
 
