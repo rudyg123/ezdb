@@ -1,8 +1,11 @@
 #!/usr/bin/env python
 # encoding: utf-8
 
-#CS419 ezdb backend main file - uses postgres_db.py and mysql_db.py files
-#Group 15: Rudy Gonzalez, Bobby Hines
+'''
+CS419 ezdb backend main file - used to launch backend functions.
+Uses postgres_db.py and mysql_db.py files.
+Group 15: Rudy Gonzalez, Bobby Hines
+'''
 
 import postgres_db as pdb
 import mysql_db as mdb

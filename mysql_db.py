@@ -1,6 +1,11 @@
 #!/usr/bin/env python
 # encoding: utf-8
 
+'''
+CS419 mysql_db.py file
+Group 15: Rudy Gonzalez, Bobby Hines
+'''
+
 import mysql.connector
 from mysql.connector import errorcode
 

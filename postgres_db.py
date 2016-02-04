@@ -1,6 +1,12 @@
 #!/usr/bin/env python
 # encoding: utf-8
 
+'''
+CS419 postgres_db.py file
+Group 15: Rudy Gonzalez, Bobby Hines
+'''
+
+
 import psycopg2
 import psycopg2.errorcodes
 import psycopg2.extras
