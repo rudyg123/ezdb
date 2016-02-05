@@ -6,7 +6,8 @@ __author__ = 'bobby'
 
 
 # ActionForm includes "Cancel" in addition to "OK"
-class FormObject(npyscreen.ActionForm):
+class FormObject(npyscreen.ActionFormWithMenus):
+
     def create(self):
 
         # Title text
@@ -20,8 +21,26 @@ class FormObject(npyscreen.ActionForm):
         self.add(npyscreen.FixedText, value=" \___|/___| \__,_||_.__/ ", editable=False)
         self.nextrely += 3  # Extra padding
 
-        # Add a button
-        self.add(npyscreen.SelectOne, values=["Open Existing Database", "Create New Database"], scroll_exit=True)
+        # Add session options and save the selected value
+        self.sessionType = self.add(npyscreen.SelectOne, values=["Open Existing Database", "Create New Database"],
+                                    scroll_exit=True)
+
+        # Add a menu
+        menu = self.new_menu(name="Help Menu")
+        menu.addItem("Some helpful guidance here.")
+
+    def on_ok(self):
+        if self.sessionType.value[0] == 0:
+            npyscreen.notify_confirm("You selected \"Open Existing Database\"", "Open Existing Database", editw=1)
+        elif self.sessionType.value[0] == 1:
+            npyscreen.notify_confirm("You selected \"Create New Database\"", "Create New Database", editw=1)
+
+    def on_cancel(self):
+        exiting = npyscreen.notify_yes_no("Are you sure you want to quit?", "Are you sure?", editw=1)
+        if exiting:
+            self.parentApp.setNextForm(None)
+        else:
+            npyscreen.blank_terminal() # clears the notification and just goes back to the original form
 
 
 # NPSAppManaged provides a framework to start and end the application
