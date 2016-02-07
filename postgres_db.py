@@ -15,9 +15,10 @@ import psycopg2.extras
 #required editing pg_hba.conf file in path etc/postgresql/9.3/main from peer to trust
 
 class Postgres_Database(object):
-
+        
     '''initializes database class variables and connect to root dbms'''
-    def __init__(self, dbtype, host, port, user, password):
+    def __init__(self, dbtype='postgreSQL', host='localhost', port='', user='postgres', password='password'):
+ 
         self.dbtype = dbtype
         self.host = host
         self.port = port
@@ -43,7 +44,7 @@ class Postgres_Database(object):
             print err.lookup(err.pgcode)
             return
 
-        print "Connected to {} DBMS.".format(self.dbtype)
+        #print "Connected to {} DBMS.".format(self.dbtype)
 
     '''connect to existing named database
     -still need to implement user db authentication'''
@@ -60,7 +61,7 @@ class Postgres_Database(object):
             print err.lookup(err.pgcode)
             return
 
-        print "Connected to database {}.".format(self.dbname)
+        #print "Connected to database {}.".format(self.dbname)
 
     def list_databases(self):
 
@@ -68,16 +69,22 @@ class Postgres_Database(object):
 
         try:
             self.cur.execute(sql_string)
+            self.conn.commit()
         except psycopg2.errorcodes, err:
             print err.lookup(err.pgcode)
             return
 
-        rows = self.cur.fetchall()
+        dbnames = self.cur.fetchall()
+        self.conn.commit()
+        print dbnames
+
+        return dbnames
+        '''
         print "{} Databases:".format(self.dbtype)
         for row in rows:
             print "   ", row[0]
         print "\n"
-
+        '''
 
     def create_database(self, dbname):
 
@@ -110,6 +117,7 @@ class Postgres_Database(object):
 
         try:
             self.conn = psycopg2.connect(**self.conn_config)
+            self.conn.commit()
             self.cur = self.conn.cursor()
 
             self.conn.set_isolation_level(psycopg2.extensions.ISOLATION_LEVEL_AUTOCOMMIT)
@@ -143,7 +151,6 @@ class Postgres_Database(object):
 
         try:
             self.cur.execute(sql_string)
-            self.conn.commit()
         except psycopg2.errorcodes, err:
             print err.lookup(err.pgcode)
             return

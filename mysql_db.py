@@ -13,6 +13,10 @@ class MySQL_Database(object):
 
     '''initializes database class variables and connect to root dbms'''
     def __init__(self, dbtype, host, port, user, password):
+        """
+
+        :rtype : object
+        """
         self.dbtype = dbtype
         self.host = host
         self.port = port
@@ -75,15 +79,20 @@ class MySQL_Database(object):
         sql_string = "SHOW DATABASES;"
         try:
             self.cur.execute(sql_string)
+
         except mysql.connector.Error, err:
             print(err)
 
-        rows = self.cur.fetchall()
+        dbnames = self.cur.fetchall()
+
+        return dbnames
+
+        '''
         print "{} Databases:".format(self.dbtype)
         for row in rows:
             print "   ", row[0]
         print "\n"
-
+        '''
 
     def create_database(self, dbname):
 

@@ -4,23 +4,21 @@
 import npyscreen as npy
 import postgres_db as pdb
 import mysql_db as mdb
-
-#global dbtype, conn_new_or_existing
+import settings
 
 # This application class serves as a wrapper for the initialization of curses
 # and also manages the actual forms of the application
 class ezdbApp(npy.NPSAppManaged):
 
     def onStart(self):
+        self.mydb = pdb.Postgres_Database()
         self.addForm("MAIN", DBMS_Form, name = 'Welcome to ezdb')
         self.addForm("ConnectDB_Form", ConnectDB_Form, name = 'ezdb open database')
         self.addForm("CreateDB_Form", CreateDB_Form, name = 'ezdb create database')
 
-class DBMS_Form(npy.Form):
+class DBMS_Form(npy.Form, settings.Settings):
 
-    DEFAULT_LINES = 15
     def create(self):
-        #global dbtype, conn_new_or_existing
 
         self.add(npy.FixedText, value = "Connect to Database System", editable = 'false')
 
@@ -55,29 +53,36 @@ class DBMS_Form(npy.Form):
 
     def afterEditing(self):
 
-        global mydb
-
-        #connects to DBMS
-        if self.dbtype.value[0] == 0:
-            mydb = pdb.Postgres_Database(self.dbtype.value, self.host.value, self.port.value, self.username.value, self.password.value)
-        elif self.dbtype.value[0] == 1:
-            mydb = mdb.MySQL_Database(self.dbtype.value, self.host.value, self.port.value, self.username.value, self.password.value)
+        self.mydb = pdb.Postgres_Database(self.dbtype.get_selected_objects()[0], self.host.value, self.port.value,
+                                          self.username.value, self.password.value)
+        self.mydb.connect_database('postgres')
 
         self.parentApp.setNextForm("ConnectDB_Form")
 
-class ConnectDB_Form(npy.Form):
+
+class ConnectDB_Form(npy.Form, settings.Settings):
 
     def create(self):
 
-        conn_new_or_existing = self.add(npy.TitleSelectOne, max_height=4,
-                                             name="Choose:",
-                                             values = ["Open Existing Database","Create New Database"],
-                                             scroll_exit=True)
-        self.add(npy.TitleText, name = "Database Name:",)
+        self.add(npy.FixedText, value=self.parentApp.mydb.dbtype + ' Database Type')
+        self.conn_new_or_existing = self.add(npy.TitleSelectOne, name="Choose:",
+                                             values = ["Create New Database", "Open Existing Database"],
+                                             scroll_exit=True, max_height=5)
+
+        self.new_dbname = self.add(npy.TitleText, name = "New Database:",)
+        dblist = self.parentApp.mydb.list_databases()
+        self.add(npy.TitleMultiLine, name = "Or Open Database:", values=dblist, max_width=50, max_height=10, scroll_exit=True)
+
+        #self.add(npy.Pager, values = dblist[0], max_width=50, max_height=10)
+
+
 
     def afterEditing(self):
 
-        self.parentApp.setNextForm(None)
+        if self.conn_new_or_existing.get_selected_objects()[0] == "Create New Database":
+            self.parentApp.mydb.create_database(self.new_dbname.value)
+
+        self.parentApp.setNextForm("ConnectDB_Form")
 
 class CreateDB_Form(npy.Form):
 
@@ -90,29 +95,3 @@ class CreateDB_Form(npy.Form):
 if __name__ == "__main__":
     App = ezdbApp().run()
 
-
-
-
-'''
-    def main-backup(self):
-        # These lines create the form and populate it with widgets.
-        # A fairly complex screen in only 8 or so lines of code - a line for each control.
-        F  = npyscreen.Form(name = "Welcome to ezdb",)
-        t  = F.add(npyscreen.TitleText, name = "Text:",)
-        fn = F.add(npyscreen.TitleFilename, name = "Filename:")
-        fn2 = F.add(npyscreen.TitleFilenameCombo, name="Filename2:")
-        dt = F.add(npyscreen.TitleDateCombo, name = "Date:")
-        s  = F.add(npyscreen.TitleSlider, out_of=12, name = "Slider")
-        ml = F.add(npyscreen.MultiLineEdit,
-               value = """try typing here!\nMutiline text, press ^R to reformat.\n""",
-               max_height=5, rely=9)
-        ms = F.add(npyscreen.TitleSelectOne, max_height=4, value = [1,], name="Pick One",
-                values = ["Option1","Option2","Option3"], scroll_exit=True)
-        ms2= F.add(npyscreen.TitleMultiSelect, max_height =-2, value = [1,], name="Pick Several",
-                values = ["Option1","Option2","Option3"], scroll_exit=True)
-
-        # This lets the user interact with the Form.
-        F.edit()
-
-        print(ms.get_selected_objects())
-'''
