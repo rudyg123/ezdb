@@ -12,11 +12,43 @@ from mysql.connector import errorcode
 class MySQL_Database(object):
 
     '''initializes database class variables and connect to root dbms'''
-    def __init__(self, dbtype, host, port, user, password):
-        """
+    def __init__(self, dbtype='MySQL', host='localhost', port='', user='root', password='password', activedb=False):
 
-        :rtype : object
-        """
+        self.dbtype = dbtype
+        self.host = host
+        self.port = port
+        self.user = user
+        self.password = password
+
+        self.dbname = ''
+
+        self.cur = ''
+        self.conn = ''
+
+        self.conn_config = {
+            'user': self.user,
+            'password': self.password,
+            'host': self.host,
+        }
+        
+        self.activedb = activedb
+
+        try:
+            self.conn = mysql.connector.connect(**self.conn_config)
+            self.cur = self.conn.cursor()
+
+        except mysql.connector.Error, err:
+
+            if err.errno == errorcode.ER_ACCESS_DENIED_ERROR:
+                print("Invalid username and/or password.")
+            else:
+                print("There was a problem connecting to the DBMS.")
+            return
+
+        #print "Connected to {} DBMS.".format(self.dbtype)
+
+    def connect_DBMS(self, dbtype, host, port, user, password, activedb):
+        
         self.dbtype = dbtype
         self.host = host
         self.port = port
@@ -34,6 +66,8 @@ class MySQL_Database(object):
             'host': self.host,
         }
 
+        self.activedb = activedb
+        
         try:
             self.conn = mysql.connector.connect(**self.conn_config)
             self.cur = self.conn.cursor()
@@ -45,9 +79,17 @@ class MySQL_Database(object):
             else:
                 print("There was a problem connecting to the DBMS.")
             return
-
-        print "Connected to {} DBMS.".format(self.dbtype)
-
+        
+    def setactive(self):
+        self.activedb = True
+        
+    #@property
+    def getactive(self):
+        if self.activedb:
+            return True
+        else:
+            return False
+        
     '''connect to existing named database
     -still need to implement user db authentication'''
     def connect_database(self, dbname):
@@ -72,7 +114,7 @@ class MySQL_Database(object):
 
             return
 
-        print "Connected to database {}.".format(self.dbname)
+        #print "Connected to database {}.".format(self.dbname)
 
     def list_databases(self):
 

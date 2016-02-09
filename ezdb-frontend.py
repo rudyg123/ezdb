@@ -1,97 +1,114 @@
 #!/usr/bin/env python
-# encoding: utf-8
 
-import npyscreen as npy
-import postgres_db as pdb
-import mysql_db as mdb
-import settings
+import npyscreen
+import curses
 
-# This application class serves as a wrapper for the initialization of curses
-# and also manages the actual forms of the application
-class ezdbApp(npy.NPSAppManaged):
-
-    def onStart(self):
-        self.mydb = pdb.Postgres_Database()
-        self.addForm("MAIN", DBMS_Form, name = 'Welcome to ezdb')
-        self.addForm("ConnectDB_Form", ConnectDB_Form, name = 'ezdb open database')
-        self.addForm("CreateDB_Form", CreateDB_Form, name = 'ezdb create database')
-
-class DBMS_Form(npy.Form, settings.Settings):
+# ActionForm includes "Cancel" in addition to "OK"
+class Initial(npyscreen.ActionFormWithMenus):
+    sessionType = None
 
     def create(self):
 
-        self.add(npy.FixedText, value = "Connect to Database System", editable = 'false')
+        # Title text
+        self.nextrely += 3  # Move down
+        self.nextrelx += 23  # Move right (centered))
+        self.add(npyscreen.FixedText, value="                _  _     ", editable=False)
+        self.add(npyscreen.FixedText, value="               | || |    ", editable=False)
+        self.add(npyscreen.FixedText, value="  ___  ____  __| || |__  ", editable=False)
+        self.add(npyscreen.FixedText, value=" / _ \|_  / / _` || '_ \ ", editable=False)
+        self.add(npyscreen.FixedText, value="|  __/ / / | (_| || |_) |", editable=False)
+        self.add(npyscreen.FixedText, value=" \___|/___| \__,_||_.__/ ", editable=False)
+        self.nextrely += 3  # Extra padding
 
-        self.dbtype = self.add(npy.TitleSelectOne, max_height=4,
+        # Add session options and save the selected value
+
+        self.db = self.add(npyscreen.TitleSelectOne, max_height=4,
                                      name="Choose Database Type:", value = [0,],
                                      values = ["postgreSQL", "MySQL"],
                                      scroll_exit=True)
 
-        self.add(npy.FixedText, value = "Enter Connection Settings:")
+        # Add a menu
+        menu = self.new_menu(name="Help Menu")
+        menu.addItem("Some helpful guidance here.")
 
-        self.host = self.add(npy.TitleText, name = "Host:",)
-        self.port = self.add(npy.TitleText, name = "Port:",)
+    def on_ok(self):
+        #For debugging:
+        #npyscreen.notify_confirm("You selected " + str(self.db.value[0]))
+        self.parentApp.setNextForm("Connect_DBMS")
 
-        self.username = self.add(npy.TitleText, name = "Username:",)
-        self.password = self.add(npy.TitlePassword, name = "Password:", type = 'password')
+    def on_cancel(self):
+        exiting = npyscreen.notify_yes_no("Are you sure you want to quit?", "Are you sure?", editw=1)
+        if exiting:
+            self.parentApp.setNextForm(None)
+        else:
+            npyscreen.blank_terminal() # clears the notification and just goes back to the original form
 
-    def beforeEditing(self):
-        self.host.value = 'localhost'
-
-    def while_editing(self, *args, **keywords):
-        if self.dbtype.value[0] == 0:
-            self.port.value = '5432'
-            self.username.value = 'postgres'
-
-        elif self.dbtype.value[0] == 1:
-            self.port.value = '3306'
-            self.username.value = 'root'
-
-        self.port.display()
-        self.username.display()
-
-
-    def afterEditing(self):
-
-        self.mydb = pdb.Postgres_Database(self.dbtype.get_selected_objects()[0], self.host.value, self.port.value,
-                                          self.username.value, self.password.value)
-        self.mydb.connect_database('postgres')
-
-        self.parentApp.setNextForm("ConnectDB_Form")
-
-
-class ConnectDB_Form(npy.Form, settings.Settings):
+class Connect_DBMS(npyscreen.ActionFormWithMenus):
+    storedConnections = None
 
     def create(self):
 
-        self.add(npy.FixedText, value=self.parentApp.mydb.dbtype + ' Database Type')
-        self.conn_new_or_existing = self.add(npy.TitleSelectOne, name="Choose:",
-                                             values = ["Create New Database", "Open Existing Database"],
-                                             scroll_exit=True, max_height=5)
+        dbtype = self.parentApp.getForm("MAIN").db.value[0]
+        self.port = ''
+        self.username = ''
+        self.password = ''
 
-        self.new_dbname = self.add(npy.TitleText, name = "New Database:",)
-        dblist = self.parentApp.mydb.list_databases()
-        self.add(npy.TitleMultiLine, name = "Or Open Database:", values=dblist, max_width=50, max_height=10, scroll_exit=True)
+        #set default DBMS connection values
+        #For debugging:
+        #npyscreen.notify_confirm("The value of dbtype in ConectDBMS is " + str(dbtype))
+        if dbtype == 0:
+            self.add(npyscreen.FixedText, value="Enter PostgreSQL Database System Connection Settings:", editable=False)
+            self.port = '5432'
+            self.username = 'postgres'
+            self.password = 'password'
+        elif dbtype == 1:
+            self.add(npyscreen.FixedText, value="Enter MySQL Database System Connection Settings:", editable=False)
+            self.port = '3306'
+            self.username = 'root'
+            self.password = 'password'
 
-        #self.add(npy.Pager, values = dblist[0], max_width=50, max_height=10)
+        self.nextrely += 2  # Move down
+        # TODO: Use a widget that makes it more obvious that input is required, i.e. BoxTitle
+        self.add(npyscreen.TitleText, name="Hostname:", value="127.0.0.1")
+        self.nextrely += 1  # Move down
+        self.add(npyscreen.TitleText, name="Port:", value=self.port)
+        #self.nextrely += 1  # Move down
+        #self.add(npyscreen.TitleText, name="DB Name:")
+        self.nextrely += 1  # Move down
+        self.add(npyscreen.TitleText, name="Username:", value=self.username)
+        self.nextrely += 1  # Move down
+        self.add(npyscreen.TitleText, name="Password:", value=self.password)
 
+        # Add a menu
+        menu = self.new_menu(name="Help Menu")
+        menu.addItem("Some helpful guidance here.")
 
-
-    def afterEditing(self):
-
-        if self.conn_new_or_existing.get_selected_objects()[0] == "Create New Database":
-            self.parentApp.mydb.create_database(self.new_dbname.value)
-
-        self.parentApp.setNextForm("ConnectDB_Form")
-
-class CreateDB_Form(npy.Form):
-
-    def create(self):
-        self.add(npy.FixedText, value = "Create DB Form created!")
-
-    def afterEditing(self):
+    def on_ok(self):
         self.parentApp.setNextForm(None)
 
+    def on_cancel(self):
+        exiting = npyscreen.notify_yes_no("Are you sure you want to quit?", "Are you sure?", editw=1)
+        if exiting:
+            self.parentApp.setNextForm(None)
+        else:
+            npyscreen.blank_terminal() # clears the notification and just goes back to the original form
+
+
+# NPSAppManaged provides a framework to start and end the application
+# Manages the display of the various Forms we have created
+class App(npyscreen.NPSAppManaged):
+
+    def onStart(self):
+
+        # Declare all the forms that will be used within the app
+        self.addForm("MAIN", Initial, name="Welcome to ezdb")
+        self.addFormClass("Connect_DBMS", Connect_DBMS, name = "ezdb connect to DBMS")
+        #self.addForm("ConnectToExistingDatabase", ConnectToExistingDatabase, name="Connect to an Existing Database",
+        #             draw_line_at=6)
+        #self.addForm("CreateNewDatabase", CreateNewDatabase, name="Create a New Database")
+
 if __name__ == "__main__":
-    App = ezdbApp().run()
+    # Start an NPSAppManaged application mainloop
+    # Activates the default form which has a default ID of "MAIN"
+    app = App().run()
 
