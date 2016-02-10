@@ -17,16 +17,18 @@ import psycopg2.extras
 class Postgres_Database(object):
         
     '''initializes database class variables and connect to root dbms'''
-    def __init__(self, dbtype='postgreSQL', host='localhost', port='', user='postgres', password='password', activedb=False):
+    #def __init__(self, dbtype='postgreSQL', host='localhost', port='', user='postgres', password='password'):
+    def __init__(self):
  
-        self.dbtype = dbtype
-        self.host = host
-        self.port = port
-        self.user = user
-        self.password = password
+        self.dbtype = None
+        self.host = None
+        self.port = None
+        self.user = None
+        self.password = None
 
-        self.dbname = ''
-
+        self.dbname = None
+        
+        '''
         self.cur = ''
         self.conn = ''
 
@@ -46,8 +48,9 @@ class Postgres_Database(object):
         except psycopg2.errorcodes, err:
             print err.lookup(err.pgcode)
             return
-
-    def connect_DBMS(self, dbtype, host, port, user, password, activedb):
+        '''
+        
+    def connect_DBMS(self, dbtype, host, port, user, password):
         
         self.dbtype = dbtype
         self.host = host
@@ -65,8 +68,6 @@ class Postgres_Database(object):
             'password': self.password,
             'host': self.host,
         }
-
-        self.activedb = activedb
         
         try:
             self.conn = psycopg2.connect(**self.conn_config)
@@ -76,17 +77,6 @@ class Postgres_Database(object):
         except psycopg2.errorcodes, err:
             print err.lookup(err.pgcode)
             return
-
-    def setactive(self):
-        self.activedb = True
-       
-    #@property
-    def getactive(self):
-        if self.activedb:
-            return True
-        else:
-            return False
-        
         
     #connect to existing named database
     #-still need to implement user db authentication

@@ -12,27 +12,17 @@ from mysql.connector import errorcode
 class MySQL_Database(object):
 
     '''initializes database class variables and connect to root dbms'''
-    def __init__(self, dbtype='MySQL', host='localhost', port='', user='root', password='password', activedb=False):
+    #def __init__(self, dbtype='MySQL', host='localhost', port='', user='root', password='password', activedb=False):
+    def __init__(self):
+        self.dbtype = None
+        self.host = None
+        self.port = None
+        self.user = None
+        self.password = None
 
-        self.dbtype = dbtype
-        self.host = host
-        self.port = port
-        self.user = user
-        self.password = password
+        self.dbname = None
 
-        self.dbname = ''
-
-        self.cur = ''
-        self.conn = ''
-
-        self.conn_config = {
-            'user': self.user,
-            'password': self.password,
-            'host': self.host,
-        }
-        
-        self.activedb = activedb
-
+        '''
         try:
             self.conn = mysql.connector.connect(**self.conn_config)
             self.cur = self.conn.cursor()
@@ -46,8 +36,9 @@ class MySQL_Database(object):
             return
 
         #print "Connected to {} DBMS.".format(self.dbtype)
-
-    def connect_DBMS(self, dbtype, host, port, user, password, activedb):
+        '''
+        
+    def connect_DBMS(self, dbtype, host, port, user, password):
         
         self.dbtype = dbtype
         self.host = host
@@ -65,8 +56,6 @@ class MySQL_Database(object):
             'password': self.password,
             'host': self.host,
         }
-
-        self.activedb = activedb
         
         try:
             self.conn = mysql.connector.connect(**self.conn_config)
@@ -80,15 +69,6 @@ class MySQL_Database(object):
                 print("There was a problem connecting to the DBMS.")
             return
         
-    def setactive(self):
-        self.activedb = True
-        
-    #@property
-    def getactive(self):
-        if self.activedb:
-            return True
-        else:
-            return False
         
     '''connect to existing named database
     -still need to implement user db authentication'''
