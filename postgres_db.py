@@ -104,20 +104,19 @@ class Postgres_Database(object):
             self.cur.execute(sql_string)
             self.conn.commit()
         except psycopg2.errorcodes, err:
-            print err.lookup(err.pgcode)
-            return
 
-        dbnames = self.cur.fetchall()
+            return err.lookup(err.pgcode)
+
+        dblist_data = self.cur.fetchall()
         self.conn.commit()
-        print dbnames
 
-        return dbnames
-        '''
-        print "{} Databases:".format(self.dbtype)
-        for row in rows:
-            print "   ", row[0]
-        print "\n"
-        '''
+        dblist = []
+
+        for row in dblist_data:
+            dblist.append(row[0])
+
+        return dblist
+
 
     def create_database(self, dbname):
 

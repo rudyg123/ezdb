@@ -105,16 +105,15 @@ class MySQL_Database(object):
         except mysql.connector.Error, err:
             print(err)
 
-        dbnames = self.cur.fetchall()
+        dblist_data = self.cur.fetchall()
+        self.conn.commit()
 
-        return dbnames
+        dblist = []
 
-        '''
-        print "{} Databases:".format(self.dbtype)
-        for row in rows:
-            print "   ", row[0]
-        print "\n"
-        '''
+        for row in dblist_data:
+            dblist.append(row[0])
+
+        return dblist
 
     def create_database(self, dbname):
 

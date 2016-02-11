@@ -12,8 +12,8 @@ import mysql_db as mdb
 
 
 '''postgresql test functions'''
-mypostgres = pdb.Postgres_Database('postgresql', 'localhost', '5432', 'postgres', 'password')
-
+mypostgres = pdb.Postgres_Database()
+mypostgres.connect_DBMS('postgresql', 'localhost', '5432', 'postgres', 'password')
 mypostgres.connect_database('testdb')
 #mypostgres.create_database('gooddb')
 #mypostgres.delete_database('gooddb')
