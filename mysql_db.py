@@ -165,11 +165,14 @@ class MySQL_Database(object):
         except mysql.connector.Error, err:
             print(err)
 
-        rows = self.cur.fetchall()
-        print "{} Database Tables:".format(self.dbname)
-        for row in rows:
-            print "   ", row[0]
-        print "\n"
+        tablelist_data = self.cur.fetchall()
+
+        tablelist = []
+
+        for row in tablelist_data:
+            tablelist.append(row[0])
+
+        return tablelist
 
     def display_table_struct(self, table_name):
 

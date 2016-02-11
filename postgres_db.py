@@ -171,11 +171,14 @@ class Postgres_Database(object):
             print err.lookup(err.pgcode)
             return
 
-        rows = self.cur.fetchall()
-        print "{} Database Tables:".format(self.dbname)
-        for row in rows:
-            print "   ", row[0]
-        print "\n"
+        tablelist_data = self.cur.fetchall()
+
+        tablelist = []
+
+        for row in tablelist_data:
+            tablelist.append(row[0])
+
+        return tablelist
 
     def display_table_struct(self, table_name):
 
