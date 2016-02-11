@@ -106,8 +106,7 @@ class Connect_DBMS(npyscreen.ActionFormWithMenus):
 
 
 class Database_Window(npyscreen.FormWithMenus):
-    tabDatabases, tabTables, tabQuery, tabRawSQL, tabExport, tabAdmin, tabExit = None, None, None, None, None, None, \
-                                                                                 None
+    tabDatabases, tabTables, tabQuery, tabRawSQL, tabExport, tabAdmin, tabExit = None, None, None, None, None, None, None
 
     def create(self):
         self.tabDatabases = self.add(Tab_DatabaseButton, w_id="wDatabaseTab", name="Databases", value="Database_Window", rely=1, scroll_exit=True)
@@ -127,18 +126,18 @@ class Database_Window(npyscreen.FormWithMenus):
         elif self.parentApp.dbtype == 1:
             self.dbtype_str = "MySQL"
 
-        self.active_db = self.add(npyscreen.TitleSelectOne, w_id="activedb", max_height=10,
+        self.add(npyscreen.TitleSelectOne, w_id="activedb", max_height=10,
                              name="{} Databases:".format(self.dbtype_str), value = [0,],
                              values = self.dblist, scroll_exit=True)
 
-        self.parentApp.active_db = self.active_db.get_selected_objects()[0]
+        #self.parentApp.active_db = self.active_db.get_selected_objects()[0]
 
         self.add(OpenDB_Button, name="Open Selected Database")
         self.add(CreateDB_Button, name="Create Database")
         self.add(DeleteDB_Button, name="Delete Database")
 
-        self.nextrely += 10  # Move down
-        self.add(npyscreen.BoxTitle, w_id="tableresults_box", name="DB Tables", values=self.parentApp.tablelist, max_width=50,
+        self.nextrely += 4  # Move down
+        self.add(npyscreen.BoxTitle, w_id="tableresults_box", name="Database Tables", values=self.parentApp.tablelist, max_width=50,
                                     max_height=10, hidden=True)
 
         #self.add(npyscreen.Pager, name="DB Tables", w_id="dbtableview", values = self.dblist, max_width=50,
@@ -167,8 +166,7 @@ class Tables_Window(npyscreen.FormWithMenus):
         menu.addItem("Some helpful guidance here.")
 
 class Query_Window(npyscreen.FormWithMenus):
-    tabDatabases, tabTables, tabQuery, tabRawSQL, tabExport, tabAdmin, tabExit = None, None, None, None, None, None, \
-                                                                                 None
+    tabDatabases, tabTables, tabQuery, tabRawSQL, tabExport, tabAdmin, tabExit = None, None, None, None, None, None, None
 
     def create(self):
         self.tabDatabases = self.add(Tab_DatabaseButton, w_id="wDatabaseTab", name="Databases", value="Database_Window", rely=1)
@@ -186,8 +184,7 @@ class Query_Window(npyscreen.FormWithMenus):
         menu.addItem("Some helpful guidance here.")
 
 class RawSQL_Window(npyscreen.FormWithMenus):
-    tabDatabases, tabTables, tabQuery, tabRawSQL, tabExport, tabAdmin, tabExit = None, None, None, None, None, None, \
-                                                                                 None
+    tabDatabases, tabTables, tabQuery, tabRawSQL, tabExport, tabAdmin, tabExit = None, None, None, None, None, None, None
 
     def create(self):
         self.tabDatabases = self.add(Tab_DatabaseButton, w_id="wDatabaseTab", name="Databases", value="Database_Window", rely=1)
@@ -205,8 +202,7 @@ class RawSQL_Window(npyscreen.FormWithMenus):
         menu.addItem("Some helpful guidance here.")
 
 class Export_Window(npyscreen.FormWithMenus):
-    tabDatabases, tabTables, tabQuery, tabRawSQL, tabExport, tabAdmin, tabExit = None, None, None, None, None, None, \
-                                                                                 None
+    tabDatabases, tabTables, tabQuery, tabRawSQL, tabExport, tabAdmin, tabExit = None, None, None, None, None, None, None
 
     def create(self):
         self.tabDatabases = self.add(Tab_DatabaseButton, w_id="wDatabaseTab", name="Databases", value="Database_Window", rely=1)
@@ -224,8 +220,7 @@ class Export_Window(npyscreen.FormWithMenus):
         menu.addItem("Some helpful guidance here.")
 
 class Admin_Window(npyscreen.FormWithMenus):
-    tabDatabases, tabTables, tabQuery, tabRawSQL, tabExport, tabAdmin, tabExit = None, None, None, None, None, None, \
-                                                                                 None
+    tabDatabases, tabTables, tabQuery, tabRawSQL, tabExport, tabAdmin, tabExit = None, None, None, None, None, None, None
 
     def create(self):
         self.tabDatabases = self.add(Tab_DatabaseButton, w_id="wDatabaseTab", name="Databases", value="Database_Window", rely=1)
@@ -254,10 +249,16 @@ class ExitButton(npyscreen.ButtonPress):
 class OpenDB_Button(npyscreen.ButtonPress):
     def whenPressed(self):
         #TODO: insert table generation code using self.parentApp.active_db
+        self.parent.parentApp.active_db = self.parent.get_widget("activedb").get_selected_objects()[0]
         self.parent.parentApp.mydb.connect_database(self.parent.parentApp.active_db)
         self.parent.parentApp.tablelist = self.parent.parentApp.mydb.list_database_tables()
+
+        self.parent.get_widget("tableresults_box").values = self.parent.parentApp.tablelist
         self.parent.get_widget("tableresults_box").hidden = False
         self.parent.get_widget("tableresults_box").display()
+
+        #npyscreen.notify_confirm("The active db is " + str(self.parent.parentApp.active_db))
+        #npyscreen.notify_confirm("The tablelist is " + str(self.parent.parentApp.tablelist))
         return self.parent.parentApp.tablelist
 
 class CreateDB_Button(npyscreen.ButtonPress):

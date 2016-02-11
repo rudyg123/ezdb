@@ -17,8 +17,11 @@ mypostgres.connect_DBMS('postgresql', 'localhost', '5432', 'postgres', 'password
 mypostgres.connect_database('testdb')
 #mypostgres.create_database('gooddb')
 #mypostgres.delete_database('gooddb')
-mypostgres.list_databases()
-#mypostgres.list_database_tables()
+pdb_dblist = mypostgres.list_databases()
+print pdb_dblist
+
+pdb_tablelist = mypostgres.list_database_tables()
+print pdb_tablelist
 #producer = Table(mypostgres,'producer','id','int')
 #mypostgres.display_table_struct('actor')
 #mypostgres.delete_table('producer')
@@ -27,11 +30,15 @@ mypostgres.list_databases()
 #mypostgres.close_database()
 
 '''mysql test functions'''
-#my_mysql = mdb.MySQL_Database('mysql', 'localhost', '3306', 'root', 'password')
-#my_mysql.connect_database('testdb_mysql')
+my_mysql = mdb.MySQL_Database()
+my_mysql.connect_DBMS('mysql', 'localhost', '3306', 'root', 'password')
+my_mysql.connect_database('testdb_mysql')
 
-#my_mysql.list_databases()
-#my_mysql.list_database_tables()
+dblist=my_mysql.list_databases()
+print dblist
+
+tablelist = my_mysql.list_database_tables()
+print tablelist
 
 #mypostgres.close_database()
 #my_mysql.close_database()
