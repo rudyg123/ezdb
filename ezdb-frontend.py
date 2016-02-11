@@ -126,22 +126,21 @@ class Database_Window(npyscreen.FormWithMenus):
         elif self.parentApp.dbtype == 1:
             self.dbtype_str = "MySQL"
 
-        self.add(npyscreen.TitleSelectOne, w_id="activedb", max_height=10,
+        self.add(npyscreen.TitleSelectOne, w_id="wActiveDB", max_height=10,
                              name="{} Databases:".format(self.dbtype_str), value = [0,],
                              values = self.dblist, scroll_exit=True)
 
-        #self.parentApp.active_db = self.active_db.get_selected_objects()[0]
+        self.add(OpenDB_Button, name="Open Selected Database", rely=12)
+        self.add(CreateDB_Button, name="Create Database", rely=13)
 
-        self.add(OpenDB_Button, name="Open Selected Database")
-        self.add(CreateDB_Button, name="Create Database")
-        self.add(DeleteDB_Button, name="Delete Database")
+        self.add(npyscreen.TitleText, w_id="wNewDB_name", name="Enter New DB Name:",
+                                   rely=14, relx=6, begin_entry_at=22, use_two_lines=False)
+
+        self.add(DeleteDB_Button, name="Delete Database", rely=15)
 
         self.nextrely += 4  # Move down
         self.add(npyscreen.BoxTitle, w_id="tableresults_box", name="Database Tables", values=self.parentApp.tablelist, max_width=50,
-                                    max_height=10, hidden=True)
-
-        #self.add(npyscreen.Pager, name="DB Tables", w_id="dbtableview", values = self.dblist, max_width=50,
-        #                            max_height=10, hidden=True)
+                                    max_height=10, scroll_exit=True, hidden=True)
 
         # Add a menu
         menu = self.new_menu(name="Help Menu")
@@ -248,8 +247,8 @@ class ExitButton(npyscreen.ButtonPress):
 
 class OpenDB_Button(npyscreen.ButtonPress):
     def whenPressed(self):
-        #TODO: insert table generation code using self.parentApp.active_db
-        self.parent.parentApp.active_db = self.parent.get_widget("activedb").get_selected_objects()[0]
+
+        self.parent.parentApp.active_db = self.parent.get_widget("wActiveDB").get_selected_objects()[0]
         self.parent.parentApp.mydb.connect_database(self.parent.parentApp.active_db)
         self.parent.parentApp.tablelist = self.parent.parentApp.mydb.list_database_tables()
 
@@ -263,14 +262,17 @@ class OpenDB_Button(npyscreen.ButtonPress):
 
 class CreateDB_Button(npyscreen.ButtonPress):
     def whenPressed(self):
-        pass
-
+        self.newDB_name = self.parent.get_widget("wNewDB_name").value
+        self.parent.parentApp.mydb.create_database(self.newDB_name)
+        self.parent.get_widget("wActiveDB").display()
         return
 
 class DeleteDB_Button(npyscreen.ButtonPress):
     def whenPressed(self):
-        pass
-
+        #self.parent.parentApp.mydb.connect_database()
+        self.parent.parentApp.active_db = self.parent.get_widget("wActiveDB").get_selected_objects()[0]
+        self.parent.parentApp.mydb.delete_database(self.parent.parentApp.active_db)
+        self.parent.get_widget("wActiveDB").display()
         return
 
 class Tab_DatabaseButton(npyscreen.ButtonPress):
