@@ -12,27 +12,17 @@ from mysql.connector import errorcode
 class MySQL_Database(object):
 
     '''initializes database class variables and connect to root dbms'''
-    def __init__(self, dbtype='MySQL', host='localhost', port='', user='root', password='password', activedb=False):
+    #def __init__(self, dbtype='MySQL', host='localhost', port='', user='root', password='password', activedb=False):
+    def __init__(self):
+        self.dbtype = None
+        self.host = None
+        self.port = None
+        self.user = None
+        self.password = None
 
-        self.dbtype = dbtype
-        self.host = host
-        self.port = port
-        self.user = user
-        self.password = password
+        self.dbname = None
 
-        self.dbname = ''
-
-        self.cur = ''
-        self.conn = ''
-
-        self.conn_config = {
-            'user': self.user,
-            'password': self.password,
-            'host': self.host,
-        }
-        
-        self.activedb = activedb
-
+        '''
         try:
             self.conn = mysql.connector.connect(**self.conn_config)
             self.cur = self.conn.cursor()
@@ -46,8 +36,9 @@ class MySQL_Database(object):
             return
 
         #print "Connected to {} DBMS.".format(self.dbtype)
-
-    def connect_DBMS(self, dbtype, host, port, user, password, activedb):
+        '''
+        
+    def connect_DBMS(self, dbtype, host, port, user, password):
         
         self.dbtype = dbtype
         self.host = host
@@ -65,8 +56,6 @@ class MySQL_Database(object):
             'password': self.password,
             'host': self.host,
         }
-
-        self.activedb = activedb
         
         try:
             self.conn = mysql.connector.connect(**self.conn_config)
@@ -80,15 +69,6 @@ class MySQL_Database(object):
                 print("There was a problem connecting to the DBMS.")
             return
         
-    def setactive(self):
-        self.activedb = True
-        
-    #@property
-    def getactive(self):
-        if self.activedb:
-            return True
-        else:
-            return False
         
     '''connect to existing named database
     -still need to implement user db authentication'''
@@ -125,16 +105,15 @@ class MySQL_Database(object):
         except mysql.connector.Error, err:
             print(err)
 
-        dbnames = self.cur.fetchall()
+        dblist_data = self.cur.fetchall()
+        self.conn.commit()
 
-        return dbnames
+        dblist = []
 
-        '''
-        print "{} Databases:".format(self.dbtype)
-        for row in rows:
-            print "   ", row[0]
-        print "\n"
-        '''
+        for row in dblist_data:
+            dblist.append(row[0])
+
+        return dblist
 
     def create_database(self, dbname):
 
@@ -144,11 +123,10 @@ class MySQL_Database(object):
 
             sql_string = "CREATE DATABASE {}".format(self.dbname)
             self.cur.execute(sql_string)
-            print "{} MySQL database created.".format(self.dbname)
+            return "{} MySQL database created.".format(self.dbname)
 
         except mysql.connector.Error, err:
-            print "There was a problem creating the database"
-            print 'Error %s' % err
+            return "The following problem occurred during creation:\n" + str(err)
 
 
     def delete_database(self, dbname):
@@ -172,11 +150,11 @@ class MySQL_Database(object):
 
             sql_string = "DROP DATABASE {}".format(self.dbname)
             self.cur.execute(sql_string)
-            print "{} MySQL database deleted.".format(self.dbname)
+            return "{} MySQL database deleted.".format(self.dbname)
 
         except mysql.connector.Error, err:
-            print "There was a problem deleting the database"
-            print 'Error %s' % err
+            return "The following problem occurred during deletion:\n" + str(err)
+
 
     def list_database_tables(self):
 
@@ -186,11 +164,14 @@ class MySQL_Database(object):
         except mysql.connector.Error, err:
             print(err)
 
-        rows = self.cur.fetchall()
-        print "{} Database Tables:".format(self.dbname)
-        for row in rows:
-            print "   ", row[0]
-        print "\n"
+        tablelist_data = self.cur.fetchall()
+
+        tablelist = []
+
+        for row in tablelist_data:
+            tablelist.append(row[0])
+
+        return tablelist
 
     def display_table_struct(self, table_name):
 
