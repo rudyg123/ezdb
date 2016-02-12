@@ -105,8 +105,9 @@ class Connect_DBMS(npyscreen.ActionFormWithMenus):
         self.parentApp.setNextForm("MAIN")
 
 
-class Database_Window(npyscreen.FormWithMenus):
+class Database_Window(npyscreen.ActionFormWithMenus):
     tabDatabases, tabTables, tabQuery, tabRawSQL, tabExport, tabAdmin, tabExit = None, None, None, None, None, None, None
+
 
     def create(self):
         self.tabDatabases = self.add(Tab_DatabaseButton, w_id="wDatabaseTab", name="Databases", value="Database_Window", rely=1, scroll_exit=True)
@@ -130,21 +131,36 @@ class Database_Window(npyscreen.FormWithMenus):
                              name="{} Databases:".format(self.dbtype_str), value = [0,],
                              values = self.dblist, scroll_exit=True)
 
-        self.add(OpenDB_Button, name="Open Selected Database", rely=12)
-        self.add(CreateDB_Button, name="Create Database", rely=13)
+        #database button options
+        self.nextrely += 1  # Move down
+        self.add(OpenDB_Button, name="Open Selected Database")
 
-        self.add(npyscreen.TitleText, w_id="wNewDB_name", name="Enter New DB Name:",
-                                   rely=14, relx=6, begin_entry_at=22, use_two_lines=False)
+        self.nextrely += 1  # Move down
+        self.add(npyscreen.TitleText, w_id="wNewDB_name", name="Enter New DB Name:", relx=4,
+                                   begin_entry_at=22, use_two_lines=False)
 
-        self.add(DeleteDB_Button, name="Delete Database", rely=15)
+        self.add(CreateDB_Button, name="Create")
+
+        self.nextrely += 1  # Move down
+        self.add(DeleteDB_Button, name="Delete Database")
 
         self.nextrely += 4  # Move down
+
         self.add(npyscreen.BoxTitle, w_id="tableresults_box", name="Database Tables", values=self.parentApp.tablelist, max_width=50,
                                     max_height=10, scroll_exit=True, hidden=True)
-
         # Add a menu
         menu = self.new_menu(name="Help Menu")
         menu.addItem("Some helpful guidance here.")
+
+        #self.add(npyscreen.MiniButton, name = "Main", rely=-1)
+
+    def on_cancel(self):
+        self.parentApp.setNextForm("MAIN")
+
+
+    #def while_waiting(self):
+    #    self.get_widget("wActiveDB").display()
+
 
 class Tables_Window(npyscreen.FormWithMenus):
     tabDatabases, tabTables, tabQuery, tabRawSQL, tabExport, tabAdmin, tabExit = None, None, None, None, None, None, None
@@ -158,11 +174,17 @@ class Tables_Window(npyscreen.FormWithMenus):
         self.tabAdmin = self.add(Tab_AdminButton, w_id="wAdminTab", name="Admin", value="Admin_Window", rely=1, relx=55)
         self.tabExit = self.add(ExitButton, name="Exit", rely=1, relx=64)
 
+        self.nextrely += 1  # Move down
         self.add(npyscreen.FixedText, value="Here is the TABLES window", editable=False)
-
+        self.nextrely += 4  # Move down
+        self.add(npyscreen.BoxTitle, w_id="tableresults_box", name="{} Tables".format(self.parentApp.active_db),
+                 values=self.parentApp.tablelist, max_width=50, max_height=10, scroll_exit=True)
         # Add a menu
         menu = self.new_menu(name="Help Menu")
         menu.addItem("Some helpful guidance here.")
+
+    def on_cancel(self):
+        self.parentApp.setNextForm("MAIN")
 
 class Query_Window(npyscreen.FormWithMenus):
     tabDatabases, tabTables, tabQuery, tabRawSQL, tabExport, tabAdmin, tabExit = None, None, None, None, None, None, None
@@ -253,8 +275,9 @@ class OpenDB_Button(npyscreen.ButtonPress):
         self.parent.parentApp.tablelist = self.parent.parentApp.mydb.list_database_tables()
 
         self.parent.get_widget("tableresults_box").values = self.parent.parentApp.tablelist
-        self.parent.get_widget("tableresults_box").hidden = False
-        self.parent.get_widget("tableresults_box").display()
+        self.parent.parentApp.switchForm("Tables_Window")
+        #self.parent.get_widget("tableresults_box").hidden = False
+        #self.parent.get_widget("tableresults_box").display()
 
         #npyscreen.notify_confirm("The active db is " + str(self.parent.parentApp.active_db))
         #npyscreen.notify_confirm("The tablelist is " + str(self.parent.parentApp.tablelist))
@@ -263,17 +286,34 @@ class OpenDB_Button(npyscreen.ButtonPress):
 class CreateDB_Button(npyscreen.ButtonPress):
     def whenPressed(self):
         self.newDB_name = self.parent.get_widget("wNewDB_name").value
-        self.parent.parentApp.mydb.create_database(self.newDB_name)
+        create_confirm = npyscreen.notify_yes_no("Are you sure you want to create " + str(self.newDB_name)
+                                                 + "?", "Confirm Creation", editw=1)
+        if create_confirm:
+            servermsg = self.parent.parentApp.mydb.create_database(self.newDB_name)
+            npyscreen.notify_confirm(servermsg)
+            self.parent.get_widget("wActiveDB").display()
+            return
+
+        else:
+            npyscreen.blank_terminal() # clears the notification and just goes back to the original form
         self.parent.get_widget("wActiveDB").display()
-        return
 
 class DeleteDB_Button(npyscreen.ButtonPress):
     def whenPressed(self):
         #self.parent.parentApp.mydb.connect_database()
         self.parent.parentApp.active_db = self.parent.get_widget("wActiveDB").get_selected_objects()[0]
-        self.parent.parentApp.mydb.delete_database(self.parent.parentApp.active_db)
+        delete_confirm = npyscreen.notify_yes_no("Are you sure you want to delete " + str(self.parent.parentApp.active_db)
+                                                 + "?", "Confirm Deletion", editw=1)
+        if delete_confirm:
+            servermsg = self.parent.parentApp.mydb.delete_database(self.parent.parentApp.active_db)
+            npyscreen.notify_confirm(servermsg)
+            self.parent.get_widget("wActiveDB").display()
+            return
+
+        else:
+            npyscreen.blank_terminal() # clears the notification and just goes back to the original form
         self.parent.get_widget("wActiveDB").display()
-        return
+
 
 class Tab_DatabaseButton(npyscreen.ButtonPress):
     def whenPressed(self):

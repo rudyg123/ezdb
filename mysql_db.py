@@ -123,11 +123,10 @@ class MySQL_Database(object):
 
             sql_string = "CREATE DATABASE {}".format(self.dbname)
             self.cur.execute(sql_string)
-            print "{} MySQL database created.".format(self.dbname)
+            return "{} MySQL database created.".format(self.dbname)
 
         except mysql.connector.Error, err:
-            print "There was a problem creating the database"
-            print 'Error %s' % err
+            return "The following problem occurred during creation:\n" + str(err)
 
 
     def delete_database(self, dbname):
@@ -151,11 +150,11 @@ class MySQL_Database(object):
 
             sql_string = "DROP DATABASE {}".format(self.dbname)
             self.cur.execute(sql_string)
-            print "{} MySQL database deleted.".format(self.dbname)
+            return "{} MySQL database deleted.".format(self.dbname)
 
         except mysql.connector.Error, err:
-            print "There was a problem deleting the database"
-            print 'Error %s' % err
+            return "The following problem occurred during deletion:\n" + str(err)
+
 
     def list_database_tables(self):
 

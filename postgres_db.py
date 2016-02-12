@@ -129,8 +129,7 @@ class Postgres_Database(object):
             print "{} postgreSQL database created.".format(self.dbname)
 
         except psycopg2.errorcodes, err:
-            print "There was a problem creating the database"
-            print 'Error %s' % err
+            return "The following problem occurred during creation: {}".format(err)
 
     def delete_database(self, dbname):
 
@@ -155,11 +154,11 @@ class Postgres_Database(object):
             self.conn.set_isolation_level(psycopg2.extensions.ISOLATION_LEVEL_AUTOCOMMIT)
             sql_string = "DROP DATABASE %s" % self.dbname
             self.cur.execute(sql_string)
-            print "{} postgreSQL database deleted.".format(self.dbname)
+            return "{} postgreSQL database deleted.".format(self.dbname)
 
         except psycopg2.errorcodes, err:
-            print "There was a problem deleting the database"
-            print 'Error %s' % err
+            return "The following problem occurred during deletion:\n" + str(err)
+
 
     def list_database_tables(self):
 
