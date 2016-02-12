@@ -27,29 +27,7 @@ class Postgres_Database(object):
         self.password = None
 
         self.dbname = None
-        
-        '''
-        self.cur = ''
-        self.conn = ''
 
-        self.conn_config = {
-            'user': self.user,
-            'password': self.password,
-            'host': self.host,
-        }
-
-        self.activedb = activedb
-        
-        try:
-            self.conn = psycopg2.connect(**self.conn_config)
-            self.cur = self.conn.cursor()
-            self.conn.commit()
-
-        except psycopg2.errorcodes, err:
-            print err.lookup(err.pgcode)
-            return
-        '''
-        
     def connect_DBMS(self, dbtype, host, port, user, password):
         
         self.dbtype = dbtype
@@ -74,9 +52,8 @@ class Postgres_Database(object):
             self.cur = self.conn.cursor()
             self.conn.commit()
 
-        except psycopg2.errorcodes, err:
-            print err.lookup(err.pgcode)
-            return
+        except psycopg2.DatabaseError, err:
+            return "The following problem occurred during creation:\n" + str(err)
         
     #connect to existing named database
     #-still need to implement user db authentication
@@ -90,9 +67,8 @@ class Postgres_Database(object):
             self.cur = self.conn.cursor()
             self.conn.commit()
 
-        except psycopg2.errorcodes, err:
-            print err.lookup(err.pgcode)
-            return
+        except psycopg2.DatabaseError, err:
+            return "The following problem occurred during connection:\n" + str(err)
 
         #print "Connected to database {}.".format(self.dbname)
 
@@ -103,9 +79,8 @@ class Postgres_Database(object):
         try:
             self.cur.execute(sql_string)
             self.conn.commit()
-        except psycopg2.errorcodes, err:
-
-            return err.lookup(err.pgcode)
+        except psycopg2.DatabaseError, err:
+            return "The following problem occurred:\n" + str(err)
 
         dblist_data = self.cur.fetchall()
         self.conn.commit()
@@ -126,10 +101,10 @@ class Postgres_Database(object):
             self.conn.set_isolation_level(psycopg2.extensions.ISOLATION_LEVEL_AUTOCOMMIT)
             sql_string = "CREATE DATABASE {}".format(self.dbname)
             self.cur.execute(sql_string)
-            print "{} postgreSQL database created.".format(self.dbname)
+            return "{} postgreSQL database created.".format(self.dbname)
 
-        except psycopg2.errorcodes, err:
-            return "The following problem occurred during creation: {}".format(err)
+        except psycopg2.DatabaseError, err:
+            return "The following problem occurred during creation:\n" + str(err)
 
     def delete_database(self, dbname):
 
@@ -156,7 +131,7 @@ class Postgres_Database(object):
             self.cur.execute(sql_string)
             return "{} postgreSQL database deleted.".format(self.dbname)
 
-        except psycopg2.errorcodes, err:
+        except psycopg2.DatabaseError, err:
             return "The following problem occurred during deletion:\n" + str(err)
 
 
@@ -166,9 +141,8 @@ class Postgres_Database(object):
 
         try:
             self.cur.execute(sql_string)
-        except psycopg2.errorcodes, err:
-            print err.lookup(err.pgcode)
-            return
+        except psycopg2.DatabaseError, err:
+            return "The following problem occurred during table retrieval:\n" + str(err)
 
         tablelist_data = self.cur.fetchall()
 
@@ -185,9 +159,8 @@ class Postgres_Database(object):
 
         try:
             self.cur.execute(sql_string)
-        except psycopg2.errorcodes, err:
-            print err.lookup(err.pgcode)
-            return
+        except psycopg2.DatabaseError, err:
+            return "The following problem occurred:\n" + str(err)
 
         rows = self.cur.fetchall()
 
@@ -202,9 +175,8 @@ class Postgres_Database(object):
 
         try:
             self.cur.execute(sql_string)
-        except psycopg2.errorcodes, err:
-            print err.lookup(err.pgcode)
-            return
+        except psycopg2.DatabaseError, err:
+            return "The following problem occurred during deletion:\n" + str(err)
 
 
 class Postgres_Table(object):
@@ -247,7 +219,6 @@ class Postgres_Table(object):
         try:
             self.db.cur.execute(sql_string)
             self.db.conn.commit()
-        except psycopg2.errorcodes, err:
-            print err.lookup(err.pgcode)
-            return
+        except psycopg2.DatabaseError, err:
+            print "The following problem occurred during table creation:\n" + str(err)
 
