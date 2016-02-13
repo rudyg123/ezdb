@@ -169,19 +169,19 @@ class Tables_Window(npyscreen.ActionFormWithMenus):
         self.add(npyscreen.FixedText, value="Here is the TABLES window", editable=False)
         self.nextrely += 1  # Move down
         self.add(npyscreen.BoxTitle, w_id="tableresults_box", name="{} Tables".format(self.parentApp.active_db),
-                 values=self.parentApp.tablelist, max_width=15, max_height=10, scroll_exit=True)
+                 values=self.parentApp.tablelist, max_width=25, max_height=8, scroll_exit=True)
 
         self.nextrely += 1  # Move down
-        self.add(OpenTable_Button, name="Open Table", relx=1)
+        self.add(ViewTableStruct_Button, name="View Table Structure", rely=6, relx=27, max_width=35)
 
         self.nextrely += 1  # Move down
-        self.add(npyscreen.TitleText, w_id="wNewTable_name", name="New Table Name:", relx=3,
-                                  begin_entry_at=22, use_two_lines=False)
+        self.add(npyscreen.TitleText, w_id="wNewTable_name", name="New Table Name:",
+                                  begin_entry_at=22, relx=29, max_width=35, use_two_lines=False)
 
-        self.add(CreateTable_Button, name="Create", relx=1)
+        self.add(CreateTable_Button, name="Create", relx=27, max_width=35)
 
         self.nextrely += 1  # Move down
-        self.add(DeleteTable_Button, name="Delete Table", relx=1)
+        self.add(DeleteTable_Button, name="Delete Table", relx=27, max_width=35)
 
 
 
@@ -240,7 +240,7 @@ class Table_Create_PostgreSQL_Form(npyscreen.ActionForm):
         self.add(npyscreen.Checkbox, w_id="wAuto_increment", name="Auto Increment?", relx=40)
 
         self.nextrely += 1  # Move down
-        self.add(npyscreen.MultiLineEditableBoxed, w_id="wField_comment", name="Field Comment", max_height=4,
+        self.add(npyscreen.MultiLineEditableBoxed, w_id="wField_comment", name="Field Comment", max_height=5,
                  relx=40, edit=True, scroll_exit=True)
 
 
@@ -395,7 +395,7 @@ class DeleteDB_Button(npyscreen.ButtonPress):
             npyscreen.blank_terminal() # clears the notification and just goes back to the original form
         self.parent.get_widget("wActiveDB").display()
 
-class OpenTable_Button(npyscreen.ButtonPress):
+class ViewTableStruct_Button(npyscreen.ButtonPress):
     def whenPressed(self):
         pass
         '''
