@@ -69,7 +69,7 @@ class Connect_DBMS(npyscreen.ActionFormWithMenus):
             self.parentApp.password = 'password'
 
         self.nextrely += 2  # Move down
-        # TODO: Use a widget that makes it more obvious that input is required, i.e. BoxTitle
+
         self.parentApp.host = self.add(npyscreen.TitleText, name="Hostname:", value="127.0.0.1")
         self.nextrely += 1  # Move down
         self.parentApp.port = self.add(npyscreen.TitleText, name="Port:", value=self.parentApp.port)
@@ -86,12 +86,12 @@ class Connect_DBMS(npyscreen.ActionFormWithMenus):
 
         #connect to DBMS
         if self.parentApp.dbtype == 0:
-            self.parentApp.mydb = pdb.Postgres_Database()
-            self.parentApp.mydb.connect_DBMS(self.parentApp.dbtype, self.parentApp.host.value, self.parentApp.port.value,
+            self.parentApp.dbms = pdb.Postgres_Database()
+            self.parentApp.dbms.connect_DBMS(self.parentApp.dbtype, self.parentApp.host.value, self.parentApp.port.value,
                                              self.parentApp.username.value, self.parentApp.password.value)
         elif self.parentApp.dbtype == 1:
-            self.parentApp.mydb = mdb.MySQL_Database()
-            self.parentApp.mydb.connect_DBMS(self.parentApp.dbtype, self.parentApp.host.value, self.parentApp.port.value,
+            self.parentApp.dbms = mdb.MySQL_Database()
+            self.parentApp.dbms.connect_DBMS(self.parentApp.dbtype, self.parentApp.host.value, self.parentApp.port.value,
                                              self.parentApp.username.value, self.parentApp.password.value)
 
         self.parentApp.setNextForm("Database_Window")
@@ -113,7 +113,7 @@ class Database_Window(npyscreen.ActionFormWithMenus):
         self.tabAdmin = self.add(Tab_AdminButton, w_id="wAdminTab", name="Admin", value="Admin_Window", rely=1, relx=55)
         self.tabExit = self.add(ExitButton, name="Exit", rely=1, relx=64)
 
-        self.dblist = self.parentApp.mydb.list_databases()
+        self.dblist = self.parentApp.dbms.list_databases()
 
         self.nextrely += 1  # Move down
 
@@ -207,20 +207,57 @@ class Table_Create_PostgreSQL_Form(npyscreen.ActionForm):
                                   'SERIAL','BIGSERIAL','NUMERIC','DOUBLE PRECISION','REAL','MONEY','BOOL',
                                   'DATE','TIMESTAMP','TIMESTAMP WITH TIME ZONE','TIME','TIME WITH TIME ZONE','BYTEA']
 
-        postgresql_field_collat_list = ['C','POSIX','C.UTF-8','en_AG','en_AG.utf8','en_AU.utf8','en_AU.utf8','en_BW.utf8',
-                                    'en_BW.utf8','en_CA.utf8','en_CA.utf8','en_DK.utf8','en_DK.utf8','en_GB.utf8',
-                                    'en_GB.utf8','en_HK.utf8','en_HK.utf8','en_IE.utf8','en_IE.utf8','en_IN',
-                                    'en_IN.utf8','en_NG','en_NG.utf8','en_NZ.utf8','en_NZ.utf8','en_PH.utf8',
-                                    'en_PH.utf8','en_SG.utf8','en_SG.utf8','en_US.utf8','en_US.utf8','en_ZA.utf8',
-                                    'en_ZA.utf8','en_ZM','en_ZM.utf8','en_ZW.utf8','en_ZW.utf8']
+        postgresql_field_collat_list = ['en_US.utf8','C','POSIX','C.UTF-8','en_AG','en_AG.utf8','en_AU.utf8',
+                                    'en_AU.utf8','en_BW.utf8','en_BW.utf8','en_CA.utf8','en_CA.utf8','en_DK.utf8',
+                                    'en_DK.utf8','en_GB.utf8','en_GB.utf8','en_HK.utf8','en_HK.utf8','en_IE.utf8',
+                                    'en_IE.utf8','en_IN','en_IN.utf8','en_NG','en_NG.utf8','en_NZ.utf8','en_NZ.utf8',
+                                    'en_PH.utf8','en_SG.utf8','en_SG.utf8','en_ZA.utf8','en_ZA.utf8','en_ZM',
+                                    'en_ZM.utf8','en_ZW.utf8','en_ZW.utf8']
 
-        postgresql_field_constraint_list = ['PRIMARY KEY','UNIQUE']
+        postgresql_field_constraint_list = ['NONE','PRIMARY KEY','UNIQUE','INDEX']
 
-        self.add(npyscreen.TitleText, w_id="wNewField_name", name="Field Name: ",
+        self.add(npyscreen.TitleText, w_id="wField_name", name="Field Name: ", max_width=35, begin_entry_at=15,
+                 use_two_lines=False)
+
+        self.add(npyscreen.TitleSelectOne, w_id="wField_type", max_height=4, name="Type: ", value = [0,],
+                 values=postgresql_field_type_list, max_width=35)
+
+        self.nextrely += 1  # Move down
+        self.add(npyscreen.TitleText, w_id="wField_length_or_val", name="Length/Value: ", max_width=35,
                                    begin_entry_at=15, use_two_lines=False)
 
-        self.add(npyscreen.TitleSelectOne, w_id="wActiveDB", max_height=4, name="Type: ", value = [0,],
-                 values=postgresql_field_type_list,)
+        self.nextrely += 1  # Move down
+        self.add(npyscreen.TitleSelectOne, w_id="wCollation", max_height=4, name="Collation: ", value = [0,],
+                 values=postgresql_field_collat_list, max_width=35)
+
+        self.nextrely += 1  # Move down
+        self.add(npyscreen.TitleSelectOne, w_id="wConstraint", max_height=4, name="Constraint: ", value = [0,],
+                 values=postgresql_field_constraint_list, rely=2, relx=40, max_width=35)
+
+        self.nextrely += 1  # Move down
+        self.add(npyscreen.Checkbox, w_id="wNot_null", name="Required?", relx=40)
+
+        self.add(npyscreen.Checkbox, w_id="wAuto_increment", name="Auto Increment?", relx=40)
+
+        self.nextrely += 1  # Move down
+        self.add(npyscreen.MultiLineEditableBoxed, w_id="wField_comment", name="Field Comment", max_height=4,
+                 relx=40, edit=True, scroll_exit=True)
+
+
+
+    def on_cancel(self):
+        self.parentApp.setNextForm("Tables_Window")
+
+class FieldComment(npyscreen.MultiLineEdit):
+    pass
+
+
+class FieldComment_Box(npyscreen.BoxTitle):
+    _entry_contained_widget = FieldComment
+    contained_widget_arguments={
+        'name':'comment'
+    }
+
 
 class Table_Create_MySQL_Form(npyscreen.ActionForm):
     '''
@@ -321,8 +358,8 @@ class OpenDB_Button(npyscreen.ButtonPress):
     def whenPressed(self):
 
         self.parent.parentApp.active_db = self.parent.get_widget("wActiveDB").get_selected_objects()[0]
-        self.parent.parentApp.mydb.connect_database(self.parent.parentApp.active_db)
-        self.parent.parentApp.tablelist = self.parent.parentApp.mydb.list_database_tables()
+        self.parent.parentApp.dbms.connect_database(self.parent.parentApp.active_db)
+        self.parent.parentApp.tablelist = self.parent.parentApp.dbms.list_database_tables()
 
         self.parent.parentApp.switchForm("Tables_Window")
         return self.parent.parentApp.tablelist
@@ -331,9 +368,9 @@ class CreateDB_Button(npyscreen.ButtonPress):
     def whenPressed(self):
         self.newDB_name = self.parent.get_widget("wNewDB_name").value
         create_confirm = npyscreen.notify_yes_no("Are you sure you want to create " + str(self.newDB_name)
-                                                 + "?", "Confirm Creation", editw=1)
+                                                 + "?", "Confirm Creation", editw=2)
         if create_confirm:
-            servermsg = self.parent.parentApp.mydb.create_database(self.newDB_name)
+            servermsg = self.parent.parentApp.dbms.create_database(self.newDB_name)
             npyscreen.notify_confirm(servermsg)
             self.parent.get_widget("wActiveDB").display()
             return
@@ -344,12 +381,12 @@ class CreateDB_Button(npyscreen.ButtonPress):
 
 class DeleteDB_Button(npyscreen.ButtonPress):
     def whenPressed(self):
-        #self.parent.parentApp.mydb.connect_database()
+        #self.parent.parentApp.dbms.connect_database()
         self.parent.parentApp.active_db = self.parent.get_widget("wActiveDB").get_selected_objects()[0]
         delete_confirm = npyscreen.notify_yes_no("Are you sure you want to delete " + str(self.parent.parentApp.active_db)
-                                                 + "?", "Confirm Deletion", editw=1)
+                                                 + "?", "Confirm Deletion", editw=2)
         if delete_confirm:
-            servermsg = self.parent.parentApp.mydb.delete_database(self.parent.parentApp.active_db)
+            servermsg = self.parent.parentApp.dbms.delete_database(self.parent.parentApp.active_db)
             npyscreen.notify_confirm(servermsg)
             self.parent.get_widget("wActiveDB").display()
             return
@@ -363,8 +400,8 @@ class OpenTable_Button(npyscreen.ButtonPress):
         pass
         '''
         self.parent.parentApp.active_db = self.parent.get_widget("wActiveDB").get_selected_objects()[0]
-        self.parent.parentApp.mydb.connect_database(self.parent.parentApp.active_db)
-        self.parent.parentApp.tablelist = self.parent.parentApp.mydb.list_database_tables()
+        self.parent.parentApp.dbms.connect_database(self.parent.parentApp.active_db)
+        self.parent.parentApp.tablelist = self.parent.parentApp.dbms.list_database_tables()
 
 
         self.parent.parentApp.switchForm("Tables_Window")
@@ -374,9 +411,9 @@ class CreateTable_Button(npyscreen.ButtonPress):
     def whenPressed(self):
         self.newTable_name = self.parent.get_widget("wNewTable_name").value
         create_confirm = npyscreen.notify_yes_no("Are you sure you want to create " + str(self.newTable_name)
-                                                 + "?", "Confirm Creation", editw=1)
+                                                 + "?", "Confirm Creation", editw=2)
         if create_confirm:
-            self.parent.parentApp.table_name = self.parent.parentApp.mydb.create_database(self.newTable_name)
+            self.parent.parentApp.table_name = self.newTable_name
 
             if self.parent.parentApp.dbtype == 0:
                 self.parent.parentApp.switchForm("Table_Create_PostgreSQL_Form")
@@ -395,7 +432,7 @@ class DeleteTable_Button(npyscreen.ButtonPress):
         delete_confirm = npyscreen.notify_yes_no("Are you sure you want to delete " + str(self.parent.parentApp.active_db)
                                                  + "?", "Confirm Deletion", editw=1)
         if delete_confirm:
-            servermsg = self.parent.parentApp.mydb.delete_database(self.parent.parentApp.active_db)
+            servermsg = self.parent.parentApp.dbms.delete_database(self.parent.parentApp.active_db)
             npyscreen.notify_confirm(servermsg)
             self.parent.get_widget("wActiveDB").display()
             return
@@ -442,7 +479,7 @@ class App(npyscreen.NPSAppManaged):
     port = None
     username = None
     password = None
-    mydb = None
+    dbms = None
     active_db = None
     tablelist = None
 
@@ -456,15 +493,15 @@ class App(npyscreen.NPSAppManaged):
 
         # Declare all the forms that will be used within the app
         self.addFormClass("MAIN", Initial, name="Welcome to ezdb")
-        self.addFormClass("Connect_DBMS", Connect_DBMS, name = "ezdb DBMS Connection Page")
-        self.addFormClass("Database_Window", Database_Window, name = "ezdb Database Page")
-        self.addFormClass("Tables_Window", Tables_Window, name = "ezdb Tables Page")
-        self.addFormClass("Query_Window", Query_Window, name = "ezdb Query Page")
-        self.addFormClass("RawSQL_Window", RawSQL_Window, name = "ezdb Raw SQL Page")
-        self.addFormClass("Export_Window", Export_Window, name = "ezdb Export Page")
-        self.addFormClass("Admin_Window", Admin_Window, name = "ezdb Admin Page")
-        self.addFormClass("Table_Create_PostgreSQL_Form", Table_Create_PostgreSQL_Form, name = "ezdb Create Table")
-        self.addFormClass("Table_Create_MySQL_Form", Table_Create_MySQL_Form, name = "ezdb Create Table")
+        self.addFormClass("Connect_DBMS", Connect_DBMS, name = "ezdb >> DBMS Connection Page")
+        self.addFormClass("Database_Window", Database_Window, name = "ezdb >> Database Page")
+        self.addFormClass("Tables_Window", Tables_Window, name = "ezdb >> Tables Page")
+        self.addFormClass("Query_Window", Query_Window, name = "ezdb >> Query Page")
+        self.addFormClass("RawSQL_Window", RawSQL_Window, name = "ezdb >> Raw SQL Page")
+        self.addFormClass("Export_Window", Export_Window, name = "ezdb >> Export Page")
+        self.addFormClass("Admin_Window", Admin_Window, name = "ezdb >> Admin Page")
+        self.addFormClass("Table_Create_PostgreSQL_Form", Table_Create_PostgreSQL_Form, name = "ezdb >> Create Table")
+        self.addFormClass("Table_Create_MySQL_Form", Table_Create_MySQL_Form, name = "ezdb >> Create Table")
 
 if __name__ == "__main__":
     # Start an NPSAppManaged application mainloop

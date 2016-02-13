@@ -177,7 +177,25 @@ class Postgres_Database(object):
             self.cur.execute(sql_string)
         except psycopg2.DatabaseError, err:
             return "The following problem occurred during deletion:\n" + str(err)
+    '''
+    def get_collation(self, dbname):
 
+        self.dbname = dbname
+        sql_string = "SELECT '" + str(self.dbname) + "', datcollate FROM pg_database;"
+
+        try:
+            self.cur.execute(sql_string)
+        except psycopg2.DatabaseError, err:
+            return "The following problem occurred during collation retrieval:\n" + str(err)
+
+        collate_data = self.cur.fetchall()
+        collatelist = []
+
+        for row in collate_data:
+            collatelist.append(row[0])
+
+        return collatelist
+    '''
 
 class Postgres_Table(object):
 
@@ -190,7 +208,7 @@ class Postgres_Table(object):
                                     'en_BW.utf8','en_CA.utf8','en_CA.utf8','en_DK.utf8','en_DK.utf8','en_GB.utf8',
                                     'en_GB.utf8','en_HK.utf8','en_HK.utf8','en_IE.utf8','en_IE.utf8','en_IN',
                                     'en_IN.utf8','en_NG','en_NG.utf8','en_NZ.utf8','en_NZ.utf8','en_PH.utf8',
-                                    'en_PH.utf8','en_SG.utf8','en_SG.utf8','en_US.utf8','en_US.utf8','en_ZA.utf8',
+                                    'en_PH.utf8','en_SG.utf8','en_SG.utf8','en_US.utf8','en_ZA.utf8',
                                     'en_ZA.utf8','en_ZM','en_ZM.utf8','en_ZW.utf8','en_ZW.utf8']
 
     postgresql_field_constraint_list = ['PRIMARY KEY','UNIQUE']
