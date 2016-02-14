@@ -461,12 +461,13 @@ class SQL_Button(npyscreen.ButtonPress):
     def whenPressed(self):
 
         self.sql_command = self.parent.get_widget("wSQL_command").values[0]
-        npyscreen.notify_confirm("You are sending the following SQL: " + str(self.sql_command))
+        #npyscreen.notify_confirm("You are sending the following SQL: " + str(self.sql_command))
         self.parent.parentApp.sql_results = self.parent.parentApp.dbms.execute_SQL(self.sql_command)
-        npyscreen.notify_confirm(str(self.parent.parentApp.sql_results))
-
-
-
+        if self.parent.parentApp.sql_results is None:
+            npyscreen.notify_confirm("SQL command sent successfully")
+        else:
+            npyscreen.notify_confirm(str(self.parent.parentApp.sql_results))
+            return
 
 
 class Tab_DatabaseButton(npyscreen.ButtonPress):

@@ -216,7 +216,7 @@ class Postgres_Database(object):
                 sql_results.append(row)
             return sql_results
         except psycopg2.DatabaseError, err:
-            return
+            return err
 
 
     '''
