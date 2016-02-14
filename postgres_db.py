@@ -101,6 +101,7 @@ class Postgres_Database(object):
             self.conn.set_isolation_level(psycopg2.extensions.ISOLATION_LEVEL_AUTOCOMMIT)
             sql_string = "CREATE DATABASE {}".format(self.dbname)
             self.cur.execute(sql_string)
+            self.conn.commit()
             return "{} postgreSQL database created.".format(self.dbname)
 
         except psycopg2.DatabaseError, err:
@@ -129,6 +130,7 @@ class Postgres_Database(object):
             self.conn.set_isolation_level(psycopg2.extensions.ISOLATION_LEVEL_AUTOCOMMIT)
             sql_string = "DROP DATABASE %s" % self.dbname
             self.cur.execute(sql_string)
+            self.conn.commit()
             return "{} postgreSQL database deleted.".format(self.dbname)
 
         except psycopg2.DatabaseError, err:
@@ -141,6 +143,7 @@ class Postgres_Database(object):
 
         try:
             self.cur.execute(sql_string)
+            self.conn.commit()
         except psycopg2.DatabaseError, err:
             return "The following problem occurred during table retrieval:\n" + str(err)
 
@@ -154,29 +157,68 @@ class Postgres_Database(object):
         return tablelist
 
     def display_table_struct(self, table_name):
-
+        #get number of table columns select count(*) from information_schema.columns where table_name='x';
         sql_string = "SELECT column_name, data_type, collation_name, is_nullable, column_default FROM information_schema.columns WHERE table_name ='{}';".format(table_name)
-
+        sql_string = "SELECT * FROM information_schema.columns WHERE table_name ='{}';".format(table_name)
         try:
             self.cur.execute(sql_string)
+            self.conn.commit()
         except psycopg2.DatabaseError, err:
             return "The following problem occurred:\n" + str(err)
 
-        rows = self.cur.fetchall()
+        fields = self.cur.fetchall()
+
+        sql_string = "SELECT COUNT(*) FROM information_schema.columns WHERE table_name ='{}';".format(table_name)
+        try:
+            self.cur.execute(sql_string)
+            self.conn.commit()
+        except psycopg2.DatabaseError, err:
+            return "The following problem occurred:\n" + str(err)
+
+        numcols = self.cur.fetchall()
+        field_row = []
+        table_struct = []
 
         print "{} Table Structure:".format(table_name)
-        for row in rows:
-            print "   ", row[0], row[1], row[2], row[3], row[4]
-        print "\n"
+        for row in fields:
+            for c in range(numcols):
+                field_row.append(row[c])
+            table_struct.append(field_row)
+            #print "   ", row[0], row[1], row[2], row[3], row[4]
+        return table_struct
 
     def delete_table(self, table_name):
 
-        sql_string = "DROP TABLE {};".format(table_name)
+        sql_string = "DROP TABLE {};".format(str(table_name))
 
         try:
             self.cur.execute(sql_string)
+            self.conn.commit()
         except psycopg2.DatabaseError, err:
             return "The following problem occurred during deletion:\n" + str(err)
+
+    def execute_SQL(self, sql):
+
+        sql_string = sql + ";"
+
+        try:
+            self.cur.execute(sql_string)
+            self.conn.commit()
+        except psycopg2.DatabaseError, err:
+            self.conn.rollback()
+            return "The following problem occurred during execution:\n" + str(err)
+
+        try:
+            sql_results_data = self.cur.fetchall()
+            sql_results = []
+
+            for row in sql_results_data:
+                sql_results.append(row)
+            return sql_results
+        except psycopg2.DatabaseError, err:
+            return
+
+
     '''
     def get_collation(self, dbname):
 
@@ -198,21 +240,6 @@ class Postgres_Database(object):
     '''
 
 class Postgres_Table(object):
-
-    #postgresql table form dropdown values
-    postgresql_field_type_list = ['CHAR','VARCHAR','TEXT','BIT','VARBIT','SMALLINT','INT','BIGINT','SMALLSERIAL',
-                                  'SERIAL','BIGSERIAL','NUMERIC','DOUBLE PRECISION','REAL','MONEY','BOOL',
-                                  'DATE','TIMESTAMP','TIMESTAMP WITH TIME ZONE','TIME','TIME WITH TIME ZONE','BYTEA']
-
-    postgresql_field_collat_list = ['C','POSIX','C.UTF-8','en_AG','en_AG.utf8','en_AU.utf8','en_AU.utf8','en_BW.utf8',
-                                    'en_BW.utf8','en_CA.utf8','en_CA.utf8','en_DK.utf8','en_DK.utf8','en_GB.utf8',
-                                    'en_GB.utf8','en_HK.utf8','en_HK.utf8','en_IE.utf8','en_IE.utf8','en_IN',
-                                    'en_IN.utf8','en_NG','en_NG.utf8','en_NZ.utf8','en_NZ.utf8','en_PH.utf8',
-                                    'en_PH.utf8','en_SG.utf8','en_SG.utf8','en_US.utf8','en_ZA.utf8',
-                                    'en_ZA.utf8','en_ZM','en_ZM.utf8','en_ZW.utf8','en_ZW.utf8']
-
-    postgresql_field_constraint_list = ['PRIMARY KEY','UNIQUE']
-
 
     def __init__(self,db,table_name, field_name, field_type):
         self.db = db

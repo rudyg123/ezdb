@@ -14,18 +14,25 @@ import mysql_db as mdb
 '''postgresql test functions'''
 mypostgres = pdb.Postgres_Database()
 mypostgres.connect_DBMS('postgresql', 'localhost', '5432', 'postgres', 'password')
-#mypostgres.connect_database('testdb')
+mypostgres.connect_database('postgres')
 dberror = mypostgres.create_database('testdb')
-print dberror
+#print dberror
 #mypostgres.delete_database('gooddb')
 #pdb_dblist = mypostgres.list_databases()
 #print pdb_dblist
 
 #pdb_tablelist = mypostgres.list_database_tables()
 #print pdb_tablelist
-#producer = Table(mypostgres,'producer','id','int')
-#mypostgres.display_table_struct('actor')
-#mypostgres.delete_table('producer')
+#pdb.Postgres_Table(mypostgres,'test_table01','id','int')
+#pdb.Postgres_Table(mypostgres,'test_table02','id','int')
+#pdb.Postgres_Table(mypostgres,'test_table03','id','int')
+#pdb_tablelist = mypostgres.list_database_tables()
+#print pdb_tablelist
+results = mypostgres.display_table_struct('actor')
+for i in results:
+    print i
+#msg = mypostgres.delete_table('test_table01')
+#print msg
 #mypostgres.list_database_tables()
 
 #mypostgres.close_database()
@@ -48,7 +55,7 @@ print dberror
 #my_mysql.delete_database('testdb02_mysql')
 #my_mysql.list_databases()
 #mdb.MySQL_Table(my_mysql,'director','name','varchar(30)')
-#my_mysql.display_table_struct('director')
+#my_mysql.display_table_struct('actor')
 #director = Table(my_mysql,'director','id','int')
 #actor.create_table()
 #my_mysql.delete_table('actor')

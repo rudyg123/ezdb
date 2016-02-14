@@ -168,7 +168,7 @@ class Tables_Window(npyscreen.ActionFormWithMenus):
         self.nextrely += 1  # Move down
         self.add(npyscreen.FixedText, value="Here is the TABLES window", editable=False)
         self.nextrely += 1  # Move down
-        self.add(npyscreen.BoxTitle, w_id="tableresults_box", name="{} Tables".format(self.parentApp.active_db),
+        self.add(npyscreen.BoxTitle, w_id="wTableresults_box", name="{} Tables".format(self.parentApp.active_db),
                  values=self.parentApp.tablelist, max_width=25, max_height=8, scroll_exit=True)
 
         self.nextrely += 1  # Move down
@@ -183,12 +183,16 @@ class Tables_Window(npyscreen.ActionFormWithMenus):
         self.nextrely += 1  # Move down
         self.add(DeleteTable_Button, name="Delete Table", relx=27, max_width=35)
 
-
+        self.nextrely += 1  # Move down
+        self.add(npyscreen.GridColTitles, w_id="w_TableGrid", col_titles=self.parentApp.tablefield_cols, relx=1)
 
 
         # Add a menu
         menu = self.new_menu(name="Help Menu")
         menu.addItem("Some helpful guidance here.")
+
+    def while_editing(self):
+        self.get_widget("wTableresults_box").display()
 
     def on_cancel(self):
         self.parentApp.setNextForm("MAIN")
@@ -300,11 +304,19 @@ class RawSQL_Window(npyscreen.ActionFormWithMenus):
         self.tabAdmin = self.add(Tab_AdminButton, w_id="wAdminTab", name="Admin", value="Admin_Window", rely=1, relx=55)
         self.tabExit = self.add(ExitButton, name="Exit", rely=1, relx=64)
 
-        self.add(npyscreen.FixedText, value="Here is the RAW SQL window", editable=False)
+        self.nextrely += 1  # Move down
+        self.add(npyscreen.MultiLineEditableBoxed, w_id="wSQL_command", name="Enter SQL Command", max_height=6,
+                 relx=20, max_width=40, edit=True, scroll_exit=True)
 
-        self.add(npyscreen.MultiLineEdit,
-                         value = """try typing here!\nMutiline text, press ^R to reformat.\n""",
-                         max_height=5, rely=9)
+        self.add(SQL_Button, w_id="wSQL_button", name="Send Command", relx=34)
+        self.nextrely += 1  # Move down
+
+        self.add(npyscreen.BoxTitle, w_id="wSQLresults_box", name="SQL Results", values=self.parentApp.sql_results,
+                 max_width=75, max_height=11, scroll_exit=True)
+
+
+
+
         # Add a menu
         menu = self.new_menu(name="Help Menu")
         menu.addItem("Some helpful guidance here.")
@@ -426,20 +438,37 @@ class CreateTable_Button(npyscreen.ButtonPress):
 
 class DeleteTable_Button(npyscreen.ButtonPress):
     def whenPressed(self):
-        pass
-        '''
-        self.parent.parentApp.active_db = self.parent.get_widget("wActiveDB").get_selected_objects()[0]
-        delete_confirm = npyscreen.notify_yes_no("Are you sure you want to delete " + str(self.parent.parentApp.active_db)
-                                                 + "?", "Confirm Deletion", editw=1)
+
+        self.selected_table = self.parent.parentApp.tablelist[self.parent.get_widget("wTableresults_box").value]
+        npyscreen.notify_confirm("You selected table: " + str(self.selected_table))
+
+
+        delete_confirm = npyscreen.notify_yes_no("Are you sure you want to delete " + str(self.selected_table)
+                                                 + "?", "Confirm Deletion", editw=2)
         if delete_confirm:
-            servermsg = self.parent.parentApp.dbms.delete_database(self.parent.parentApp.active_db)
-            npyscreen.notify_confirm(servermsg)
-            self.parent.get_widget("wActiveDB").display()
+            servermsg = self.parent.parentApp.dbms.delete_table(self.selected_table)
+            if servermsg:
+                npyscreen.notify_confirm(servermsg)
+
+            self.parent.parentApp.tablelist = self.parent.parentApp.dbms.list_database_tables()
+            self.parent.get_widget("wTableresults_box").display()
             return
 
         else:
             npyscreen.blank_terminal() # clears the notification and just goes back to the original form
-        '''
+
+class SQL_Button(npyscreen.ButtonPress):
+    def whenPressed(self):
+
+        self.sql_command = self.parent.get_widget("wSQL_command").values[0]
+        npyscreen.notify_confirm("You are sending the following SQL: " + str(self.sql_command))
+        self.parent.parentApp.sql_results = self.parent.parentApp.dbms.execute_SQL(self.sql_command)
+        npyscreen.notify_confirm(str(self.parent.parentApp.sql_results))
+
+
+
+
+
 class Tab_DatabaseButton(npyscreen.ButtonPress):
     def whenPressed(self):
         self.parent.parentApp.switchForm("Database_Window")
@@ -482,12 +511,17 @@ class App(npyscreen.NPSAppManaged):
     dbms = None
     active_db = None
     tablelist = None
+    active_table = None
 
     #table creation global variables
     field_name, field_type, field_length_or_val, field_collation, field_attrib, field_default = None, None, None, None, None, None
 
     field_autoincrement, field_primarykey, field_unique, field_index= False, False, False, False
     field_optional = True #user friendly way of saying if Null is okay for this field
+
+    tablefield_cols = []
+
+    sql_results = []
 
     def onStart(self):
 
