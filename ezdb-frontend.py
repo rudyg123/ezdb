@@ -197,8 +197,8 @@ class Tables_Window(npyscreen.ActionFormWithMenus):
         menu = self.new_menu(name="Help Menu")
         menu.addItem("Some helpful guidance here.")
 
-    def while_editing(self):
-        self.get_widget("wTables_box").display()
+    def beforeEditing(self):
+        self.parentApp.tablelist = self.parentApp.dbms.list_database_tables()
 
     def on_cancel(self):
         self.parentApp.setNextForm("MAIN")
@@ -224,7 +224,7 @@ class Table_Create_PostgreSQL_Form(npyscreen.ActionForm):
                                     'en_PH.utf8','en_SG.utf8','en_SG.utf8','en_ZA.utf8','en_ZA.utf8','en_ZM',
                                     'en_ZM.utf8','en_ZW.utf8','en_ZW.utf8']
 
-        postgresql_field_constraint_list = [None,'PRIMARY KEY','UNIQUE','INDEX']
+        postgresql_field_constraint_list = [None,'PRIMARY KEY','UNIQUE']
 
         self.add(npyscreen.TitleText, w_id="wField_name", name="Field Name: ", max_width=35, begin_entry_at=15,
                  use_two_lines=False)
@@ -241,24 +241,30 @@ class Table_Create_PostgreSQL_Form(npyscreen.ActionForm):
                  values=postgresql_field_collat_list, max_width=35)
 
         self.nextrely += 1  # Move down
-        self.add(npyscreen.TitleSelectOne, w_id="wConstraint", max_height=4, name="Constraint: ", value = [0,],
+        self.add(npyscreen.TitleSelectOne, w_id="wConstraint", max_height=4, name="Constraint: ",
                  values=postgresql_field_constraint_list, rely=2, relx=40, max_width=35)
 
         self.nextrely += 1  # Move down
-        self.add(npyscreen.Checkbox, w_id="wNot_null", name="Required?", relx=40)
+        self.add(npyscreen.SelectOne, w_id="wNot_null", values=["Not Required", "Required"], value = [0,],
+                 max_width=20, max_height=4, relx=40)
 
         #self.add(npyscreen.Checkbox, w_id="wAuto_increment", name="Auto Increment?", relx=40)
         self.nextrely += 1  # Move down
         self.add(npyscreen.TitleText, w_id="wDefault", name="Default: ", max_width=35,
-                                   begin_entry_at=15, relx=40, use_two_lines=False)
+                                   relx=40, use_two_lines=False)
 
         self.nextrely += 2  # Move down
         self.add(AddField_Button, name="Add Field", relx=40, max_width=13)
         self.add(CreateTable_Button, name="Create Table", relx=40, max_width=13)
 
-
+    def on_ok(self):
+        self.parentApp.field_string_array = []
+        self.parentApp.tablelist = self.parentApp.dbms.list_database_tables()
+        self.parentApp.setNextForm("Tables_Window")
 
     def on_cancel(self):
+        self.parentApp.field_string_array = []
+        self.parentApp.tablelist = self.parentApp.dbms.list_database_tables()
         self.parentApp.setNextForm("Tables_Window")
 
 class FieldComment(npyscreen.MultiLineEdit):
@@ -455,13 +461,6 @@ class BrowseTable_Button(npyscreen.ButtonPress):
 
 
 
-
-
-
-
-
-
-
 class BuildTable_Button(npyscreen.ButtonPress):
     def whenPressed(self):
         self.newTable_name = self.parent.get_widget("wNewTable_name").value
@@ -501,7 +500,7 @@ class AddField_Button(npyscreen.ButtonPress):
             self.constraint = self.parent.get_widget("wConstraint").get_selected_objects()[0]
             self.field_string += (" " + self.constraint)
 
-        if self.parent.get_widget("wNot_null").value == True:
+        if self.parent.get_widget("wNot_null").value[0] == 1:
             self.not_null = "NOT NULL"
         else:
             self.not_null = "NULL"
@@ -513,15 +512,18 @@ class AddField_Button(npyscreen.ButtonPress):
             self.field_string += (" " + self.default)
 
         self.parent.parentApp.field_string_array.append(self.field_string + ", ")
-        npyscreen.notify_confirm(self.field_string)
+        npyscreen.notify_confirm("Adding the following field:\n" + self.field_string)
+        self.parent.parentApp.switchForm("Table_Create_PostgreSQL_Form")
 
 
 
 class CreateTable_Button(npyscreen.ButtonPress):
     def whenPressed(self):
+
         create_table_string = "CREATE TABLE {} ".format(self.parent.parentApp.table_name) + "("
         for field in self.parent.parentApp.field_string_array:
             create_table_string += field
+        create_table_string = create_table_string[:-2]
         create_table_string += ")"
 
         npyscreen.notify_confirm(create_table_string)
@@ -529,10 +531,17 @@ class CreateTable_Button(npyscreen.ButtonPress):
         self.results = self.parent.parentApp.dbms.execute_SQL(create_table_string)
 
         if self.results[0] == 'error':
-            npyscreen.notify_confirm(str(self.results[1]))
+            if self.results[1] == 'no results to fetch':
+                npyscreen.notify_confirm("Table [] successfully created".format(self.parent.parentApp.table_name))
+                self.parent.parentApp.field_string_array = []
+                self.parent.parentApp.switchForm("Tables_Window")
+            else:
+                npyscreen.notify_confirm(str(self.results[1]))
+                self.parent.parentApp.field_string_array = []
 
         elif self.results[0] == 'success':
             npyscreen.notify_confirm("Table [] successfully created".format(self.parent.parentApp.table_name))
+            self.parent.parentApp.field_string_array = []
 
             self.parent.parentApp.switchForm("Tables_Window")
             return
@@ -542,11 +551,11 @@ class CreateTable_Button(npyscreen.ButtonPress):
 class DeleteTable_Button(npyscreen.ButtonPress):
     def whenPressed(self):
 
-        if self.parent.get_widget("wTableresults_box").value is None:
+        if self.parent.get_widget("wTables_box").value is None:
             npyscreen.notify_confirm("Please select a table by highlighting it and enter")
             return
         else:
-            self.selected_table = self.parent.parentApp.tablelist[self.parent.get_widget("wTableresults_box").value]
+            self.selected_table = self.parent.parentApp.tablelist[self.parent.get_widget("wTables_box").value]
 
         delete_confirm = npyscreen.notify_yes_no("Are you sure you want to delete " + str(self.selected_table)
                                                  + "?", "Confirm Deletion", editw=2)
