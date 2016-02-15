@@ -178,13 +178,13 @@ class Tables_Window(npyscreen.ActionFormWithMenus):
         self.add(npyscreen.TitleText, w_id="wNewTable_name", name="New Table Name:",
                                   begin_entry_at=22, relx=29, max_width=35, use_two_lines=False)
 
-        self.add(CreateTable_Button, name="Create", relx=27, max_width=35)
+        self.add(BuildTable_Button, name="Build", relx=27, max_width=35)
 
         self.nextrely += 1  # Move down
         self.add(DeleteTable_Button, name="Delete Table", relx=27, max_width=35)
 
-        self.nextrely += 1  # Move down
-        self.add(npyscreen.GridColTitles, w_id="w_TableGrid", col_titles=self.parentApp.tablefield_cols, relx=1)
+        #self.nextrely += 1  # Move down
+        #self.add(npyscreen.GridColTitles, w_id="w_TableGrid", col_titles=self.parentApp.tablefield_cols, relx=1)
 
 
         # Add a menu
@@ -211,14 +211,14 @@ class Table_Create_PostgreSQL_Form(npyscreen.ActionForm):
                                   'SERIAL','BIGSERIAL','NUMERIC','DOUBLE PRECISION','REAL','MONEY','BOOL',
                                   'DATE','TIMESTAMP','TIMESTAMP WITH TIME ZONE','TIME','TIME WITH TIME ZONE','BYTEA']
 
-        postgresql_field_collat_list = ['en_US.utf8','C','POSIX','C.UTF-8','en_AG','en_AG.utf8','en_AU.utf8',
+        postgresql_field_collat_list = [None,'en_US.utf8','C','POSIX','C.UTF-8','en_AG','en_AG.utf8','en_AU.utf8',
                                     'en_AU.utf8','en_BW.utf8','en_BW.utf8','en_CA.utf8','en_CA.utf8','en_DK.utf8',
                                     'en_DK.utf8','en_GB.utf8','en_GB.utf8','en_HK.utf8','en_HK.utf8','en_IE.utf8',
                                     'en_IE.utf8','en_IN','en_IN.utf8','en_NG','en_NG.utf8','en_NZ.utf8','en_NZ.utf8',
                                     'en_PH.utf8','en_SG.utf8','en_SG.utf8','en_ZA.utf8','en_ZA.utf8','en_ZM',
                                     'en_ZM.utf8','en_ZW.utf8','en_ZW.utf8']
 
-        postgresql_field_constraint_list = ['NONE','PRIMARY KEY','UNIQUE','INDEX']
+        postgresql_field_constraint_list = [None,'PRIMARY KEY','UNIQUE','INDEX']
 
         self.add(npyscreen.TitleText, w_id="wField_name", name="Field Name: ", max_width=35, begin_entry_at=15,
                  use_two_lines=False)
@@ -241,11 +241,14 @@ class Table_Create_PostgreSQL_Form(npyscreen.ActionForm):
         self.nextrely += 1  # Move down
         self.add(npyscreen.Checkbox, w_id="wNot_null", name="Required?", relx=40)
 
-        self.add(npyscreen.Checkbox, w_id="wAuto_increment", name="Auto Increment?", relx=40)
-
+        #self.add(npyscreen.Checkbox, w_id="wAuto_increment", name="Auto Increment?", relx=40)
         self.nextrely += 1  # Move down
-        self.add(npyscreen.MultiLineEditableBoxed, w_id="wField_comment", name="Field Comment", max_height=5,
-                 relx=40, edit=True, scroll_exit=True)
+        self.add(npyscreen.TitleText, w_id="wDefault", name="Default: ", max_width=35,
+                                   begin_entry_at=15, relx=40, use_two_lines=False)
+
+        self.nextrely += 2  # Move down
+        self.add(AddField_Button, name="Add Field", relx=40, max_width=13)
+        self.add(CreateTable_Button, name="Create Table", relx=40, max_width=13)
 
 
 
@@ -416,7 +419,8 @@ class ViewTableStruct_Button(npyscreen.ButtonPress):
         self.parent.parentApp.switchForm("Tables_Window")
         return self.parent.parentApp.tablelist
         '''
-class CreateTable_Button(npyscreen.ButtonPress):
+
+class BuildTable_Button(npyscreen.ButtonPress):
     def whenPressed(self):
         self.newTable_name = self.parent.get_widget("wNewTable_name").value
         create_confirm = npyscreen.notify_yes_no("Are you sure you want to create " + str(self.newTable_name)
@@ -431,6 +435,54 @@ class CreateTable_Button(npyscreen.ButtonPress):
 
         else:
             npyscreen.blank_terminal() # clears the notification and just goes back to the original form
+
+class AddField_Button(npyscreen.ButtonPress):
+    def whenPressed(self):
+
+        self.field_string = ""
+
+        self.field_name = self.parent.get_widget("wField_name").value
+        self.field_type = self.parent.get_widget("wField_type").get_selected_objects()[0]
+
+        if self.parent.get_widget("wField_length_or_val").value:
+            self.field_type += "("
+            self.field_type += str(self.parent.get_widget("wField_length_or_val").value)
+            self.field_type += ")"
+
+        self.field_string += (self.field_name + " " + self.field_type)
+
+        if self.parent.get_widget("wCollation").get_selected_objects()[0] is not None:
+            self.collation = "COLLATE '" + str(self.parent.get_widget("wCollation").get_selected_objects()[0]) + "'"
+            self.field_string += (" " + self.collation)
+
+        if self.parent.get_widget("wConstraint").get_selected_objects()[0] is not None:
+            self.constraint = self.parent.get_widget("wConstraint").get_selected_objects()[0]
+            self.field_string += (" " + self.constraint)
+
+        if self.parent.get_widget("wNot_null").value == True:
+            self.not_null = "NOT NULL"
+        else:
+            self.not_null = "NULL"
+
+        self.field_string += (" " + self.not_null)
+
+        if self.parent.get_widget("wDefault").value:
+            self.default = "DEFAULT '" + str(self.parent.get_widget("wDefault").value) + "'"
+            self.field_string += (" " + self.default)
+
+        self.parent.parentApp.field_string_array.append(self.field_string + ",")
+        npyscreen.notify_confirm(self.field_string)
+
+
+
+class CreateTable_Button(npyscreen.ButtonPress):
+    def whenPressed(self):
+        create_table_string = "CREATE TABLE {}".format(self.parent.parentApp.table_name) + "("
+        for field in self.parent.parentApp.field_string_array:
+            create_table_string += field
+        create_table_string += ")"
+
+        npyscreen.notify_confirm(create_table_string)
 
 
 class DeleteTable_Button(npyscreen.ButtonPress):
@@ -526,6 +578,8 @@ class App(npyscreen.NPSAppManaged):
     tablefield_cols = []
 
     sql_results = []
+
+    field_string_array = []
 
     def onStart(self):
 
