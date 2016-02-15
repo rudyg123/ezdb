@@ -206,7 +206,7 @@ class Postgres_Database(object):
             self.conn.commit()
         except psycopg2.DatabaseError, err:
             self.conn.rollback()
-            return "The following problem occurred during execution:\n" + str(err)
+            return "error", err
 
         try:
             sql_results_data = self.cur.fetchall()
@@ -214,9 +214,9 @@ class Postgres_Database(object):
 
             for row in sql_results_data:
                 sql_results.append(row)
-            return sql_results
+            return "success", sql_results
         except psycopg2.DatabaseError, err:
-            return err
+            return "error", err
 
 
     '''

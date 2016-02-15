@@ -306,16 +306,13 @@ class RawSQL_Window(npyscreen.ActionFormWithMenus):
 
         self.nextrely += 1  # Move down
         self.add(npyscreen.MultiLineEditableBoxed, w_id="wSQL_command", name="Enter SQL Command", max_height=6,
-                 relx=20, max_width=40, edit=True, scroll_exit=True)
+                 max_width=75, edit=True, scroll_exit=True)
 
         self.add(SQL_Button, w_id="wSQL_button", name="Send Command", relx=34)
         self.nextrely += 1  # Move down
 
         self.add(npyscreen.BoxTitle, w_id="wSQLresults_box", name="SQL Results", values=self.parentApp.sql_results,
                  max_width=75, max_height=11, scroll_exit=True)
-
-
-
 
         # Add a menu
         menu = self.new_menu(name="Help Menu")
@@ -384,7 +381,7 @@ class CreateDB_Button(npyscreen.ButtonPress):
         if create_confirm:
             servermsg = self.parent.parentApp.dbms.create_database(self.newDB_name)
             npyscreen.notify_confirm(servermsg)
-            self.parent.get_widget("wActiveDB").display()
+            self.parent.parentApp.switchForm("Database_Window")
             return
 
         else:
@@ -400,7 +397,7 @@ class DeleteDB_Button(npyscreen.ButtonPress):
         if delete_confirm:
             servermsg = self.parent.parentApp.dbms.delete_database(self.parent.parentApp.active_db)
             npyscreen.notify_confirm(servermsg)
-            self.parent.get_widget("wActiveDB").display()
+            self.parent.parentApp.switchForm("Database_Window")
             return
 
         else:
@@ -439,9 +436,11 @@ class CreateTable_Button(npyscreen.ButtonPress):
 class DeleteTable_Button(npyscreen.ButtonPress):
     def whenPressed(self):
 
-        self.selected_table = self.parent.parentApp.tablelist[self.parent.get_widget("wTableresults_box").value]
-        npyscreen.notify_confirm("You selected table: " + str(self.selected_table))
-
+        if self.parent.get_widget("wTableresults_box").value is None:
+            npyscreen.notify_confirm("Please select a table by highlighting it and enter")
+            return
+        else:
+            self.selected_table = self.parent.parentApp.tablelist[self.parent.get_widget("wTableresults_box").value]
 
         delete_confirm = npyscreen.notify_yes_no("Are you sure you want to delete " + str(self.selected_table)
                                                  + "?", "Confirm Deletion", editw=2)
@@ -451,7 +450,7 @@ class DeleteTable_Button(npyscreen.ButtonPress):
                 npyscreen.notify_confirm(servermsg)
 
             self.parent.parentApp.tablelist = self.parent.parentApp.dbms.list_database_tables()
-            self.parent.get_widget("wTableresults_box").display()
+            self.parent.parentApp.switchForm("Tables_Window")
             return
 
         else:
@@ -461,12 +460,16 @@ class SQL_Button(npyscreen.ButtonPress):
     def whenPressed(self):
 
         self.sql_command = self.parent.get_widget("wSQL_command").values[0]
-        #npyscreen.notify_confirm("You are sending the following SQL: " + str(self.sql_command))
-        self.parent.parentApp.sql_results = self.parent.parentApp.dbms.execute_SQL(self.sql_command)
-        if self.parent.parentApp.sql_results is None:
+
+        self.results = self.parent.parentApp.dbms.execute_SQL(self.sql_command)
+
+        if self.results[0] == 'error':
+            npyscreen.notify_confirm(str(self.results[1]))
+
+        elif self.results[0] == 'success':
             npyscreen.notify_confirm("SQL command sent successfully")
-        else:
-            npyscreen.notify_confirm(str(self.parent.parentApp.sql_results))
+            self.parent.parentApp.sql_results = self.results[1]
+            self.parent.parentApp.switchForm("RawSQL_Window")
             return
 
 
