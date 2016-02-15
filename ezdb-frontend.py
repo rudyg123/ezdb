@@ -415,7 +415,24 @@ class DeleteDB_Button(npyscreen.ButtonPress):
 
 class ViewTableStruct_Button(npyscreen.ButtonPress):
     def whenPressed(self):
-        pass
+
+       if self.parent.get_widget("wTables_box").value is None:
+           npyscreen.notify_confirm("Please select a table by highlighting it and enter")
+           return
+       else:
+           self.selected_table = self.parent.parentApp.tablelist[self.parent.get_widget("wTables_box").value]
+           self.results = self.parent.parentApp.dbms.view_table_struct(self.selected_table)
+
+       if self.results[0] == 'error':
+           npyscreen.notify_confirm(str(self.results[1]))
+
+       elif self.results[0] == 'success':
+           self.parent.parentApp.table_results = self.results[1]
+           self.parent.parentApp.switchForm("Tables_Window")
+           return
+
+
+
 
 class BrowseTable_Button(npyscreen.ButtonPress):
     def whenPressed(self):
@@ -495,19 +512,31 @@ class AddField_Button(npyscreen.ButtonPress):
             self.default = "DEFAULT '" + str(self.parent.get_widget("wDefault").value) + "'"
             self.field_string += (" " + self.default)
 
-        self.parent.parentApp.field_string_array.append(self.field_string + ",")
+        self.parent.parentApp.field_string_array.append(self.field_string + ", ")
         npyscreen.notify_confirm(self.field_string)
 
 
 
 class CreateTable_Button(npyscreen.ButtonPress):
     def whenPressed(self):
-        create_table_string = "CREATE TABLE {}".format(self.parent.parentApp.table_name) + "("
+        create_table_string = "CREATE TABLE {} ".format(self.parent.parentApp.table_name) + "("
         for field in self.parent.parentApp.field_string_array:
             create_table_string += field
         create_table_string += ")"
 
         npyscreen.notify_confirm(create_table_string)
+
+        self.results = self.parent.parentApp.dbms.execute_SQL(create_table_string)
+
+        if self.results[0] == 'error':
+            npyscreen.notify_confirm(str(self.results[1]))
+
+        elif self.results[0] == 'success':
+            npyscreen.notify_confirm("Table [] successfully created".format(self.parent.parentApp.table_name))
+
+            self.parent.parentApp.switchForm("Tables_Window")
+            return
+
 
 
 class DeleteTable_Button(npyscreen.ButtonPress):
@@ -604,6 +633,7 @@ class App(npyscreen.NPSAppManaged):
 
     sql_results = []
     table_results = []
+    table_struct_results = []
 
     field_string_array = []
 

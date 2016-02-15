@@ -218,6 +218,43 @@ class Postgres_Database(object):
         except psycopg2.DatabaseError, err:
             return "error", err
 
+    def view_table_struct(self, table):
+
+        sql_string = "SELECT * from information_schema.columns WHERE table_name = '{}'".format(table) + ";"
+
+        try:
+            self.cur.execute(sql_string)
+            self.conn.commit()
+        except psycopg2.DatabaseError, err:
+            self.conn.rollback()
+            return "error", err
+
+        try:
+            struct_results_data = self.cur.fetchall()
+            struct_results = []
+
+            for row in struct_results_data:
+                struct_results.append(row)
+            return "success", struct_results
+        except psycopg2.DatabaseError, err:
+            return "error", err
+
+
+
+
+    def create_table(self, sql):
+
+        sql_string = sql
+
+        try:
+            self.cur.execute(sql_string)
+            self.conn.commit()
+            return "success", " "
+        except psycopg2.DatabaseError, err:
+            self.conn.rollback()
+            return "error", err
+
+
     def execute_SQL(self, sql):
 
         sql_string = sql + ";"
