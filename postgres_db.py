@@ -197,6 +197,27 @@ class Postgres_Database(object):
         except psycopg2.DatabaseError, err:
             return "The following problem occurred during deletion:\n" + str(err)
 
+    def browse_table(self, table):
+
+        sql_string = "SELECT * from {}".format(table) + ";"
+
+        try:
+            self.cur.execute(sql_string)
+            self.conn.commit()
+        except psycopg2.DatabaseError, err:
+            self.conn.rollback()
+            return "error", err
+
+        try:
+            browse_results_data = self.cur.fetchall()
+            browse_results = []
+
+            for row in browse_results_data:
+                browse_results.append(row)
+            return "success", browse_results
+        except psycopg2.DatabaseError, err:
+            return "error", err
+
     def execute_SQL(self, sql):
 
         sql_string = sql + ";"

@@ -168,11 +168,13 @@ class Tables_Window(npyscreen.ActionFormWithMenus):
         self.nextrely += 1  # Move down
         self.add(npyscreen.FixedText, value="Here is the TABLES window", editable=False)
         self.nextrely += 1  # Move down
-        self.add(npyscreen.BoxTitle, w_id="wTableresults_box", name="{} Tables".format(self.parentApp.active_db),
+        self.add(npyscreen.BoxTitle, w_id="wTables_box", name="{} Tables".format(self.parentApp.active_db),
                  values=self.parentApp.tablelist, max_width=25, max_height=8, scroll_exit=True)
 
         self.nextrely += 1  # Move down
-        self.add(ViewTableStruct_Button, name="View Table Structure", rely=6, relx=27, max_width=35)
+        self.add(ViewTableStruct_Button, name="View Table Structure", rely=6, relx=27, max_width=22)
+
+        self.add(BrowseTable_Button, name="Browse Table", rely=6, relx=52, max_width=12)
 
         self.nextrely += 1  # Move down
         self.add(npyscreen.TitleText, w_id="wNewTable_name", name="New Table Name:",
@@ -183,6 +185,10 @@ class Tables_Window(npyscreen.ActionFormWithMenus):
         self.nextrely += 1  # Move down
         self.add(DeleteTable_Button, name="Delete Table", relx=27, max_width=35)
 
+        self.nextrely += 1  # Move down
+        self.add(npyscreen.BoxTitle, w_id="wTableResults_box", name="Table Results", values=self.parentApp.table_results,
+                 max_width=75, max_height=9, scroll_exit=True)
+
         #self.nextrely += 1  # Move down
         #self.add(npyscreen.GridColTitles, w_id="w_TableGrid", col_titles=self.parentApp.tablefield_cols, relx=1)
 
@@ -192,7 +198,7 @@ class Tables_Window(npyscreen.ActionFormWithMenus):
         menu.addItem("Some helpful guidance here.")
 
     def while_editing(self):
-        self.get_widget("wTableresults_box").display()
+        self.get_widget("wTables_box").display()
 
     def on_cancel(self):
         self.parentApp.setNextForm("MAIN")
@@ -410,15 +416,34 @@ class DeleteDB_Button(npyscreen.ButtonPress):
 class ViewTableStruct_Button(npyscreen.ButtonPress):
     def whenPressed(self):
         pass
-        '''
-        self.parent.parentApp.active_db = self.parent.get_widget("wActiveDB").get_selected_objects()[0]
-        self.parent.parentApp.dbms.connect_database(self.parent.parentApp.active_db)
-        self.parent.parentApp.tablelist = self.parent.parentApp.dbms.list_database_tables()
+
+class BrowseTable_Button(npyscreen.ButtonPress):
+    def whenPressed(self):
+
+        if self.parent.get_widget("wTables_box").value is None:
+            npyscreen.notify_confirm("Please select a table by highlighting it and enter")
+            return
+        else:
+            self.selected_table = self.parent.parentApp.tablelist[self.parent.get_widget("wTables_box").value]
+            self.results = self.parent.parentApp.dbms.browse_table(self.selected_table)
+
+        if self.results[0] == 'error':
+            npyscreen.notify_confirm(str(self.results[1]))
+
+        elif self.results[0] == 'success':
+            self.parent.parentApp.table_results = self.results[1]
+            self.parent.parentApp.switchForm("Tables_Window")
+            return
 
 
-        self.parent.parentApp.switchForm("Tables_Window")
-        return self.parent.parentApp.tablelist
-        '''
+
+
+
+
+
+
+
+
 
 class BuildTable_Button(npyscreen.ButtonPress):
     def whenPressed(self):
@@ -578,6 +603,7 @@ class App(npyscreen.NPSAppManaged):
     tablefield_cols = []
 
     sql_results = []
+    table_results = []
 
     field_string_array = []
 
