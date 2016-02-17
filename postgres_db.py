@@ -53,6 +53,7 @@ class Postgres_Database(object):
             self.conn.commit()
 
         except psycopg2.DatabaseError, err:
+            self.conn.rollback()
             return "The following problem occurred during creation:\n" + str(err)
         
     #connect to existing named database
@@ -68,6 +69,7 @@ class Postgres_Database(object):
             self.conn.commit()
 
         except psycopg2.DatabaseError, err:
+            self.conn.rollback()
             return "The following problem occurred during connection:\n" + str(err)
 
         #print "Connected to database {}.".format(self.dbname)
@@ -80,6 +82,7 @@ class Postgres_Database(object):
             self.cur.execute(sql_string)
             self.conn.commit()
         except psycopg2.DatabaseError, err:
+            self.conn.rollback()
             return "The following problem occurred:\n" + str(err)
 
         dblist_data = self.cur.fetchall()
@@ -105,6 +108,7 @@ class Postgres_Database(object):
             return "{} postgreSQL database created.".format(self.dbname)
 
         except psycopg2.DatabaseError, err:
+            self.conn.rollback()
             return "The following problem occurred during creation:\n" + str(err)
 
     def delete_database(self, dbname):
@@ -134,6 +138,7 @@ class Postgres_Database(object):
             return "{} postgreSQL database deleted.".format(self.dbname)
 
         except psycopg2.DatabaseError, err:
+            self.conn.rollback()
             return "The following problem occurred during deletion:\n" + str(err)
 
 
@@ -145,6 +150,7 @@ class Postgres_Database(object):
             self.cur.execute(sql_string)
             self.conn.commit()
         except psycopg2.DatabaseError, err:
+            self.conn.rollback()
             return "The following problem occurred during table retrieval:\n" + str(err)
 
         tablelist_data = self.cur.fetchall()
@@ -164,6 +170,7 @@ class Postgres_Database(object):
             self.cur.execute(sql_string)
             self.conn.commit()
         except psycopg2.DatabaseError, err:
+            self.conn.rollback()
             return "The following problem occurred:\n" + str(err)
 
         fields = self.cur.fetchall()
@@ -173,13 +180,14 @@ class Postgres_Database(object):
             self.cur.execute(sql_string)
             self.conn.commit()
         except psycopg2.DatabaseError, err:
+            self.conn.rollback()
             return "The following problem occurred:\n" + str(err)
 
         numcols = self.cur.fetchall()
         field_row = []
         table_struct = []
 
-        print "{} Table Structure:".format(table_name)
+        #print "{} Table Structure:".format(table_name)
         for row in fields:
             for c in range(numcols):
                 field_row.append(row[c])
@@ -195,6 +203,7 @@ class Postgres_Database(object):
             self.cur.execute(sql_string)
             self.conn.commit()
         except psycopg2.DatabaseError, err:
+            self.conn.rollback()
             return "The following problem occurred during deletion:\n" + str(err)
 
     def browse_table(self, table):
@@ -216,6 +225,7 @@ class Postgres_Database(object):
                 browse_results.append(row)
             return "success", browse_results
         except psycopg2.DatabaseError, err:
+            self.conn.rollback()
             return "error", err
 
     def view_table_struct(self, table):
@@ -237,6 +247,7 @@ class Postgres_Database(object):
                 struct_results.append(row)
             return "success", struct_results
         except psycopg2.DatabaseError, err:
+            self.conn.rollback()
             return "error", err
 
 
@@ -274,6 +285,7 @@ class Postgres_Database(object):
                 sql_results.append(row)
             return "success", sql_results
         except psycopg2.DatabaseError, err:
+            self.conn.rollback()
             return "error", err
 
 
@@ -296,32 +308,4 @@ class Postgres_Database(object):
 
         return collatelist
     '''
-
-class Postgres_Table(object):
-
-    def __init__(self,db,table_name, field_name, field_type):
-        self.db = db
-        self.table_name = table_name
-        self.table_comment = ''
-
-        self.field_name = field_name
-        self.field_type = field_type
-        self.field_length_or_val = ''
-        self.field_collation = ''
-        self.field_attrib = ''
-        self.field_nullval = 'NULL'
-        self.field_default = ''
-        self.field_autoincrement = ''
-        self.field_primarykey = ''
-        self.field_unique = ''
-        self.field_index = ''
-        self.field_fulltext = ''
-
-        sql_string = "CREATE TABLE {}({} {});".format(self.table_name, self.field_name, self.field_type)
-
-        try:
-            self.db.cur.execute(sql_string)
-            self.db.conn.commit()
-        except psycopg2.DatabaseError, err:
-            print "The following problem occurred during table creation:\n" + str(err)
 
