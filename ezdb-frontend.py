@@ -463,19 +463,14 @@ class BrowseTable_Button(npyscreen.ButtonPress):
 
 class BuildTable_Button(npyscreen.ButtonPress):
     def whenPressed(self):
-        self.newTable_name = self.parent.get_widget("wNewTable_name").value
-        create_confirm = npyscreen.notify_yes_no("Are you sure you want to create " + str(self.newTable_name)
-                                                 + "?", "Confirm Creation", editw=2)
-        if create_confirm:
-            self.parent.parentApp.table_name = self.newTable_name
 
-            if self.parent.parentApp.dbtype == 0:
-                self.parent.parentApp.switchForm("Table_Create_PostgreSQL_Form")
-            elif self.parent.parentApp.dbtype == 1:
-                self.parent.parentApp.switchForm("Table_Create_MySQL_Form")
+        self.parent.parentApp.table_name = self.parent.get_widget("wNewTable_name").value
 
-        else:
-            npyscreen.blank_terminal() # clears the notification and just goes back to the original form
+        if self.parent.parentApp.dbtype == 0:
+            self.parent.parentApp.switchForm("Table_Create_PostgreSQL_Form")
+        elif self.parent.parentApp.dbtype == 1:
+            self.parent.parentApp.switchForm("Table_Create_MySQL_Form")
+
 
 class AddField_Button(npyscreen.ButtonPress):
     def whenPressed(self):
@@ -520,32 +515,38 @@ class AddField_Button(npyscreen.ButtonPress):
 class CreateTable_Button(npyscreen.ButtonPress):
     def whenPressed(self):
 
-        create_table_string = "CREATE TABLE {} ".format(self.parent.parentApp.table_name) + "("
-        for field in self.parent.parentApp.field_string_array:
-            create_table_string += field
-        create_table_string = create_table_string[:-2]
-        create_table_string += ")"
+        create_confirm = npyscreen.notify_yes_no("Are you sure you want to create " + str(self.parent.parentApp.table_name)
+                                                 + "?", "Confirm Creation", editw=2)
 
-        npyscreen.notify_confirm(create_table_string)
+        if create_confirm:
+            create_table_string = "CREATE TABLE {} ".format(self.parent.parentApp.table_name) + "("
+            for field in self.parent.parentApp.field_string_array:
+                create_table_string += field
+            create_table_string = create_table_string[:-2]
+            create_table_string += ")"
 
-        self.results = self.parent.parentApp.dbms.execute_SQL(create_table_string)
+            npyscreen.notify_confirm(create_table_string)
 
-        if self.results[0] == 'error':
-            if self.results[1] == 'no results to fetch':
+            self.results = self.parent.parentApp.dbms.execute_SQL(create_table_string)
+
+            if self.results[0] == 'error':
+                if self.results[1] == 'no results to fetch':
+                    npyscreen.notify_confirm("Table [] successfully created".format(self.parent.parentApp.table_name))
+                    self.parent.parentApp.field_string_array = []
+                    self.parent.parentApp.switchForm("Tables_Window")
+                else:
+                    npyscreen.notify_confirm(str(self.results[1]))
+                    self.parent.parentApp.field_string_array = []
+
+            elif self.results[0] == 'success':
                 npyscreen.notify_confirm("Table [] successfully created".format(self.parent.parentApp.table_name))
                 self.parent.parentApp.field_string_array = []
+
                 self.parent.parentApp.switchForm("Tables_Window")
-            else:
-                npyscreen.notify_confirm(str(self.results[1]))
-                self.parent.parentApp.field_string_array = []
+                return
 
-        elif self.results[0] == 'success':
-            npyscreen.notify_confirm("Table [] successfully created".format(self.parent.parentApp.table_name))
-            self.parent.parentApp.field_string_array = []
-
-            self.parent.parentApp.switchForm("Tables_Window")
-            return
-
+        else:
+            npyscreen.blank_terminal() # clears the notification and just goes back to the original form
 
 
 class DeleteTable_Button(npyscreen.ButtonPress):

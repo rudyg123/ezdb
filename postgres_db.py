@@ -250,9 +250,6 @@ class Postgres_Database(object):
             self.conn.rollback()
             return "error", err
 
-
-
-
     def create_table(self, sql):
 
         sql_string = sql
@@ -264,7 +261,6 @@ class Postgres_Database(object):
         except psycopg2.DatabaseError, err:
             self.conn.rollback()
             return "error", err
-
 
     def execute_SQL(self, sql):
 
