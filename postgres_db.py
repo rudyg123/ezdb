@@ -267,20 +267,28 @@ class Postgres_Database(object):
         try:
             self.cur.execute(sql_string)
             self.conn.commit()
+            sql_results = []
 
             try:
                 sql_results_data = self.cur.fetchall()
-                sql_results = []
 
-                for row in sql_results_data:
-                    sql_results.append(row)
-                return "success", sql_results
+                if sql_results_data:
+                    for row in sql_results_data:
+                        sql_results.append(row)
+                    return "success", sql_results
+
+                else:
+                    sql_results.append("No results to display")
+                    return "success", sql_results
+
             except psycopg2.DatabaseError, err:
-                self.conn.rollback()
-                return "error", err
+                if str(err) == "no results to fetch":
+                    sql_results.append("Operation completed successfully")
+                    return "success", sql_results
+                else:
+                    return "error", err
 
         except psycopg2.DatabaseError, err:
-            self.conn.rollback()
             return "error", err
 
 
