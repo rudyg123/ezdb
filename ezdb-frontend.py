@@ -598,7 +598,6 @@ class SQL_Button(npyscreen.ButtonPress):
             npyscreen.notify_confirm(str(self.results[1]))
 
         elif self.results[0] == 'success':
-            npyscreen.notify_confirm("SQL command sent successfully")
             self.parent.parentApp.sql_results = self.results[1]
             self.parent.parentApp.switchForm("RawSQL_Window")
             return

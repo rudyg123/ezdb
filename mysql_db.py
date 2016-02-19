@@ -45,7 +45,7 @@ class MySQL_Database(object):
         
         try:
             self.conn = mysql.connector.connect(**self.conn_config)
-            self.cur = self.conn.cursor()
+            self.cur = self.conn.cursor(buffered=True)
 
         except mysql.connector.Error, err:
             return err
@@ -60,22 +60,10 @@ class MySQL_Database(object):
         self.conn_config['database'] = self.dbname
         try:
             self.conn = mysql.connector.connect(**self.conn_config)
-            self.cur = self.conn.cursor()
+            self.cur = self.conn.cursor(buffered=True)
 
         except mysql.connector.Error, err:
-
-            if err.errno == errorcode.ER_ACCESS_DENIED_ERROR:
-                print("Invalid username and/or password")
-
-            elif err.errno == errorcode.ER_BAD_DB_ERROR:
-                print("Database does not exist.")
-
-            else:
-                print(err)
-
-            return
-
-        #print "Connected to database {}.".format(self.dbname)
+            return err
 
     def list_databases(self):
 
@@ -83,18 +71,16 @@ class MySQL_Database(object):
         try:
             self.cur.execute(sql_string)
 
+            dblist_data = self.cur.fetchall()
+            dblist = []
+
+            for row in dblist_data:
+                dblist.append(row[0])
+
+            return dblist
+
         except mysql.connector.Error, err:
-            print(err)
-
-        dblist_data = self.cur.fetchall()
-        self.conn.commit()
-
-        dblist = []
-
-        for row in dblist_data:
-            dblist.append(row[0])
-
-        return dblist
+            return err
 
     def create_database(self, dbname):
 
@@ -136,7 +122,6 @@ class MySQL_Database(object):
         except mysql.connector.Error, err:
             return "The following problem occurred during deletion:\n" + str(err)
 
-
     def list_database_tables(self):
 
         sql_string = "SHOW TABLES;"
@@ -152,34 +137,87 @@ class MySQL_Database(object):
             return tablelist
 
         except mysql.connector.Error, err:
-            return(err)
+            return err
 
+    def browse_table(self, table):
 
+        sql_string = "SELECT * from {}".format(table) + ";"
 
-    def display_table_struct(self, table_name):
+        try:
+            self.cur.execute(sql_string)
+            try:
+                browse_results_data = self.cur.fetchall()
+                browse_results = []
 
-        sql_string = "DESCRIBE {};".format(table_name)
+                for row in browse_results_data:
+                    browse_results.append(row)
+                return "success", browse_results
+            except mysql.connector.Error, err:
+                return "error", err
+
+        except mysql.connector.Error, err:
+            return "error", err
+
+    def view_table_struct(self, table):
+
+        sql_string = "DESCRIBE {};".format(table)
+
+        try:
+            self.cur.execute(sql_string)
+            try:
+                struct_results_data = self.cur.fetchall()
+                struct_results = []
+
+                for row in struct_results_data:
+                    struct_results.append(row)
+                return "success", struct_results
+
+            except mysql.connector.Error, err:
+                return "error", err
+
+        except mysql.connector.Error, err:
+            return "error", err
+
+    def delete_table(self, table):
+
+        sql_string = "DROP TABLE {};".format(table)
 
         try:
             self.cur.execute(sql_string)
         except mysql.connector.Error, err:
-            print(err)
+            return err
 
-        rows = self.cur.fetchall()
+    def execute_SQL(self, sql):
 
-        print "{} Table Structure:".format(table_name)
-        for row in rows:
-            print "   ", row[0], row[1], row[2], row[3], row[4]
-        print "\n"
-
-    def delete_table(self, table_name):
-
-        sql_string = "DROP TABLE {};".format(table_name)
+        sql_string = sql + ";"
 
         try:
             self.cur.execute(sql_string)
+            self.conn.commit()
+            sql_results = []
+
+            try:
+                sql_results_data = self.cur.fetchall()
+
+                if sql_results_data:
+                    for row in sql_results_data:
+                        sql_results.append(row)
+                    return "success", sql_results
+
+                else:
+                    sql_results.append("No results to display")
+                    return "success", sql_results
+
+            except mysql.connector.Error, err:
+                if str(err) == "No result set to fetch from.":
+                    sql_results.append("Operation completed successfully")
+                    return "success", sql_results
+                else:
+                    return "error", err
+
         except mysql.connector.Error, err:
-            print(err)
+            return "error", err
+
 
 class MySQL_Table(object):
 
