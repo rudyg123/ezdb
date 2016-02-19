@@ -8,6 +8,7 @@ Group 15: Rudy Gonzalez, Bobby Hines
 
 import mysql.connector
 from mysql.connector import errorcode
+import urllib2
 
 class MySQL_Database(object):
 
@@ -22,22 +23,6 @@ class MySQL_Database(object):
 
         self.dbname = None
 
-        '''
-        try:
-            self.conn = mysql.connector.connect(**self.conn_config)
-            self.cur = self.conn.cursor()
-
-        except mysql.connector.Error, err:
-
-            if err.errno == errorcode.ER_ACCESS_DENIED_ERROR:
-                print("Invalid username and/or password.")
-            else:
-                print("There was a problem connecting to the DBMS.")
-            return
-
-        #print "Connected to {} DBMS.".format(self.dbtype)
-        '''
-        
     def connect_DBMS(self, dbtype, host, port, user, password):
         
         self.dbtype = dbtype
@@ -55,6 +40,7 @@ class MySQL_Database(object):
             'user': self.user,
             'password': self.password,
             'host': self.host,
+            'database': ''
         }
         
         try:
@@ -62,14 +48,9 @@ class MySQL_Database(object):
             self.cur = self.conn.cursor()
 
         except mysql.connector.Error, err:
+            return err
 
-            if err.errno == errorcode.ER_ACCESS_DENIED_ERROR:
-                print("Invalid username and/or password.")
-            else:
-                print("There was a problem connecting to the DBMS.")
-            return
-        
-        
+
     '''connect to existing named database
     -still need to implement user db authentication'''
     def connect_database(self, dbname):
@@ -161,17 +142,19 @@ class MySQL_Database(object):
         sql_string = "SHOW TABLES;"
         try:
             self.cur.execute(sql_string)
+            tablelist_data = self.cur.fetchall()
+
+            tablelist = []
+
+            for row in tablelist_data:
+                tablelist.append(row[0])
+
+            return tablelist
+
         except mysql.connector.Error, err:
-            print(err)
+            return(err)
 
-        tablelist_data = self.cur.fetchall()
 
-        tablelist = []
-
-        for row in tablelist_data:
-            tablelist.append(row[0])
-
-        return tablelist
 
     def display_table_struct(self, table_name):
 

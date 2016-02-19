@@ -53,8 +53,7 @@ class Postgres_Database(object):
             self.conn.commit()
 
         except psycopg2.DatabaseError, err:
-            self.conn.rollback()
-            return "The following problem occurred during creation:\n" + str(err)
+            return err
         
     #connect to existing named database
     #-still need to implement user db authentication
@@ -81,20 +80,20 @@ class Postgres_Database(object):
         try:
             self.cur.execute(sql_string)
             self.conn.commit()
+
+            dblist_data = self.cur.fetchall()
+            self.conn.commit()
+
+            dblist = []
+
+            for row in dblist_data:
+                dblist.append(row[0])
+
+            return dblist
+
         except psycopg2.DatabaseError, err:
             self.conn.rollback()
             return "The following problem occurred:\n" + str(err)
-
-        dblist_data = self.cur.fetchall()
-        self.conn.commit()
-
-        dblist = []
-
-        for row in dblist_data:
-            dblist.append(row[0])
-
-        return dblist
-
 
     def create_database(self, dbname):
 
@@ -141,7 +140,6 @@ class Postgres_Database(object):
             self.conn.rollback()
             return "The following problem occurred during deletion:\n" + str(err)
 
-
     def list_database_tables(self):
 
         sql_string = "SELECT table_name FROM information_schema.tables WHERE table_schema = 'public'"
@@ -149,18 +147,19 @@ class Postgres_Database(object):
         try:
             self.cur.execute(sql_string)
             self.conn.commit()
+
+            tablelist_data = self.cur.fetchall()
+
+            tablelist = []
+
+            for row in tablelist_data:
+                tablelist.append(row[0])
+
+            return tablelist
+
         except psycopg2.DatabaseError, err:
             self.conn.rollback()
             return "The following problem occurred during table retrieval:\n" + str(err)
-
-        tablelist_data = self.cur.fetchall()
-
-        tablelist = []
-
-        for row in tablelist_data:
-            tablelist.append(row[0])
-
-        return tablelist
 
     def display_table_struct(self, table_name):
         #get number of table columns select count(*) from information_schema.columns where table_name='x';
@@ -169,31 +168,30 @@ class Postgres_Database(object):
         try:
             self.cur.execute(sql_string)
             self.conn.commit()
+            fields = self.cur.fetchall()
         except psycopg2.DatabaseError, err:
             self.conn.rollback()
             return "The following problem occurred:\n" + str(err)
-
-        fields = self.cur.fetchall()
 
         sql_string = "SELECT COUNT(*) FROM information_schema.columns WHERE table_name ='{}';".format(table_name)
         try:
             self.cur.execute(sql_string)
             self.conn.commit()
+            numcols = self.cur.fetchall()
+            field_row = []
+            table_struct = []
+
+            #print "{} Table Structure:".format(table_name)
+            for row in fields:
+                for c in range(numcols):
+                    field_row.append(row[c])
+                table_struct.append(field_row)
+                #print "   ", row[0], row[1], row[2], row[3], row[4]
+            return table_struct
+
         except psycopg2.DatabaseError, err:
             self.conn.rollback()
             return "The following problem occurred:\n" + str(err)
-
-        numcols = self.cur.fetchall()
-        field_row = []
-        table_struct = []
-
-        #print "{} Table Structure:".format(table_name)
-        for row in fields:
-            for c in range(numcols):
-                field_row.append(row[c])
-            table_struct.append(field_row)
-            #print "   ", row[0], row[1], row[2], row[3], row[4]
-        return table_struct
 
     def delete_table(self, table_name):
 
@@ -213,17 +211,17 @@ class Postgres_Database(object):
         try:
             self.cur.execute(sql_string)
             self.conn.commit()
-        except psycopg2.DatabaseError, err:
-            self.conn.rollback()
-            return "error", err
+            try:
+                browse_results_data = self.cur.fetchall()
+                browse_results = []
 
-        try:
-            browse_results_data = self.cur.fetchall()
-            browse_results = []
+                for row in browse_results_data:
+                    browse_results.append(row)
+                return "success", browse_results
+            except psycopg2.DatabaseError, err:
+                self.conn.rollback()
+                return "error", err
 
-            for row in browse_results_data:
-                browse_results.append(row)
-            return "success", browse_results
         except psycopg2.DatabaseError, err:
             self.conn.rollback()
             return "error", err
@@ -235,17 +233,17 @@ class Postgres_Database(object):
         try:
             self.cur.execute(sql_string)
             self.conn.commit()
-        except psycopg2.DatabaseError, err:
-            self.conn.rollback()
-            return "error", err
+            try:
+                struct_results_data = self.cur.fetchall()
+                struct_results = []
 
-        try:
-            struct_results_data = self.cur.fetchall()
-            struct_results = []
+                for row in struct_results_data:
+                    struct_results.append(row)
+                return "success", struct_results
+            except psycopg2.DatabaseError, err:
+                self.conn.rollback()
+                return "error", err
 
-            for row in struct_results_data:
-                struct_results.append(row)
-            return "success", struct_results
         except psycopg2.DatabaseError, err:
             self.conn.rollback()
             return "error", err
@@ -269,17 +267,18 @@ class Postgres_Database(object):
         try:
             self.cur.execute(sql_string)
             self.conn.commit()
-        except psycopg2.DatabaseError, err:
-            self.conn.rollback()
-            return "error", err
 
-        try:
-            sql_results_data = self.cur.fetchall()
-            sql_results = []
+            try:
+                sql_results_data = self.cur.fetchall()
+                sql_results = []
 
-            for row in sql_results_data:
-                sql_results.append(row)
-            return "success", sql_results
+                for row in sql_results_data:
+                    sql_results.append(row)
+                return "success", sql_results
+            except psycopg2.DatabaseError, err:
+                self.conn.rollback()
+                return "error", err
+
         except psycopg2.DatabaseError, err:
             self.conn.rollback()
             return "error", err

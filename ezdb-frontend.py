@@ -34,8 +34,6 @@ class Initial(npyscreen.ActionFormWithMenus):
         menu = self.new_menu(name="Help Menu")
         menu.addItem("Some helpful guidance here.")
 
-
-
     def on_ok(self):
         #For debugging:
         #npyscreen.notify_confirm("You selected " + str(self.db.value[0]))
@@ -84,19 +82,30 @@ class Connect_DBMS(npyscreen.ActionFormWithMenus):
 
     def on_ok(self):
 
+        self.result = None
+
         #connect to DBMS
         if self.parentApp.dbtype == 0:
             self.parentApp.dbms = pdb.Postgres_Database()
-            self.parentApp.dbms.connect_DBMS(self.parentApp.dbtype, self.parentApp.host.value, self.parentApp.port.value,
+            self.result = self.parentApp.dbms.connect_DBMS(self.parentApp.dbtype, self.parentApp.host.value, self.parentApp.port.value,
                                              self.parentApp.username.value, self.parentApp.password.value)
+
         elif self.parentApp.dbtype == 1:
             self.parentApp.dbms = mdb.MySQL_Database()
-            self.parentApp.dbms.connect_DBMS(self.parentApp.dbtype, self.parentApp.host.value, self.parentApp.port.value,
+            self.result = self.parentApp.dbms.connect_DBMS(self.parentApp.dbtype, self.parentApp.host.value, self.parentApp.port.value,
                                              self.parentApp.username.value, self.parentApp.password.value)
 
-        self.parentApp.setNextForm("Database_Window")
+        if self.result is not None:
+            npyscreen.notify_confirm("There was a problem connecting to the database system:\n" + str(self.result))
+            self.result = None
+            npyscreen.blank_terminal() # clears the notification and just goes back to the original form
+        else:
+            self.parentApp.setNextForm("Database_Window")
+
+
 
     def on_cancel(self):
+
         self.parentApp.setNextForm("MAIN")
 
 
@@ -203,6 +212,7 @@ class Tables_Window(npyscreen.ActionFormWithMenus):
     def on_cancel(self):
         self.parentApp.setNextForm("MAIN")
 
+
 class Table_Create_PostgreSQL_Form(npyscreen.ActionForm):
     '''
     field_name, field_type, field_length_or_val, field_collation, field_attrib, field_default = None
@@ -289,6 +299,7 @@ class Table_Create_MySQL_Form(npyscreen.ActionForm):
         self.add(npyscreen.TitleText, w_id="wNewField_name", name="Field Name:",
                                    begin_entry_at=15, use_two_lines=False)
 
+
 class Query_Window(npyscreen.ActionFormWithMenus):
     tabDatabases, tabTables, tabQuery, tabRawSQL, tabExport, tabAdmin, tabExit = None, None, None, None, None, None, None
 
@@ -306,6 +317,7 @@ class Query_Window(npyscreen.ActionFormWithMenus):
         # Add a menu
         menu = self.new_menu(name="Help Menu")
         menu.addItem("Some helpful guidance here.")
+
 
 class RawSQL_Window(npyscreen.ActionFormWithMenus):
     tabDatabases, tabTables, tabQuery, tabRawSQL, tabExport, tabAdmin, tabExit = None, None, None, None, None, None, None
@@ -333,6 +345,7 @@ class RawSQL_Window(npyscreen.ActionFormWithMenus):
         menu = self.new_menu(name="Help Menu")
         menu.addItem("Some helpful guidance here.")
 
+
 class Export_Window(npyscreen.ActionFormWithMenus):
     tabDatabases, tabTables, tabQuery, tabRawSQL, tabExport, tabAdmin, tabExit = None, None, None, None, None, None, None
 
@@ -350,6 +363,7 @@ class Export_Window(npyscreen.ActionFormWithMenus):
         # Add a menu
         menu = self.new_menu(name="Help Menu")
         menu.addItem("Some helpful guidance here.")
+
 
 class Admin_Window(npyscreen.ActionFormWithMenus):
     tabDatabases, tabTables, tabQuery, tabRawSQL, tabExport, tabAdmin, tabExit = None, None, None, None, None, None, None
@@ -369,6 +383,7 @@ class Admin_Window(npyscreen.ActionFormWithMenus):
         menu = self.new_menu(name="Help Menu")
         menu.addItem("Some helpful guidance here.")
 
+
 class ExitButton(npyscreen.ButtonPress):
     def whenPressed(self):
         exiting = npyscreen.notify_yes_no("Are you sure you want to quit?", "Are you sure?", editw=2)
@@ -377,6 +392,7 @@ class ExitButton(npyscreen.ButtonPress):
         else:
             npyscreen.blank_terminal() # clears the notification and just goes back to the original form
         return
+
 
 class OpenDB_Button(npyscreen.ButtonPress):
     def whenPressed(self):
@@ -387,6 +403,7 @@ class OpenDB_Button(npyscreen.ButtonPress):
 
         self.parent.parentApp.switchForm("Tables_Window")
         return self.parent.parentApp.tablelist
+
 
 class CreateDB_Button(npyscreen.ButtonPress):
     def whenPressed(self):
@@ -403,6 +420,7 @@ class CreateDB_Button(npyscreen.ButtonPress):
             npyscreen.blank_terminal() # clears the notification and just goes back to the original form
         self.parent.get_widget("wActiveDB").display()
 
+
 class DeleteDB_Button(npyscreen.ButtonPress):
     def whenPressed(self):
         #self.parent.parentApp.dbms.connect_database()
@@ -418,6 +436,7 @@ class DeleteDB_Button(npyscreen.ButtonPress):
         else:
             npyscreen.blank_terminal() # clears the notification and just goes back to the original form
         self.parent.get_widget("wActiveDB").display()
+
 
 class ViewTableStruct_Button(npyscreen.ButtonPress):
     def whenPressed(self):
@@ -438,8 +457,6 @@ class ViewTableStruct_Button(npyscreen.ButtonPress):
            return
 
 
-
-
 class BrowseTable_Button(npyscreen.ButtonPress):
     def whenPressed(self):
 
@@ -457,8 +474,6 @@ class BrowseTable_Button(npyscreen.ButtonPress):
             self.parent.parentApp.table_results = self.results[1]
             self.parent.parentApp.switchForm("Tables_Window")
             return
-
-
 
 
 class BuildTable_Button(npyscreen.ButtonPress):
@@ -509,7 +524,6 @@ class AddField_Button(npyscreen.ButtonPress):
         self.parent.parentApp.field_string_array.append(self.field_string + ", ")
         npyscreen.notify_confirm("Adding the following field:\n" + self.field_string)
         self.parent.parentApp.switchForm("Table_Create_PostgreSQL_Form")
-
 
 
 class CreateTable_Button(npyscreen.ButtonPress):
@@ -572,6 +586,7 @@ class DeleteTable_Button(npyscreen.ButtonPress):
         else:
             npyscreen.blank_terminal() # clears the notification and just goes back to the original form
 
+
 class SQL_Button(npyscreen.ButtonPress):
     def whenPressed(self):
 
@@ -594,25 +609,30 @@ class Tab_DatabaseButton(npyscreen.ButtonPress):
         self.parent.parentApp.switchForm("Database_Window")
         return
 
+
 class Tab_TablesButton(npyscreen.ButtonPress):
     def whenPressed(self):
         self.parent.parentApp.switchForm("Tables_Window")
         return
+
 
 class Tab_QueryButton(npyscreen.ButtonPress):
     def whenPressed(self):
         self.parent.parentApp.switchForm("Query_Window")
         return
 
+
 class Tab_RawSQLButton(npyscreen.ButtonPress):
     def whenPressed(self):
         self.parent.parentApp.switchForm("RawSQL_Window")
         return
 
+
 class Tab_ExportButton(npyscreen.ButtonPress):
     def whenPressed(self):
         self.parent.parentApp.switchForm("Export_Window")
         return
+
 
 class Tab_AdminButton(npyscreen.ButtonPress):
     def whenPressed(self):
