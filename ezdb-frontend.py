@@ -6,28 +6,40 @@ import mysql_db as mdb
 
 
 # ActionForm includes "Cancel" in addition to "OK"
-class Initial(npyscreen.ActionFormWithMenus):
+class Initial(npyscreen.ActionForm):
     sessionType, db = None, None
 
     def create(self):
         # Title text
         self.nextrely += 3  # Move down
-        self.nextrelx += 23  # Move right (centered))
+        self.nextrelx += 24  # Move right (centered))
         self.add(npyscreen.FixedText, value="                _  _     ", editable=False)
         self.add(npyscreen.FixedText, value="               | || |    ", editable=False)
         self.add(npyscreen.FixedText, value="  ___  ____  __| || |__  ", editable=False)
         self.add(npyscreen.FixedText, value=" / _ \|_  / / _` || '_ \ ", editable=False)
         self.add(npyscreen.FixedText, value="|  __/ / / | (_| || |_) |", editable=False)
         self.add(npyscreen.FixedText, value=" \___|/___| \__,_||_.__/ ", editable=False)
-        self.nextrely += 1  # Extra padding
 
         # Add session options and save the selected value
-        self.db = self.add(npyscreen.TitleSelectOne, max_height=4, name="Choose Database Type:", value=[0],
-                           values=["postgreSQL", "MySQL"], scroll_exit=True)
+        self.nextrely += 1  # Move down
+        self.nextrelx += 2  # Move right (centered)
+        self.add(npyscreen.FixedText, value="Choose Database Type:", editable=False)
+        self.db = self.add(npyscreen.SelectOne, max_height=2, value=[0], values=["postgreSQL", "MySQL"],
+                           scroll_exit=True)
 
-        # Add a menu
-        menu = self.new_menu(name="Help Menu")
-        menu.addItem("Some helpful guidance here.")
+        # Help menu guidance
+        self.nextrely += 3
+        self.nextrelx -= 15
+        self.add(npyscreen.FixedText, value="Note: Press ctrl+h on any screen to open the help window.", editable=False)
+
+        # Register help key
+        self.add_handlers({'^H': self.display_help})
+
+    @staticmethod
+    def display_help(help_cmd):
+        help_msg = "Select the database type with which you'd like to interact this session. This application " \
+                   "supports MySQL and PostgreSQL database systems."
+        npyscreen.notify_confirm(help_msg, title='Help Menu', editw=1)
 
     def on_ok(self):
         # For debugging:
