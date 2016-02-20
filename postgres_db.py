@@ -75,7 +75,7 @@ class Postgres_Database(object):
 
     def list_databases(self):
 
-        sql_string = "SELECT datname FROM pg_database WHERE datistemplate = false;"
+        sql_string = "SELECT datname FROM pg_database WHERE datistemplate = false AND datname != 'postgres';"
 
         try:
             self.cur.execute(sql_string)
