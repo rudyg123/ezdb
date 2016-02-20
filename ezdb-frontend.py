@@ -196,7 +196,7 @@ class TablesWindow(npyscreen.ActionFormWithMenus):
 
         self.nextrely += 1  # Move down
         self.add(npyscreen.TitleText, w_id="wNewTable_name", name="New Table Name:",
-                 begin_entry_at=22, relx=29, max_width=35, use_two_lines=False)
+                 relx=29, max_width=35, use_two_lines=False)
 
         self.add(BuildTableButton, name="Build", relx=27, max_width=35)
 
@@ -223,9 +223,6 @@ class TablesWindow(npyscreen.ActionFormWithMenus):
 
 
 class TableCreatePostgreSQLForm(npyscreen.ActionForm):
-    # field_name, field_type, field_length_or_val, field_collation, field_attrib, field_default = None
-    # field_autoincrement, field_primarykey, field_unique, field_index= False
-    # field_optional = True #user friendly way of saying if Null is okay for this field
 
     def create(self):
         postgresql_field_type_list = ['CHAR', 'VARCHAR', 'TEXT', 'BIT', 'VARBIT', 'SMALLINT', 'INT', 'BIGINT',
@@ -257,7 +254,7 @@ class TableCreatePostgreSQLForm(npyscreen.ActionForm):
                  values=postgresql_field_collat_list, max_width=35)
 
         self.nextrely += 1  # Move down
-        self.add(npyscreen.TitleSelectOne, w_id="wConstraint", max_height=4, name="Constraint: ",
+        self.add(npyscreen.TitleSelectOne, w_id="wConstraint", max_height=4, name="Constraint: ", value=[0],
                  values=postgresql_field_constraint_list, rely=2, relx=40, max_width=35)
 
         self.nextrely += 1  # Move down
@@ -266,8 +263,7 @@ class TableCreatePostgreSQLForm(npyscreen.ActionForm):
 
         # self.add(npyscreen.Checkbox, w_id="wAuto_increment", name="Auto Increment?", relx=40)
         self.nextrely += 1  # Move down
-        self.add(npyscreen.TitleText, w_id="wDefault", name="Default: ", max_width=35,
-                 relx=40, use_two_lines=False)
+        self.add(npyscreen.TitleText, w_id="wDefault", name="Default: ", max_width=35, relx=40)
 
         self.nextrely += 2  # Move down
         self.add(AddFieldButton, name="Add Field", relx=40, max_width=13)
@@ -284,21 +280,8 @@ class TableCreatePostgreSQLForm(npyscreen.ActionForm):
         self.parentApp.setNextForm("TablesWindow")
 
 
-class FieldComment(npyscreen.MultiLineEdit):
-    pass
-
-
-class FieldCommentBox(npyscreen.BoxTitle):
-    _entry_contained_widget = FieldComment
-    contained_widget_arguments={
-        'name': 'comment'
-    }
-
-
 class TableCreateMySQLForm(npyscreen.ActionForm):
-    # field_name, field_type, field_length_or_val, field_collation, field_attrib, field_default = None
-    # field_autoincrement, field_primarykey, field_unique, field_index= False
-    # field_optional = True #user friendly way of saying if Null is okay for this field
+
     def create(self):
         self.add(npyscreen.TitleText, w_id="wNewField_name", name="Field Name:", begin_entry_at=15, use_two_lines=False)
 
@@ -503,12 +486,18 @@ class BrowseTableButton(npyscreen.ButtonPress):
 
 class BuildTableButton(npyscreen.ButtonPress):
     def whenPressed(self):
-        self.parent.parentApp.table_name = self.parent.get_widget("wNewTable_name").value
 
-        if self.parent.parentApp.dbtype == 0:
-            self.parent.parentApp.switchForm("TableCreatePostgreSQLForm")
-        elif self.parent.parentApp.dbtype == 1:
-            self.parent.parentApp.switchForm("TableCreateMySQLForm")
+        if self.parent.get_widget("wNewTable_name").value == '':
+            npyscreen.notify_confirm("Please enter the name of the table to be created first")
+            return
+
+        else:
+            self.parent.parentApp.table_name = self.parent.get_widget("wNewTable_name").value
+
+            if self.parent.parentApp.dbtype == 0:
+                self.parent.parentApp.switchForm("TableCreatePostgreSQLForm")
+            elif self.parent.parentApp.dbtype == 1:
+                self.parent.parentApp.switchForm("TableCreateMySQLForm")
 
 
 class AddFieldButton(npyscreen.ButtonPress):
@@ -546,9 +535,13 @@ class AddFieldButton(npyscreen.ButtonPress):
             self.default = "DEFAULT '" + str(self.parent.get_widget("wDefault").value) + "'"
             self.field_string += (" " + self.default)
 
-        self.parent.parentApp.field_string_array.append(self.field_string + ", ")
-        npyscreen.notify_confirm("Adding the following field:\n" + self.field_string)
-        self.parent.parentApp.switchForm("TableCreatePostgreSQLForm")
+        add_confirm = npyscreen.notify_yes_no("Add the following field?\n" + self.field_string, editw=2)
+        if add_confirm:
+            self.parent.parentApp.field_string_array.append(self.field_string + ", ")
+            self.parent.parentApp.switchForm("TableCreatePostgreSQLForm")
+
+        else:
+            return
 
 
 class CreateTableButton(npyscreen.ButtonPress):
@@ -566,25 +559,27 @@ class CreateTableButton(npyscreen.ButtonPress):
             create_table_string = create_table_string[:-2]
             create_table_string += ")"
 
-            npyscreen.notify_confirm(create_table_string)
+            #npyscreen.notify_confirm(create_table_string)
 
             self.results = self.parent.parentApp.dbms.execute_SQL(create_table_string)
 
             if self.results[0] == 'error':
                 if self.results[1] == 'no results to fetch':
-                    npyscreen.notify_confirm("Table [] successfully created".format(self.parent.parentApp.table_name))
-                    self.parent.parentApp.field_string_array = []
-                    self.parent.parentApp.switchForm("TablesWindow")
+                    npyscreen.notify_confirm("Table {} successfully created".format(self.parent.parentApp.table_name))
+
                 else:
                     npyscreen.notify_confirm(str(self.results[1]))
                     self.parent.parentApp.field_string_array = []
+                    return
 
             elif self.results[0] == 'success':
-                npyscreen.notify_confirm("Table [] successfully created".format(self.parent.parentApp.table_name))
-                self.parent.parentApp.field_string_array = []
+                npyscreen.notify_confirm("Table {} successfully created".format(self.parent.parentApp.table_name))
 
-                self.parent.parentApp.switchForm("TablesWindow")
-                return
+            self.parent.parentApp.field_string_array = []
+            self.parent.parentApp.table_results = []
+            self.parent.parentApp.tableList = self.parent.parentApp.dbms.list_database_tables()
+
+            self.parent.parentApp.switchForm("TablesWindow")
 
         else:
             npyscreen.blank_terminal() # clears the notification and just goes back to the original form
@@ -639,8 +634,14 @@ class TabDatabaseButton(npyscreen.ButtonPress):
 
 class TabTablesButton(npyscreen.ButtonPress):
     def whenPressed(self):
-        self.parent.parentApp.switchForm("TablesWindow")
-        return
+
+        if self.parent.parentApp.active_db is None:
+            npyscreen.notify_confirm("You must first open a database before accessing the Tables view")
+            return
+
+        else:
+            self.parent.parentApp.switchForm("TablesWindow")
+
 
 
 class TabQueryButton(npyscreen.ButtonPress):

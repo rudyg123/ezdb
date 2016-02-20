@@ -75,7 +75,7 @@ class Postgres_Database(object):
 
     def list_databases(self):
 
-        sql_string = "SELECT datname FROM pg_database WHERE datistemplate = false;"
+        sql_string = "SELECT datname FROM pg_database WHERE datistemplate = false AND datname != 'postgres';"
 
         try:
             self.cur.execute(sql_string)
@@ -181,12 +181,11 @@ class Postgres_Database(object):
             field_row = []
             table_struct = []
 
-            #print "{} Table Structure:".format(table_name)
             for row in fields:
                 for c in range(numcols):
                     field_row.append(row[c])
                 table_struct.append(field_row)
-                #print "   ", row[0], row[1], row[2], row[3], row[4]
+
             return table_struct
 
         except psycopg2.DatabaseError, err:
@@ -200,6 +199,7 @@ class Postgres_Database(object):
         try:
             self.cur.execute(sql_string)
             self.conn.commit()
+
         except psycopg2.DatabaseError, err:
             self.conn.rollback()
             return "The following problem occurred during deletion:\n" + str(err)
@@ -218,6 +218,7 @@ class Postgres_Database(object):
                 for row in browse_results_data:
                     browse_results.append(row)
                 return "success", browse_results
+
             except psycopg2.DatabaseError, err:
                 self.conn.rollback()
                 return "error", err
@@ -240,6 +241,7 @@ class Postgres_Database(object):
                 for row in struct_results_data:
                     struct_results.append(row)
                 return "success", struct_results
+
             except psycopg2.DatabaseError, err:
                 self.conn.rollback()
                 return "error", err
@@ -256,6 +258,7 @@ class Postgres_Database(object):
             self.cur.execute(sql_string)
             self.conn.commit()
             return "success", " "
+
         except psycopg2.DatabaseError, err:
             self.conn.rollback()
             return "error", err
@@ -289,6 +292,7 @@ class Postgres_Database(object):
                     return "error", err
 
         except psycopg2.DatabaseError, err:
+            self.conn.rollback()
             return "error", err
 
 

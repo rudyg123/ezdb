@@ -67,7 +67,9 @@ class MySQL_Database(object):
 
     def list_databases(self):
 
-        sql_string = "SHOW DATABASES;"
+        #sql command to only show user created databases exlusive of system databases
+        sql_string = "SELECT schema_name FROM INFORMATION_SCHEMA.SCHEMATA WHERE schema_name not in" \
+                     "('information_schema','mysql','performance_schema');"
         try:
             self.cur.execute(sql_string)
 
