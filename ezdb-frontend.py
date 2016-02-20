@@ -122,6 +122,7 @@ class DatabaseWindow(npyscreen.ActionFormWithMenus):
     tabDatabases, tabTables, tabQuery, tabRawSQL, tabExport, tabAdmin, tabExit, dbList, dbtype_str = (None,)*9
 
     def create(self):
+
         self.tabDatabases = self.add(TabDatabaseButton, w_id="wDatabaseTab", name="Databases", value="DatabaseWindow",
                                      rely=1, scroll_exit=True)
         self.tabTables = self.add(TabTablesButton, w_id="wTablesTab", name="Tables", value="TablesWindow", rely=1,
@@ -133,6 +134,7 @@ class DatabaseWindow(npyscreen.ActionFormWithMenus):
                                   relx=45)
         self.tabAdmin = self.add(TabAdminButton, w_id="wAdminTab", name="Admin", value="AdminWindow", rely=1, relx=55)
         self.tabExit = self.add(ExitButton, name="Exit", rely=1, relx=64)
+
 
         self.dbList = self.parentApp.dbms.list_databases()
 
@@ -163,7 +165,6 @@ class DatabaseWindow(npyscreen.ActionFormWithMenus):
         menu = self.new_menu(name="Help Menu")
         menu.addItem("Some helpful guidance here.")
 
-        # self.add(npyscreen.MiniButton, name = "Main", rely=-1)
 
     def on_cancel(self):
         self.parentApp.setNextForm("MAIN")
@@ -288,7 +289,102 @@ class TableCreatePostgreSQLForm(npyscreen.ActionForm):
 class TableCreateMySQLForm(npyscreen.ActionForm):
 
     def create(self):
-        self.add(npyscreen.TitleText, w_id="wNewField_name", name="Field Name:", begin_entry_at=15, use_two_lines=False)
+        mysql_field_type_list = ['CHAR','VARCHAR','TINYTEXT','TEXT','LONGTEXT',
+                                 'TINYINT','SMALLINT','MEDIUMINT','INT','BIGINT','FLOAT','DOUBLE',
+                                 'DATE','DECIMAL','DATETIME','TIMESTAMP','TIME','YEAR',
+                                 'TINYBLOB','BLOB','MEDIUMBLOB','LONGBLOB',
+                                 'ENUM','SET','BIT','BOOL','BINARY','VARBINARY']
+
+        mysql_field_collat_list = [None,
+            'armscii8_bin','armscii8_general_ci','ascii_bin','ascii_general_ci','big5_bin','big5_chinese_ci','binary',
+            'cp1250_bin','cp1250_croatian_ci','cp1250_czech_cs','cp1250_general_ci','cp1250_polish_ci','cp1251_bin',
+            'cp1251_bulgarian_ci','cp1251_general_ci','cp1251_general_cs','cp1251_ukranian_ci','cp1256_bin',
+            'cp1256_general_ci','cp1257_bin','cp1257_general_ci','cp1257_lithuanian_ci','cp850_bin','cp850_general_ci',
+            'cp852_bin','cp852_general_ci','cp866_bin','cp866_general_ci','cp932_bin','cp932_japanese_ci','dec8_bin',
+            'dec8_swedish_ci','eucjpms_bin','eucjpms_japanese_ci','euckr_bin','euckr_korean_ci','gb2312_bin',
+            'gb2312_chinese_ci','gbk_bin','gbk_chinese_ci','geostd8_bin','geostd8_general_ci','greek_bin','greek_general_ci',
+            'hebrew_bin','hebrew_general_ci','hp8_bin','hp8_english_ci','keybcs2_bin','keybcs2_general_ci','koi8r_bin',
+            'koi8r_general_ci','latin1_bin','latin1_danish_ci','latin1_general_ci','latin1_general_cs','latin1_german1_ci',
+            'latin1_german2_ci','latin1_spanish_ci','latin1_swedish_ci','latin2_bin','latin2_croatian_ci','latin2_czech_cs',
+            'latin2_general_ci','latin2_hungarian_ci','latin5_bin','latin5_turkish_ci','latin7_bin','latin7_estonian_cs',
+            'latin7_general_ci','latin7_general_cs','macce_bin','macce_general_ci','macroman_bin','macroman_general_ci',
+            'sjis_bin','sjis_japanese_ci','swe7_bin','swe7_swedish_ci','tis620_bin','tis620_thai_ci','ucs2_bin',
+            'ucs2_czech_ci','ucs2_danish_ci','ucs2_esperanto_ci','ucs2_estonian_ci','ucs2_general_ci',
+            'ucs2_general_mysql500_ci','ucs2_hungarian_ci','ucs2_icelandic_ci','ucs2_latvian_ci','ucs2_lithuanian_ci',
+            'ucs2_persian_ci','ucs2_polish_ci','ucs2_roman_ci','ucs2_romanian_ci','ucs2_sinhala_ci','ucs2_slovak_ci',
+            'ucs2_slovenian_ci','ucs2_spanish_ci','ucs2_spanish2_ci','ucs2_swedish_ci','ucs2_turkish_ci','ucs2_unicode_ci',
+            'ujis_bin','ujis_japanese_ci','utf8_bin','utf8_czech_ci','utf8_danish_ci', 'utf8_esperanto_ci',
+            'utf8_estonian_ci','utf8_general_ci','utf8_general_mysql500_ci','utf8_hungarian_ci','utf8_icelandic_ci',
+            'utf8_latvian_ci','utf8_lithuanian_ci','utf8_persian_ci','utf8_polish_ci','utf8_roman_ci','utf8_romanian_ci',
+            'utf8_sinhala_ci','utf8_slovak_ci','utf8_slovenian_ci','utf8_spanish_ci','utf8_spanish2_ci','utf8_swedish_ci',
+            'utf8_turkish_ci','utf8_unicode_ci','utf8mb4_bin','utf8mb4_czech_ci','utf8mb4_danish_ci', 'utf8mb4_esperanto_ci',
+            'utf8mb4_estonian_ci','utf8mb4_general_ci','utf8mb4_hungarian_ci','utf8mb4_icelandic_ci','utf8mb4_latvian_ci',
+            'utf8mb4_lithuanian_ci','utf8mb4_persian_ci','utf8mb4_polish_ci','utf8mb4_roman_ci','utf8mb4_romanian_ci',
+            'utf8mb4_sinhala_ci','utf8mb4_slovak_ci','utf8mb4_slovenian_ci','utf8mb4_spanish_ci','utf8mb4_spanish2_ci',
+            'utf8mb4_swedish_ci','utf8mb4_turkish_ci','utf8mb4_unicode_ci','utf16_bin','utf16_czech_ci','utf16_danish_ci',
+            'utf16_esperanto_ci','utf16_estonian_ci','utf16_general_ci','utf16_hungarian_ci','utf16_icelandic_ci',
+            'utf16_latvian_ci','utf16_lithuanian_ci','utf16_persian_ci','utf16_polish_ci','utf16_roman_ci','utf16_romanian_ci',
+            'utf16_sinhala_ci','utf16_slovak_ci','utf16_slovenian_ci','utf16_spanish_ci','utf16_spanish2_ci',
+            'utf16_swedish_ci','utf16_turkish_ci','utf16_unicode_ci','utf32_bin','utf32_czech_ci','utf32_danish_ci',
+            'utf32_esperanto_ci','utf32_estonian_ci','utf32_general_ci','utf32_hungarian_ci','utf32_icelandic_ci',
+            'utf32_latvian_ci','utf32_lithuanian_ci','utf32_persian_ci','utf32_polish_ci','utf32_roman_ci',
+            'utf32_romanian_ci','utf32_sinhala_ci','utf32_slovak_ci','utf32_slovenian_ci','utf32_spanish_ci',
+            'utf32_spanish2_ci','utf32_swedish_ci','utf32_turkish_ci','utf32_unicode_ci']
+
+        mysql_field_attrib_list = [None, 'binary','unsigned','unsigned zerofill','on update current_timestamp']
+        mysql_field_constraint_list = [None, 'PRIMARY KEY','UNIQUE','INDEX']
+        mysql_engine_list = ['InnoDB','MyISAM','MRG_MYISAM','CSV','MEMORY','BLACKHOLE','PERFORMANCE_SCHEMA','ARCHIVE']
+
+        self.add(npyscreen.TitleText, w_id="wField_name", name="Field Name: ", max_width=35, relx=2,
+                 use_two_lines=False)
+
+        self.add(npyscreen.TitleSelectOne, w_id="wField_type", max_height=5, name="Type: ", value=[0],
+                 values=mysql_field_type_list, max_width=35)
+
+        self.nextrely += 1  # Move down
+        self.add(npyscreen.TitleText, w_id="wField_length_or_val", name="Length/Value: ", max_width=35,
+                 use_two_lines=False)
+
+        self.nextrely += 1  # Move down
+        self.add(npyscreen.TitleSelectOne, w_id="wCollation", max_height=4, name="Collation: ", value=[0],
+                 values=mysql_field_collat_list, max_width=35)
+
+        self.nextrely += 1  # Move down
+        self.add(npyscreen.TitleSelectOne, w_id="wAttribute", max_height=5, name="Attribute: ", value=[0],
+                 values=mysql_field_attrib_list, max_width=35)
+
+        self.nextrely += 1  # Move down
+        self.add(npyscreen.TitleSelectOne, w_id="wConstraint", max_height=4, name="Constraint: ", value=[0],
+                 values=mysql_field_constraint_list, rely=2, relx=40, max_width=37)
+
+        self.nextrely += 1  # Move down
+        self.add(npyscreen.SelectOne, w_id="wNot_null", values=["Not Required", "Required"], value=[0],
+                 max_width=20, max_height=2, relx=40)
+
+        self.nextrely += 1  # Move down
+        self.add(npyscreen.TitleText, w_id="wDefault", name="Default: ", max_width=25, relx=40)
+
+        self.nextrely += 1  # Move down
+        self.add(npyscreen.TitleSelectOne, w_id="wAuto_increment", name="Auto Increment: ", values=["No", "Yes"], value=[0],
+                 max_width=37, max_height=2, relx=40, use_two_lines=False)
+
+        self.nextrely += 1  # Move down
+        self.add(npyscreen.TitleSelectOne, w_id="wStorage_engine", max_height=4, name="Engine: ", value=[0],
+                 values=mysql_engine_list, relx=40, max_width=35)
+
+        self.nextrely += 1  # Move down
+        self.add(AddFieldButton, name="Add Field", relx=40, max_width=13)
+        self.add(CreateTableButton, name="Create Table", relx=40, max_width=13)
+
+    def on_ok(self):
+        self.parentApp.field_string_array = []
+        self.parentApp.tableList = self.parentApp.dbms.list_database_tables()
+        self.parentApp.setNextForm("TablesWindow")
+
+    def on_cancel(self):
+        self.parentApp.field_string_array = []
+        self.parentApp.tableList = self.parentApp.dbms.list_database_tables()
+        self.parentApp.setNextForm("TablesWindow")
 
 
 class QueryWindow(npyscreen.ActionFormWithMenus):
@@ -648,7 +744,6 @@ class TabTablesButton(npyscreen.ButtonPress):
             self.parent.parentApp.switchForm("TablesWindow")
 
 
-
 class TabQueryButton(npyscreen.ButtonPress):
     def whenPressed(self):
         self.parent.parentApp.switchForm("QueryWindow")
@@ -671,6 +766,25 @@ class TabAdminButton(npyscreen.ButtonPress):
     def whenPressed(self):
         self.parent.parentApp.switchForm("AdminWindow")
         return
+
+#for testing
+class Nav_Bar(npyscreen.Form):
+
+    def create(self):
+
+            self.add(TabDatabaseButton, w_id="wDatabaseTab", name="Databases", value="DatabaseWindow",
+                                 rely=1, max_height=1, scroll_exit=True)
+            self.add(TabTablesButton, w_id="wTablesTab", name="Tables", value="TablesWindow", rely=1,
+                                      relx=15, max_height=1)
+            self.add(TabQueryButton, w_id="wQueryTab", name="Query", value="QueryWindow", rely=1,
+                                     relx=25, max_height=1)
+            self.add(TabRawSQLButton, w_id="wRawSQLTab", name="Raw SQL", value="RawSQLWindow", rely=1,
+                                      relx=34, max_height=1)
+            self.add(TabExportButton, w_id="wExportTab", name="Export", value="ExportWindow", rely=1,
+                                      relx=45, max_height=1)
+            self.add(TabAdminButton, w_id="wAdminTab", name="Admin", value="AdminWindow", rely=1,
+                                     relx=55, max_height=1)
+            self.add(ExitButton, name="Exit", rely=1, relx=64, max_height=1)
 
 
 # NPSAppManaged provides a framework to start and end the application
@@ -697,8 +811,10 @@ class App(npyscreen.NPSAppManaged):
         self.addFormClass("RawSQLWindow", RawSQLWindow, name="ezdb >> Raw SQL Page")
         self.addFormClass("ExportWindow", ExportWindow, name="ezdb >> Export Page")
         self.addFormClass("AdminWindow", AdminWindow, name="ezdb >> Admin Page")
-        self.addFormClass("TableCreatePostgreSQLForm", TableCreatePostgreSQLForm, name="ezdb >> Create Table")
-        self.addFormClass("TableCreateMySQLForm", TableCreateMySQLForm, name="ezdb >> Create Table")
+        self.addFormClass("TableCreatePostgreSQLForm", TableCreatePostgreSQLForm, name="ezdb >> Build/Create Table")
+        self.addFormClass("TableCreateMySQLForm", TableCreateMySQLForm, name="ezdb >> Build/Create Table")
+        # for testing:
+        # self.addForm("Nav_Bar", Nav_Bar)
 
 if __name__ == "__main__":
     # Start an NPSAppManaged application mainloop
