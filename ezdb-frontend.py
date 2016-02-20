@@ -29,14 +29,14 @@ class Initial(npyscreen.ActionForm):
 
         # Help menu guidance
         self.nextrely += 3
-        self.nextrelx -= 15
-        self.add(npyscreen.FixedText, value="Note: Press ctrl+h on any screen to open the help window.", editable=False)
+        self.nextrelx -= 17
+        self.add(npyscreen.FixedText, value="Note: Press ctrl+q from any screen to open the help window.", editable=False)
 
         # Register help key
-        self.add_handlers({'^H': self.display_help})
+        self.add_handlers({'^Q': self.display_help})
 
     @staticmethod
-    def display_help(help_cmd):
+    def display_help(self):
         help_msg = "Select the database type with which you'd like to interact this session. This application " \
                    "supports MySQL and PostgreSQL database systems."
         npyscreen.notify_confirm(help_msg, title='Help Menu', editw=1)
@@ -55,8 +55,8 @@ class Initial(npyscreen.ActionForm):
             npyscreen.blank_terminal() # clears the notification and just goes back to the original form
 
 
-class ConnectDBMS(npyscreen.ActionFormWithMenus):
-    storedConnections, result = None, None
+class ConnectDBMS(npyscreen.ActionForm):
+    storedConnections, result, dbtype = (None,)*3
 
     def create(self):
         # Set default DBMS connection values
@@ -82,9 +82,14 @@ class ConnectDBMS(npyscreen.ActionFormWithMenus):
         self.nextrely += 1  # Move down
         self.parentApp.password = self.add(npyscreen.TitleText, name="Password:", value=self.parentApp.password)
 
-        # Add a menu
-        menu = self.new_menu(name="Help Menu")
-        menu.addItem("Some helpful guidance here.")
+        # Register help key
+        self.add_handlers({'^Q': self.display_help})
+
+    @staticmethod
+    def display_help(self):
+        help_msg = "Enter the connection settings for the database system with which you'd like to interact. The " \
+                   "initial settings are the default settings for local databases."
+        npyscreen.notify_confirm(help_msg, title='Help Menu', editw=1)
 
     def on_ok(self):
         self.result = None
