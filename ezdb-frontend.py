@@ -291,7 +291,7 @@ class TableCreateMySQLForm(npyscreen.ActionForm):
     def create(self):
         mysql_field_type_list = ['CHAR','VARCHAR','TINYTEXT','TEXT','LONGTEXT',
                                  'TINYINT','SMALLINT','MEDIUMINT','INT','BIGINT','FLOAT','DOUBLE',
-                                 'DATE','DECIMAL','DATETIME','TIMESTAMP','TIME','YEAR',
+                                 'DECIMAL','NUMERIC', 'REAL','DATE','DATETIME','TIMESTAMP','TIME','YEAR',
                                  'TINYBLOB','BLOB','MEDIUMBLOB','LONGBLOB',
                                  'ENUM','SET','BIT','BOOL','BINARY','VARBINARY']
 
@@ -609,26 +609,66 @@ class AddFieldButton(npyscreen.ButtonPress):
 
         self.field_name = self.parent.get_widget("wField_name").value
         self.field_type = self.parent.get_widget("wField_type").get_selected_objects()[0]
+        self.field_type_val = ""
+        self.attribute = ""
+        self.auto_increment = ""
 
         if self.parent.get_widget("wField_length_or_val").value:
-            self.field_type += "("
-            self.field_type += str(self.parent.get_widget("wField_length_or_val").value)
-            self.field_type += ")"
+            self.field_type_val += "("
+            self.field_type_val += str(self.parent.get_widget("wField_length_or_val").value)
+            self.field_type_val += ")"
+            self.field_string += (self.field_name + " " + self.field_type + self.field_type_val)
 
-        self.field_string += (self.field_name + " " + self.field_type)
+        else:
+            self.field_string += (self.field_name + " " + self.field_type)
+
+        if self.parent.parentApp.dbtype == 1:
+
+            if self.parent.get_widget("wAttribute").get_selected_objects()[0] is not None:
+
+                self.attribute = str(self.parent.get_widget("wAttribute").get_selected_objects()[0])
+
+                if self.attribute == "binary" and (self.field_type != "tinytext" or "text" or "mediumtext" or "longtext"):
+
+                    npyscreen.notify_confirm("The 'binary' attribute can only be used with one of the following data"
+                                             " types:\ntinytext, text, mediumtext or longtext")
+                    return
+
+                elif (self.attribute == "unsigned" or self.attribute == "unsigned zerofill") \
+                    and self.field_type not in ("TINYINT", "SMALLINT", "INT", "BIGINT", "FLOAT", "DOUBLE", "REAL",
+                                                "DECIMAL", "NUMERIC"):
+
+                    npyscreen.notify_confirm("The 'unsigned' and 'unsigned zerofill' attribute can only be used with"
+                                             " one of the following data types:\n"
+                                             "TINYINT, SMALLINT, INT, BIGINT, FLOAT, DOUBLE, REAL, DECIMAL or NUMERIC")
+                    return
+
+                elif self.attribute == "on update current_timestamp" and self.field_type not in ("DATETIME", "TIMESTAMP"):
+
+                    npyscreen.notify_confirm("The 'on update current_timestamp' attribute can only be used with"
+                                             " one of the following data types:\nDATETIME or TIMESTAMP")
+                    return
+
+                else:
+                    self.field_string += (" " + self.attribute)
 
         if self.parent.get_widget("wCollation").get_selected_objects()[0] is not None:
             self.collation = "COLLATE '" + str(self.parent.get_widget("wCollation").get_selected_objects()[0]) + "'"
             self.field_string += (" " + self.collation)
 
         if self.parent.get_widget("wConstraint").get_selected_objects()[0] is not None:
+
             self.constraint = self.parent.get_widget("wConstraint").get_selected_objects()[0]
-            self.field_string += (" " + self.constraint)
 
         if self.parent.get_widget("wNot_null").value[0] == 1:
             self.not_null = "NOT NULL"
-        else:
+
+        elif self.parent.get_widget("wNot_null").value[0] == 0 and self.constraint != "PRIMARY KEY":
             self.not_null = "NULL"
+
+        else:
+            npyscreen.notify_confirm("A Primary Key cannot be null. Select the 'Required' option.")
+            return
 
         self.field_string += (" " + self.not_null)
 
@@ -636,10 +676,38 @@ class AddFieldButton(npyscreen.ButtonPress):
             self.default = "DEFAULT '" + str(self.parent.get_widget("wDefault").value) + "'"
             self.field_string += (" " + self.default)
 
+        if self.parent.parentApp.dbtype == 1:
+
+            if self.parent.get_widget("wAuto_increment").value[0] == 1 and self.field_type in ("TINYINT", "SMALLINT",
+                                                    "INT", "BIGINT", "FLOAT", "DOUBLE", "REAL", "DECIMAL", "NUMERIC"):
+
+                self.auto_increment = "AUTO_INCREMENT"
+                self.field_string += (" " + self.auto_increment)
+
+            elif self.parent.get_widget("wAuto_increment").value[0] == 1 and self.field_type not in ("TINYINT", "SMALLINT",
+                                                    "INT", "BIGINT", "FLOAT", "DOUBLE", "REAL", "DECIMAL", "NUMERIC"):
+
+                npyscreen.notify_confirm("Auto increment can only be used on a numeric data type")
+                return
+
+            self.parent.parentApp.engine = self.parent.get_widget("wStorage_engine").get_selected_objects()[0]
+
+        if self.constraint:
+            #if self.parent.parentApp.dbtype == 0:
+            self.field_string += (" " + self.constraint)
+
+            #else:
+            #    self.field_string += (", " + self.constraint + " ('" + self.field_name + "')")
+
         add_confirm = npyscreen.notify_yes_no("Add the following field?\n" + self.field_string, editw=2)
         if add_confirm:
             self.parent.parentApp.field_string_array.append(self.field_string + ", ")
-            self.parent.parentApp.switchForm("TableCreatePostgreSQLForm")
+
+            if self.parent.parentApp.dbtype == 0:
+                self.parent.parentApp.switchForm("TableCreatePostgreSQLForm")
+
+            else:
+                self.parent.parentApp.switchForm("TableCreateMySQLForm")
 
         else:
             return
@@ -660,7 +728,10 @@ class CreateTableButton(npyscreen.ButtonPress):
             create_table_string = create_table_string[:-2]
             create_table_string += ")"
 
-            #npyscreen.notify_confirm(create_table_string)
+            if self.parent.parentApp.dbtype == 1:
+                create_table_string += "ENGINE=" + self.parent.parentApp.engine + ";"
+
+            npyscreen.notify_confirm(create_table_string)
 
             self.results = self.parent.parentApp.dbms.execute_SQL(create_table_string)
 
@@ -793,7 +864,7 @@ class App(npyscreen.NPSAppManaged):
     dbtype, host, port, username, password, dbms, active_db, tableList, active_table = (None,)*9
 
     # Table creation global variables
-    field_name, field_type, field_length_or_val, field_collation, field_attrib, field_default = (None,)*6
+    field_name, field_type, field_length_or_val, field_collation, field_attrib, field_default, engine = (None,)*7
 
     field_autoincrement, field_primarykey, field_unique, field_index = (False,)*4
     # User friendly way of saying if Null is okay for this field
