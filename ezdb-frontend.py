@@ -428,19 +428,27 @@ class RawSQLWindow(npyscreen.ActionFormWithMenus):
         self.tabExit = self.add(ExitButton, name="Exit", rely=1, relx=64)
 
         self.nextrely += 1  # Move down
-        self.add(npyscreen.MultiLineEditableBoxed, w_id="wSQL_command", name="Enter SQL Command", max_height=6,
-                 max_width=75, edit=True, scroll_exit=True)
 
-        self.add(SQLButton, w_id="wSQLButton", name="Send Command", relx=34)
+        self.add(wgBoxed_SQLCommand, name="Enter SQL Command", w_id="wSQL_command", max_height=7, editable=True,
+                 scroll_exit=True)
+
+        self.add(SQLButton, w_id="wSQLButton", name="Send Command", relx=53)
         self.nextrely += 1  # Move down
 
-        self.add(npyscreen.BoxTitle, w_id="wSQLresults_box", name="SQL Results", values=self.parentApp.sql_results,
-                 max_width=75, max_height=11, scroll_exit=True)
+        self.add(npyscreen.GridColTitles, max_height=10, values=self.parentApp.sql_results, default_column_number = 10,
+                 name="SQL Results")
 
         # Add a menu
         menu = self.new_menu(name="Help Menu")
         menu.addItem("Some helpful guidance here.")
 
+class wgSQLCommand(npyscreen.MultiLineEdit):
+
+    def display_value(self, vl):
+        return
+
+class wgBoxed_SQLCommand(npyscreen.BoxTitle):
+    _contained_widget = wgSQLCommand
 
 class ExportWindow(npyscreen.ActionFormWithMenus):
     tabDatabases, tabTables, tabQuery, tabRawSQL, tabExport, tabAdmin, tabExit = (None,)*7
@@ -786,7 +794,7 @@ class SQLButton(npyscreen.ButtonPress):
     sql_command, results = (None,)*2
 
     def whenPressed(self):
-        self.sql_command = self.parent.get_widget("wSQL_command").values[0]
+        self.sql_command = self.parent.get_widget("wSQL_command").value
         self.results = self.parent.parentApp.dbms.execute_SQL(self.sql_command)
 
         if self.results[0] == 'error':
@@ -861,6 +869,7 @@ class Nav_Bar(npyscreen.Form):
 # NPSAppManaged provides a framework to start and end the application
 # Manages the display of the various Forms we have created
 class App(npyscreen.NPSAppManaged):
+
     dbtype, host, port, username, password, dbms, active_db, tableList, active_table = (None,)*9
 
     # Table creation global variables
@@ -873,6 +882,7 @@ class App(npyscreen.NPSAppManaged):
     tablefield_cols, sql_results, table_results, table_struct_results, field_string_array = ([],)*5
 
     def onStart(self):
+
         # Declare all the forms that will be used within the app
         self.addFormClass("MAIN", Initial, name="Welcome to ezdb")
         self.addFormClass("ConnectDBMS", ConnectDBMS, name="ezdb >> DBMS Connection Page")
@@ -888,6 +898,10 @@ class App(npyscreen.NPSAppManaged):
         # self.addForm("Nav_Bar", Nav_Bar)
 
 if __name__ == "__main__":
+
+    #resizes the terminal to 120 x 35
+    print "\x1b[8;35;120t"
+
     # Start an NPSAppManaged application mainloop
     # Activates the default form which has a default ID of "MAIN"
     app = App().run()
