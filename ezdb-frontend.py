@@ -6,7 +6,7 @@ import mysql_db as mdb
 
 
 # ActionForm includes "Cancel" in addition to "OK"
-class Initial(npyscreen.ActionForm):
+class Initial(npyscreen.ActionForm, npyscreen.SplitForm):
     sessionType, db = None, None
 
     def create(self):
@@ -28,9 +28,9 @@ class Initial(npyscreen.ActionForm):
                            scroll_exit=True)
 
         # Help menu guidance
-        self.nextrely += 6
-        self.nextrelx -= 18
-        self.add(npyscreen.FixedText, value="Note: Press ctrl+q from any screen to open the help window.", editable=False)
+        self.nextrely = 32
+        self.nextrelx = 2
+        self.add(npyscreen.FixedText, value=" Press ^Q for Help ", editable=False)
 
         # Register help key
         self.add_handlers({'^Q': self.display_help})
@@ -55,7 +55,7 @@ class Initial(npyscreen.ActionForm):
             npyscreen.blank_terminal() # clears the notification and just goes back to the original form
 
 
-class ConnectDBMS(npyscreen.ActionForm):
+class ConnectDBMS(npyscreen.ActionForm, npyscreen.SplitForm):
     storedConnections, result, dbtype = (None,)*3
 
     def create(self):
@@ -81,6 +81,11 @@ class ConnectDBMS(npyscreen.ActionForm):
         self.parentApp.username = self.add(npyscreen.TitleText, name="Username:", value=self.parentApp.username)
         self.nextrely += 1  # Move down
         self.parentApp.password = self.add(npyscreen.TitleText, name="Password:", value=self.parentApp.password)
+
+        # Help menu guidance
+        self.nextrely = 32
+        self.nextrelx = 2
+        self.add(npyscreen.FixedText, value=" Press ^Q for Help ", editable=False)
 
         # Register help key
         self.add_handlers({'^Q': self.display_help})
@@ -118,7 +123,7 @@ class ConnectDBMS(npyscreen.ActionForm):
         self.parentApp.setNextForm("MAIN")
 
 
-class DatabaseWindow(npyscreen.ActionFormWithMenus):
+class DatabaseWindow(npyscreen.ActionForm, npyscreen.SplitForm):
     tabDatabases, tabTables, tabQuery, tabRawSQL, tabExport, tabAdmin, tabExit, dbList, dbtype_str = (None,)*9
 
     def create(self):
@@ -134,7 +139,6 @@ class DatabaseWindow(npyscreen.ActionFormWithMenus):
                                   relx=45)
         self.tabAdmin = self.add(TabAdminButton, w_id="wAdminTab", name="Admin", value="AdminWindow", rely=1, relx=55)
         self.tabExit = self.add(ExitButton, name="Exit", rely=1, relx=64)
-
 
         self.dbList = self.parentApp.dbms.list_databases()
 
@@ -161,10 +165,19 @@ class DatabaseWindow(npyscreen.ActionFormWithMenus):
         self.nextrely += 1  # Move down
         self.add(DeleteDBButton, name="Delete Database")
 
-        # Add a menu
-        menu = self.new_menu(name="Help Menu")
-        menu.addItem("Some helpful guidance here.")
+        # Help menu guidance
+        self.nextrely = 32
+        self.nextrelx = 2
+        self.add(npyscreen.FixedText, value=" Press ^Q for Help ", editable=False)
 
+        # Register help key
+        self.add_handlers({'^Q': self.display_help})
+
+    @staticmethod
+    def display_help(self):
+        help_msg = "Select an available database instance from the list, and choose \"Open Database\" to begin " \
+                   "interaction. If no instances are available, create a new one or contact your database administer."
+        npyscreen.notify_confirm(help_msg, title='Help Menu', editw=1)
 
     def on_cancel(self):
         self.parentApp.setNextForm("MAIN")
@@ -173,7 +186,7 @@ class DatabaseWindow(npyscreen.ActionFormWithMenus):
         self.get_widget("wActiveDB").display()
 
 
-class TablesWindow(npyscreen.ActionFormWithMenus):
+class TablesWindow(npyscreen.ActionForm, npyscreen.SplitForm):
     tabDatabases, tabTables, tabQuery, tabRawSQL, tabExport, tabAdmin, tabExit = (None,)*7
 
     def create(self):
@@ -218,9 +231,23 @@ class TablesWindow(npyscreen.ActionFormWithMenus):
         self.nextrely += 1  # Move down
         self.add(npyscreen.FixedText, value="{} Records Found".format(self.parentApp.num_records), editable=False)
 
-        # Add a menu
-        menu = self.new_menu(name="Help Menu")
-        menu.addItem("Some helpful guidance here.")
+        # Help menu guidance
+        self.nextrely = 32
+        self.nextrelx = 2
+        self.add(npyscreen.FixedText, value=" Press ^Q for Help ", editable=False)
+
+        # Register help key
+        self.add_handlers({'^Q': self.display_help})
+
+    @staticmethod
+    def display_help(self):
+        help_msg = "Select an available table from the list and choose \"View Table Structure\" to view the table's " \
+                   "fields and their associated constraints. Similarly, you can select a table and choose " \
+                   "\"Browse Table\" to view rows (data) within the table. To define and add a new table to the " \
+                   "current database instance, specify a name for the new table and choose \"Build\". Choosing " \
+                   "\"Delete Table\" will permanently remove the currently selected table and all of its contents " \
+                   "from the database instance."
+        npyscreen.notify_confirm(help_msg, title='Help Menu')
 
     # PEP8 Ignore (external library naming convention)
     def beforeEditing(self):
@@ -235,7 +262,7 @@ class TablesWindow(npyscreen.ActionFormWithMenus):
         self.parentApp.setNextForm("MAIN")
 
 
-class TableCreatePostgreSQLForm(npyscreen.ActionForm):
+class TableCreatePostgreSQLForm(npyscreen.ActionForm, npyscreen.SplitForm):
 
     def create(self):
         postgresql_field_type_list = ['CHAR', 'VARCHAR', 'TEXT', 'BIT', 'VARBIT', 'SMALLINT', 'INT', 'BIGINT',
@@ -282,6 +309,26 @@ class TableCreatePostgreSQLForm(npyscreen.ActionForm):
         self.add(AddFieldButton, name="Add Field", relx=40, max_width=13)
         self.add(CreateTableButton, name="Create Table", relx=40, max_width=13)
 
+        # Help menu guidance
+        self.nextrely = 32
+        self.nextrelx = 2
+        self.add(npyscreen.FixedText, value=" Press ^Q for Help ", editable=False)
+
+        # Register help key
+        self.add_handlers({'^Q': self.display_help})
+
+    @staticmethod
+    def display_help(self):
+        help_msg = "Enter in a name for a field (column) you would like to add to the new table. Choose a field " \
+                   "type for the type of information you would like the field to contain, for example \"VARCHAR\" " \
+                    "for text strings or  \"INT\" for integers. Add constraints as desired, for example " \
+                   "\"REQUIRED\" means a row cannot be added with a blank entry for field, and \"PRIMARY KEY\" marks" \
+                   "the data in this field as the primary key for references to this table. Finally, you can add " \
+                   "additional fields as needed before creating the table, or if you're ready to create, choose " \
+                   "\"CREATE TABLE\"."
+
+        npyscreen.notify_confirm(help_msg, title='Help Menu')
+
     def on_ok(self):
         self.parentApp.field_string_array = []
         self.parentApp.tableList = self.parentApp.dbms.list_database_tables()
@@ -293,7 +340,7 @@ class TableCreatePostgreSQLForm(npyscreen.ActionForm):
         self.parentApp.setNextForm("TablesWindow")
 
 
-class TableCreateMySQLForm(npyscreen.ActionForm):
+class TableCreateMySQLForm(npyscreen.ActionForm, npyscreen.SplitForm):
 
     def create(self):
         mysql_field_type_list = ['CHAR','VARCHAR','TINYTEXT','TEXT','LONGTEXT',
@@ -383,6 +430,25 @@ class TableCreateMySQLForm(npyscreen.ActionForm):
         self.add(AddFieldButton, name="Add Field", relx=40, max_width=13)
         self.add(CreateTableButton, name="Create Table", relx=40, max_width=13)
 
+        # Help menu guidance
+        self.nextrely = 32
+        self.nextrelx = 2
+        self.add(npyscreen.FixedText, value=" Press ^Q for Help ", editable=False)
+
+        # Register help key
+        self.add_handlers({'^Q': self.display_help})
+
+    @staticmethod
+    def display_help(self):
+        help_msg = "Enter in a name for a field (column) you would like to add to the new table. Choose a field " \
+                   "type for the type of information you would like the field to contain, for example \"VARCHAR\" " \
+                    "for text strings or  \"INT\" for integers. Add constraints as desired, for example " \
+                   "\"REQUIRED\" means a row cannot be added with a blank entry for field, and \"PRIMARY KEY\" marks" \
+                   "the data in this field as the primary key for references to this table. Finally, you can add " \
+                   "additional fields as needed before creating the table, or if you're ready to create, choose " \
+                   "\"CREATE TABLE\"."
+        npyscreen.notify_confirm(help_msg, title='Help Menu')
+
     def on_ok(self):
         self.parentApp.field_string_array = []
         self.parentApp.tableList = self.parentApp.dbms.list_database_tables()
@@ -394,7 +460,7 @@ class TableCreateMySQLForm(npyscreen.ActionForm):
         self.parentApp.setNextForm("TablesWindow")
 
 
-class QueryWindow(npyscreen.ActionFormWithMenus):
+class QueryWindow(npyscreen.ActionForm, npyscreen.SplitForm):
     tabDatabases, tabTables, tabQuery, tabRawSQL, tabExport, tabAdmin, tabExit = (None,)*7
 
     def create(self):
@@ -413,12 +479,29 @@ class QueryWindow(npyscreen.ActionFormWithMenus):
 
         self.add(npyscreen.FixedText, value="Here is the QUERY window", editable=False)
 
-        # Add a menu
-        menu = self.new_menu(name="Help Menu")
-        menu.addItem("Some helpful guidance here.")
+        # Help menu guidance
+        self.nextrely = 32
+        self.nextrelx = 2
+        self.add(npyscreen.FixedText, value=" Press ^Q for Help ", editable=False)
+
+        # Register help key
+        self.add_handlers({'^Q': self.display_help})
+
+    @staticmethod
+    def display_help(self):
+        help_msg = "First choose the type of action you would like to perform on the database. For example, choose " \
+                   "\"SELECT\" if you would like to display some information from the database, or \"INSERT\" if you " \
+                   "would like to add some information to the database. Next, add the names of the tables for which " \
+                   "you would like the query to select from. Finally, add criteria to the query by using field-" \
+                   "condition pairs. For example, a \"Cars\" table may have a \"color\" field, and the condition " \
+                   "for filtering could be \"red\". This criteria would ensure that the query only affects red cars " \
+                   "in the table. Add more conditions to a table for additional filtering, such as the field " \
+                   "\"type\" and the condition \"truck\", which would would return only red trucks when combined " \
+                   "with the first criteria."
+        npyscreen.notify_confirm(help_msg, title='Help Menu')
 
 
-class RawSQLWindow(npyscreen.ActionFormWithMenus):
+class RawSQLWindow(npyscreen.ActionForm, npyscreen.SplitForm):
     tabDatabases, tabTables, tabQuery, tabRawSQL, tabExport, tabAdmin, tabExit = (None,)*7
 
     def create(self):
@@ -450,9 +533,20 @@ class RawSQLWindow(npyscreen.ActionFormWithMenus):
         self.nextrely += 1  # Move down
         self.add(npyscreen.FixedText, value="{} Records Found".format(self.parentApp.num_records), editable=False)
 
-        # Add a menu
-        menu = self.new_menu(name="Help Menu")
-        menu.addItem("Some helpful guidance here.")
+        # Help menu guidance
+        self.nextrely = 32
+        self.nextrelx = 2
+        self.add(npyscreen.FixedText, value=" Press ^Q for Help ", editable=False)
+
+        # Register help key
+        self.add_handlers({'^Q': self.display_help})
+
+    @staticmethod
+    def display_help(self):
+        help_msg = "Use this page to enter and submit a raw SQL query without any of form assistance from the " \
+                   "Query Builder or Tables pages. Entering raw SQL provides none of the protections that the " \
+                   "aforementioned forms offer, and should only be performed by experienced users."
+        npyscreen.notify_confirm(help_msg, title='Help Menu', editw=1)
 
     def beforeEditing(self):
         #clear results
@@ -466,10 +560,12 @@ class wgSQLCommand(npyscreen.MultiLineEdit):
     def display_value(self, vl):
         return
 
+
 class wgBoxed_SQLCommand(npyscreen.BoxTitle):
     _contained_widget = wgSQLCommand
 
-class ExportWindow(npyscreen.ActionFormWithMenus):
+
+class ExportWindow(npyscreen.ActionForm, npyscreen.SplitForm):
     tabDatabases, tabTables, tabQuery, tabRawSQL, tabExport, tabAdmin, tabExit = (None,)*7
 
     def create(self):
@@ -487,12 +583,22 @@ class ExportWindow(npyscreen.ActionFormWithMenus):
 
         self.add(npyscreen.FixedText, value="Here is the EXPORT window", editable=False)
 
-        # Add a menu
-        menu = self.new_menu(name="Help Menu")
-        menu.addItem("Some helpful guidance here.")
+        # Help menu guidance
+        self.nextrely = 32
+        self.nextrelx = 2
+        self.add(npyscreen.FixedText, value=" Press ^Q for Help ", editable=False)
+
+        # Register help key
+        self.add_handlers({'^Q': self.display_help})
+
+    @staticmethod
+    def display_help(self):
+        help_msg = "Use this page to export contents from a specified table to a CSV text file. This may be useful " \
+                   "for importing database information to another program, such as Microsoft Excel."
+        npyscreen.notify_confirm(help_msg, title='Help Menu', editw=1)
 
 
-class AdminWindow(npyscreen.ActionFormWithMenus):
+class AdminWindow(npyscreen.ActionForm, npyscreen.SplitForm):
     tabDatabases, tabTables, tabQuery, tabRawSQL, tabExport, tabAdmin, tabExit = (None,)*7
 
     def create(self):
@@ -510,9 +616,19 @@ class AdminWindow(npyscreen.ActionFormWithMenus):
 
         self.add(npyscreen.FixedText, value="Here is the ADMIN window", editable=False)
 
-        # Add a menu
-        menu = self.new_menu(name="Help Menu")
-        menu.addItem("Some helpful guidance here.")
+        # Help menu guidance
+        self.nextrely = 32
+        self.nextrelx = 2
+        self.add(npyscreen.FixedText, value=" Press ^Q for Help ", editable=False)
+
+        # Register help key
+        self.add_handlers({'^Q': self.display_help})
+
+    @staticmethod
+    def display_help(self):
+        help_msg = "Use this screen to manage permissions for the currently selected database instance. You can add " \
+                   "user accounts and modify user read/write access from this page."
+        npyscreen.notify_confirm(help_msg, title='Help Menu', editw=1)
 
 
 class ExitButton(npyscreen.ButtonPress):
@@ -925,15 +1041,16 @@ class App(npyscreen.NPSAppManaged):
     def onStart(self):
 
         # Declare all the forms that will be used within the app
-        self.addFormClass("MAIN", Initial, name="Welcome to ezdb")
-        self.addFormClass("ConnectDBMS", ConnectDBMS, name="ezdb >> DBMS Connection Page")
-        self.addFormClass("DatabaseWindow", DatabaseWindow, name="ezdb >> Database Page")
-        self.addFormClass("TablesWindow", TablesWindow, name="ezdb >> Tables Page")
-        self.addFormClass("QueryWindow", QueryWindow, name="ezdb >> Query Page")
-        self.addFormClass("RawSQLWindow", RawSQLWindow, name="ezdb >> Raw SQL Page")
-        self.addFormClass("ExportWindow", ExportWindow, name="ezdb >> Export Page")
-        self.addFormClass("AdminWindow", AdminWindow, name="ezdb >> Admin Page")
-        self.addFormClass("TableCreatePostgreSQLForm", TableCreatePostgreSQLForm, name="ezdb >> Build/Create Table")
+        self.addFormClass("MAIN", Initial, name="Welcome to ezdb", draw_line_at=32)
+        self.addFormClass("ConnectDBMS", ConnectDBMS, name="ezdb >> DBMS Connection Page", draw_line_at=32)
+        self.addFormClass("DatabaseWindow", DatabaseWindow, name="ezdb >> Database Page", draw_line_at=32)
+        self.addFormClass("TablesWindow", TablesWindow, name="ezdb >> Tables Page", draw_line_at=32)
+        self.addFormClass("QueryWindow", QueryWindow, name="ezdb >> Query Page", draw_line_at=32)
+        self.addFormClass("RawSQLWindow", RawSQLWindow, name="ezdb >> Raw SQL Page", draw_line_at=32)
+        self.addFormClass("ExportWindow", ExportWindow, name="ezdb >> Export Page", draw_line_at=32)
+        self.addFormClass("AdminWindow", AdminWindow, name="ezdb >> Admin Page", draw_line_at=32)
+        self.addFormClass("TableCreatePostgreSQLForm", TableCreatePostgreSQLForm, name="ezdb >> Build/Create Table",
+                          draw_line_at=32)
         self.addFormClass("TableCreateMySQLForm", TableCreateMySQLForm, name="ezdb >> Build/Create Table")
         # for testing:
         # self.addForm("Nav_Bar", Nav_Bar)
