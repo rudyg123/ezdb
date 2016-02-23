@@ -219,12 +219,12 @@ class MySQL_Database(object):
                     return "success", sql_results
 
                 else:
-                    sql_results.append("No results to display")
+                    #sql_results.append("No results to display")
                     return "success", sql_results
 
             except mysql.connector.Error, err:
                 if str(err) == "No result set to fetch from.":
-                    sql_results.append("Operation completed successfully")
+                    #sql_results.append("Operation completed successfully")
                     return "success", sql_results
                 else:
                     return "error", err

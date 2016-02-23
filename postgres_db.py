@@ -162,9 +162,11 @@ class Postgres_Database(object):
             return "The following problem occurred during table retrieval:\n" + str(err)
 
     def display_table_struct(self, table_name):
+
         #get number of table columns select count(*) from information_schema.columns where table_name='x';
-        sql_string = "SELECT column_name, data_type, collation_name, is_nullable, column_default FROM information_schema.columns WHERE table_name ='{}';".format(table_name)
-        sql_string = "SELECT * FROM information_schema.columns WHERE table_name ='{}';".format(table_name)
+        sql_string = "SELECT column_name, data_type, character_maximum_length, collation_name, is_nullable," \
+                     " column_default from INFORMATION_SCHEMA.COLUMNS where table_name ='{}'".format(table_name)
+
         try:
             self.cur.execute(sql_string)
             self.conn.commit()
@@ -206,18 +208,23 @@ class Postgres_Database(object):
 
     def browse_table(self, table):
 
-        sql_string = "SELECT * from {}".format(table) + ";"
+        sql_string = "SELECT * from {}".format(table)
 
         try:
-            self.cur.execute(sql_string)
+            self.cur.execute(sql_string + " LIMIT 0;")
+            col_titles = [desc[0] for desc in self.cur.description]
+
+            self.cur.execute(sql_string  + ";")
             self.conn.commit()
             try:
                 browse_results_data = self.cur.fetchall()
                 browse_results = []
+                row_count = 0
 
                 for row in browse_results_data:
                     browse_results.append(row)
-                return "success", browse_results
+                    row_count += 1
+                return "success", browse_results, col_titles, row_count
 
             except psycopg2.DatabaseError, err:
                 self.conn.rollback()
@@ -229,18 +236,24 @@ class Postgres_Database(object):
 
     def view_table_struct(self, table):
 
-        sql_string = "SELECT * from information_schema.columns WHERE table_name = '{}'".format(table) + ";"
+        sql_string = "SELECT column_name, data_type, character_maximum_length, collation_name, is_nullable," \
+                     " column_default from INFORMATION_SCHEMA.COLUMNS where table_name ='{}'".format(table)
 
         try:
-            self.cur.execute(sql_string)
+            self.cur.execute(sql_string + " LIMIT 0;")
+            col_titles = [desc[0] for desc in self.cur.description]
+
+            self.cur.execute(sql_string + ";")
             self.conn.commit()
             try:
-                struct_results_data = self.cur.fetchall()
-                struct_results = []
+                table_struct_results_data = self.cur.fetchall()
+                table_struct_results = []
+                row_count = 0
 
-                for row in struct_results_data:
-                    struct_results.append(row)
-                return "success", struct_results
+                for row in table_struct_results_data:
+                    table_struct_results.append(row)
+                    row_count += 1
+                return "success", table_struct_results, col_titles, row_count
 
             except psycopg2.DatabaseError, err:
                 self.conn.rollback()
@@ -265,29 +278,36 @@ class Postgres_Database(object):
 
     def execute_SQL(self, sql):
 
-        sql_string = sql + ";"
+        sql_string = sql
+        col_titles = []
 
         try:
-            self.cur.execute(sql_string)
+            if "select" in sql_string.lower():
+
+                self.cur.execute(sql_string + " LIMIT 0;")
+                col_titles = [desc[0] for desc in self.cur.description]
+
+            self.cur.execute(sql_string + ";")
             self.conn.commit()
             sql_results = []
 
             try:
+
                 sql_results_data = self.cur.fetchall()
 
                 if sql_results_data:
+                    row_count = 0
                     for row in sql_results_data:
                         sql_results.append(row)
-                    return "success", sql_results
+                        row_count += 1
+                    return "success", sql_results, col_titles, row_count
 
                 else:
-                    sql_results.append("No results to display")
-                    return "success", sql_results
+                    return "success", sql_results, "", ""
 
             except psycopg2.DatabaseError, err:
                 if str(err) == "no results to fetch":
-                    sql_results.append("Operation completed successfully")
-                    return "success", sql_results
+                    return "success", sql_results, "", ""
                 else:
                     return "error", err
 

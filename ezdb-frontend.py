@@ -209,12 +209,14 @@ class TablesWindow(npyscreen.ActionFormWithMenus):
         self.nextrely += 1  # Move down
         self.add(DeleteTableButton, name="Delete Table", relx=27, max_width=35)
 
+        self.nextrely += 3  # Move down
+        self.add(npyscreen.FixedText, value="Table Results", color="LABEL", editable=False)
         self.nextrely += 1  # Move down
-        self.add(npyscreen.BoxTitle, w_id="wTableResults_box", name="Table Results",
-                 values=self.parentApp.table_results, max_width=75, max_height=9, scroll_exit=True)
+        self.add(npyscreen.GridColTitles, max_height=12, values=self.parentApp.table_results, default_column_number=10,
+                 col_titles=self.parentApp.col_titles, col_margin=1, column_width=20)
 
-        # self.nextrely += 1  # Move down
-        # self.add(npyscreen.GridColTitles, w_id="w_TableGrid", col_titles=self.parentApp.tablefield_cols, relx=1)
+        self.nextrely += 1  # Move down
+        self.add(npyscreen.FixedText, value="{} Records Found".format(self.parentApp.num_records), editable=False)
 
         # Add a menu
         menu = self.new_menu(name="Help Menu")
@@ -223,6 +225,11 @@ class TablesWindow(npyscreen.ActionFormWithMenus):
     # PEP8 Ignore (external library naming convention)
     def beforeEditing(self):
         self.parentApp.tableList = self.parentApp.dbms.list_database_tables()
+        self.parentApp.col_titles = []
+        self.parentApp.num_records = 0
+
+        #clear results
+        self.parentApp.table_results = []
 
     def on_cancel(self):
         self.parentApp.setNextForm("MAIN")
@@ -432,15 +439,27 @@ class RawSQLWindow(npyscreen.ActionFormWithMenus):
         self.add(wgBoxed_SQLCommand, name="Enter SQL Command", w_id="wSQL_command", max_height=7, editable=True,
                  scroll_exit=True)
 
-        self.add(SQLButton, w_id="wSQLButton", name="Send Command", relx=53)
-        self.nextrely += 1  # Move down
+        self.add(SQLButton, w_id="wSQLButton", relx=51, name="Send Command")
 
-        self.add(npyscreen.GridColTitles, max_height=10, values=self.parentApp.sql_results, default_column_number = 10,
-                 name="SQL Results")
+        self.nextrely += 3  # Move down
+        self.add(npyscreen.FixedText, value="SQL Results", color="LABEL", editable=False)
+        self.nextrely += 1  # Move down
+        self.add(npyscreen.GridColTitles, max_height=12, values=self.parentApp.sql_results, default_column_number=10,
+                 col_titles=self.parentApp.col_titles, col_margin=1, column_width=12, name="SQL Results")
+
+        self.nextrely += 1  # Move down
+        self.add(npyscreen.FixedText, value="{} Records Found".format(self.parentApp.num_records), editable=False)
 
         # Add a menu
         menu = self.new_menu(name="Help Menu")
         menu.addItem("Some helpful guidance here.")
+
+    def beforeEditing(self):
+        #clear results
+        self.parentApp.sql_results = []
+        self.parentApp.col_titles = []
+        self.parentApp.num_records = 0
+
 
 class wgSQLCommand(npyscreen.MultiLineEdit):
 
@@ -569,6 +588,11 @@ class ViewTableStructButton(npyscreen.ButtonPress):
 
         elif self.results[0] == 'success':
             self.parent.parentApp.table_results = self.results[1]
+            if self.results[2]:
+                self.parent.parentApp.col_titles = self.results[2]
+            if self.results[3]:
+                self.parent.parentApp.num_records = self.results[3]
+
             self.parent.parentApp.switchForm("TablesWindow")
             return
 
@@ -589,6 +613,10 @@ class BrowseTableButton(npyscreen.ButtonPress):
 
         elif self.results[0] == 'success':
             self.parent.parentApp.table_results = self.results[1]
+            if self.results[2]:
+                self.parent.parentApp.col_titles = self.results[2]
+            if self.results[3]:
+                self.parent.parentApp.num_records = self.results[3]
             self.parent.parentApp.switchForm("TablesWindow")
             return
 
@@ -794,6 +822,11 @@ class SQLButton(npyscreen.ButtonPress):
     sql_command, results = (None,)*2
 
     def whenPressed(self):
+
+        #clear results
+        self.parent.parentApp.sql_results = []
+        self.parent.parentApp.col_titles = []
+
         self.sql_command = self.parent.get_widget("wSQL_command").value
         self.results = self.parent.parentApp.dbms.execute_SQL(self.sql_command)
 
@@ -801,7 +834,13 @@ class SQLButton(npyscreen.ButtonPress):
             npyscreen.notify_confirm(str(self.results[1]))
 
         elif self.results[0] == 'success':
+
             self.parent.parentApp.sql_results = self.results[1]
+            if self.results[2]:
+                self.parent.parentApp.col_titles = self.results[2]
+            if self.results[3]:
+                self.parent.parentApp.num_records = self.results[3]
+            npyscreen.notify_confirm("Operation completed successfully")
             self.parent.parentApp.switchForm("RawSQLWindow")
             return
 
@@ -879,7 +918,9 @@ class App(npyscreen.NPSAppManaged):
     # User friendly way of saying if Null is okay for this field
     field_optional = True
 
-    tablefield_cols, sql_results, table_results, table_struct_results, field_string_array = ([],)*5
+    tablefield_cols, sql_results, col_titles, table_results, table_struct_results, field_string_array = ([],)*6
+
+    num_records = 0
 
     def onStart(self):
 
