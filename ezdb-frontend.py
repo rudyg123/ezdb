@@ -11,8 +11,8 @@ class Initial(npyscreen.ActionForm):
 
     def create(self):
         # Title text
-        self.nextrely += 3  # Move down
-        self.nextrelx += 24  # Move right (centered))
+        self.nextrely += 5  # Move down
+        self.nextrelx += 45  # Move right (centered))
         self.add(npyscreen.FixedText, value="                _  _     ", editable=False)
         self.add(npyscreen.FixedText, value="               | || |    ", editable=False)
         self.add(npyscreen.FixedText, value="  ___  ____  __| || |__  ", editable=False)
@@ -21,15 +21,15 @@ class Initial(npyscreen.ActionForm):
         self.add(npyscreen.FixedText, value=" \___|/___| \__,_||_.__/ ", editable=False)
 
         # Add session options and save the selected value
-        self.nextrely += 1  # Move down
+        self.nextrely += 4  # Move down
         self.nextrelx += 2  # Move right (centered)
         self.add(npyscreen.FixedText, value="Choose Database Type:", editable=False)
         self.db = self.add(npyscreen.SelectOne, max_height=2, value=[0], values=["postgreSQL", "MySQL"],
                            scroll_exit=True)
 
         # Help menu guidance
-        self.nextrely += 3
-        self.nextrelx -= 17
+        self.nextrely += 6
+        self.nextrelx -= 18
         self.add(npyscreen.FixedText, value="Note: Press ctrl+q from any screen to open the help window.", editable=False)
 
         # Register help key
