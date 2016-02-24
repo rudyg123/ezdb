@@ -161,39 +161,6 @@ class Postgres_Database(object):
             self.conn.rollback()
             return "The following problem occurred during table retrieval:\n" + str(err)
 
-    def display_table_struct(self, table_name):
-
-        #get number of table columns select count(*) from information_schema.columns where table_name='x';
-        sql_string = "SELECT column_name, data_type, character_maximum_length, collation_name, is_nullable," \
-                     " column_default from INFORMATION_SCHEMA.COLUMNS where table_name ='{}'".format(table_name)
-
-        try:
-            self.cur.execute(sql_string)
-            self.conn.commit()
-            fields = self.cur.fetchall()
-        except psycopg2.DatabaseError, err:
-            self.conn.rollback()
-            return "The following problem occurred:\n" + str(err)
-
-        sql_string = "SELECT COUNT(*) FROM information_schema.columns WHERE table_name ='{}';".format(table_name)
-        try:
-            self.cur.execute(sql_string)
-            self.conn.commit()
-            numcols = self.cur.fetchall()
-            field_row = []
-            table_struct = []
-
-            for row in fields:
-                for c in range(numcols):
-                    field_row.append(row[c])
-                table_struct.append(field_row)
-
-            return table_struct
-
-        except psycopg2.DatabaseError, err:
-            self.conn.rollback()
-            return "The following problem occurred:\n" + str(err)
-
     def delete_table(self, table_name):
 
         sql_string = "DROP TABLE {};".format(str(table_name))

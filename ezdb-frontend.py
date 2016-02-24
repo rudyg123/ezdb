@@ -252,6 +252,7 @@ class TablesWindow(npyscreen.ActionForm, npyscreen.SplitForm):
     # PEP8 Ignore (external library naming convention)
     def beforeEditing(self):
         self.parentApp.tableList = self.parentApp.dbms.list_database_tables()
+        self.get_widget("wTables_box").display()
         self.parentApp.col_titles = []
         self.parentApp.num_records = 0
 
@@ -881,7 +882,14 @@ class AddFieldButton(npyscreen.ButtonPress):
                     self.field_string += (" " + self.attribute)
 
         if self.parent.get_widget("wCollation").get_selected_objects()[0] is not None:
-            self.collation = "COLLATE '" + str(self.parent.get_widget("wCollation").get_selected_objects()[0]) + "'"
+
+            if self.parent.parentApp.dbtype == 0: #if postgreSQ, collation name needs double quotesL
+                self.collation = "COLLATE \"" + str(self.parent.get_widget("wCollation").get_selected_objects()[0]) + "\""
+
+            else:
+                #if MySQL
+                self.collation = "COLLATE " + str(self.parent.get_widget("wCollation").get_selected_objects()[0])
+
             self.field_string += (" " + self.collation)
 
         if self.parent.get_widget("wConstraint").get_selected_objects()[0] is not None:
@@ -1051,6 +1059,7 @@ class TabTablesButton(npyscreen.ButtonPress):
             return
 
         else:
+            self.parent.parentApp.tableList = self.parent.parentApp.dbms.list_database_tables()
             self.parent.parentApp.switchForm("TablesWindow")
 
 

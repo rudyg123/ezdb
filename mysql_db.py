@@ -162,17 +162,26 @@ class MySQL_Database(object):
 
     def view_table_struct(self, table):
 
-        sql_string = "DESCRIBE {};".format(table)
+        #sql_string = "SHOW FULL COLUMNS FROM {}".format(table)
+        sql_string = "SELECT column_name, data_type, character_maximum_length, collation_name, is_nullable," \
+                     " extra, column_default from INFORMATION_SCHEMA.COLUMNS where table_name ='{}'".format(table)
 
         try:
-            self.cur.execute(sql_string)
-            try:
-                struct_results_data = self.cur.fetchall()
-                struct_results = []
 
-                for row in struct_results_data:
-                    struct_results.append(row)
-                return "success", struct_results
+            self.cur.execute(sql_string + " LIMIT 0;")
+            col_titles = [desc[0] for desc in self.cur.description]
+
+            self.cur.execute(sql_string + ";")
+            self.conn.commit()
+            try:
+                table_struct_results_data = self.cur.fetchall()
+                table_struct_results = []
+                row_count = 0
+
+                for row in table_struct_results_data:
+                    table_struct_results.append(row)
+                    row_count += 1
+                return "success", table_struct_results, col_titles, row_count
 
             except mysql.connector.Error, err:
                 return "error", err
