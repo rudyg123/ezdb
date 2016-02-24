@@ -461,7 +461,10 @@ class TableCreateMySQLForm(npyscreen.ActionForm, npyscreen.SplitForm):
 
 
 class QueryWindow(npyscreen.ActionForm, npyscreen.SplitForm):
-    tabDatabases, tabTables, tabQuery, tabRawSQL, tabExport, tabAdmin, tabExit = (None,)*7
+    tabDatabases, tabTables, tabQuery, tabRawSQL, tabExport, tabAdmin, tabExit, action = (None,)*8
+    table1, table2, table3, t1f1, t1f2, t1f3, t2f1, t2f2, t2f3, t3f1, t3f2, t3f3 = (None,)*12
+    c1f1, c1c1, c1f2, c1c2, c1f3, c1c3, c1f4, c1c4, c2f1, c2c1, c2f2, c2c2, c2f3, c2c3, c2f4, c2c4 = (None,)*16
+    c3f1, c3c1, c3f2, c3c2, c3f3, c3c3, c3f4, c3c4, c4f1, c4c1, c4f2, c4c2, c4f3, c4c3, c4f4, c4c4 = (None,)*16
 
     def create(self):
         self.tabDatabases = self.add(TabDatabaseButton, w_id="wDatabaseTab", name="Databases", value="DatabaseWindow",
@@ -477,7 +480,80 @@ class QueryWindow(npyscreen.ActionForm, npyscreen.SplitForm):
                                  relx=55)
         self.tabExit = self.add(ExitButton, name="Exit", rely=1, relx=64)
 
-        self.add(npyscreen.FixedText, value="Here is the QUERY window", editable=False)
+        # Table 1
+        self.nextrely += 1  # Move down
+        self.nextrelx += 1  # Move right
+
+        self.table1 = self.add(npyscreen.TitleText, name="Table:", color="VERYGOOD", begin_entry_at=11, max_width=25)
+        self.t1f1 = self.add(npyscreen.TitleText, name="Field 1:", color="VERYGOOD", begin_entry_at=11, max_width=25)
+        self.t1f2 = self.add(npyscreen.TitleText, name="Field 2:", color="VERYGOOD", begin_entry_at=11, max_width=25)
+        self.t1f3 = self.add(npyscreen.TitleText, name="Field 3:", color="VERYGOOD", begin_entry_at=11, max_width=25)
+
+        # Table 2
+        self.nextrely -= 4  # Move up
+        self.nextrelx += 26  # Move right
+
+        self.table2 = self.add(npyscreen.TitleText, name="Table:", color="VERYGOOD", begin_entry_at=11, max_width=25)
+        self.t2f1 = self.add(npyscreen.TitleText, name="Field 1:", color="VERYGOOD", begin_entry_at=11, max_width=25)
+        self.t2f2 = self.add(npyscreen.TitleText, name="Field 2:", color="VERYGOOD", begin_entry_at=11, max_width=25)
+        self.t2f3 = self.add(npyscreen.TitleText, name="Field 3:", color="VERYGOOD", begin_entry_at=11, max_width=25)
+
+        # Table 3
+        self.nextrely -= 4  # Move up
+        self.nextrelx += 26  # Move right
+
+        self.table3 = self.add(npyscreen.TitleText, name="Table:", color="VERYGOOD", begin_entry_at=11, max_width=25)
+        self.t3f1 = self.add(npyscreen.TitleText, name="Field 1:", color="VERYGOOD", begin_entry_at=11, max_width=25)
+        self.t3f2 = self.add(npyscreen.TitleText, name="Field 2:", color="VERYGOOD", begin_entry_at=11, max_width=25)
+        self.t3f3 = self.add(npyscreen.TitleText, name="Field 3:", color="VERYGOOD", begin_entry_at=11, max_width=25)
+
+        # Table 1 criteria 1
+        self.nextrely += 1  # Move down
+        self.nextrelx = 3  # Add padding
+
+        self.c1f1 = self.add(npyscreen.TitleText, name="Field:", color="VERYGOOD", begin_entry_at=11, max_width=25)
+        self.c1c1 = self.add(npyscreen.TitleText, name="Condition:", color="VERYGOOD", begin_entry_at=11, max_width=25)
+
+        self.nextrelx = 3  # Add padding
+
+        self.c1op1 = self.add(npyscreen.SelectOne, max_height=2, value=[0], values=["AND", "OR"], scroll_exit=True)
+
+        # Table 1 criteria 2
+        self.nextrely += 1  # Move down
+        self.nextrelx = 3  # Add padding
+
+        self.c1f2 = self.add(npyscreen.TitleText, name="Field:", color="VERYGOOD", begin_entry_at=11, max_width=25)
+        self.c1c2 = self.add(npyscreen.TitleText, name="Condition:", color="VERYGOOD", begin_entry_at=11, max_width=25)
+
+        self.nextrelx = 3  # Add padding
+
+        self.c1op2 = self.add(npyscreen.SelectOne, max_height=2, value=[0], values=["AND", "OR"], scroll_exit=True)
+
+        # Table 1 criteria 3
+        self.nextrely += 1  # Move down
+        self.nextrelx = 3  # Add padding
+
+        self.c1f3 = self.add(npyscreen.TitleText, name="Field:", color="VERYGOOD", begin_entry_at=11, max_width=25)
+        self.c1c3 = self.add(npyscreen.TitleText, name="Condition:", color="VERYGOOD", begin_entry_at=11, max_width=25)
+
+        self.nextrelx = 3  # Add padding
+
+        self.c1op3 = self.add(npyscreen.SelectOne, max_height=2, value=[0], values=["AND", "OR"], scroll_exit=True)
+
+        # Sorting
+        self.nextrely += 1  # Move down
+        
+        self.sortBy = self.add(npyscreen.TitleText, name="Sort by:", color="VERYGOOD", begin_entry_at=11, max_width=25)
+        self.sortOrder = self.add(npyscreen.SelectOne, max_height=2, value=[0], values=["ASC", "DES"], scroll_exit=True)
+
+
+
+        # Action type selection
+        self.nextrely = 24
+        self.nextrelx = 86
+        self.action = self.add(npyscreen.BoxTitle, name=" Action: ", value=[0], scroll_exit=True, max_width=30,
+                               max_height=7)
+        self.action.values = ["SELECT", "INSERT", "UPDATE", "DELETE","CREATE TABLE"]
 
         # Help menu guidance
         self.nextrely = 32
