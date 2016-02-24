@@ -143,26 +143,33 @@ class MySQL_Database(object):
 
     def browse_table(self, table):
 
-        sql_string = "SELECT * from {}".format(table) + ";"
+        sql_string = "SELECT * from {}".format(table)
 
         try:
-            self.cur.execute(sql_string)
+            self.cur.execute(sql_string + " LIMIT 0;")
+            col_titles = [desc[0] for desc in self.cur.description]
+
+            self.cur.execute(sql_string + ";")
+            #self.conn.commit()
+
             try:
                 browse_results_data = self.cur.fetchall()
                 browse_results = []
+                row_count = 0
 
                 for row in browse_results_data:
                     browse_results.append(row)
-                return "success", browse_results
+                    row_count += 1
+                return "success", browse_results, col_titles, row_count
+
             except mysql.connector.Error, err:
-                return "error", err
+                return "error", err, "", ""
 
         except mysql.connector.Error, err:
-            return "error", err
+            return "error", err, "", ""
 
     def view_table_struct(self, table):
 
-        #sql_string = "SHOW FULL COLUMNS FROM {}".format(table)
         sql_string = "SELECT column_name, data_type, character_maximum_length, collation_name, is_nullable," \
                      " extra, column_default from INFORMATION_SCHEMA.COLUMNS where table_name ='{}'".format(table)
 
@@ -172,7 +179,7 @@ class MySQL_Database(object):
             col_titles = [desc[0] for desc in self.cur.description]
 
             self.cur.execute(sql_string + ";")
-            self.conn.commit()
+            #self.conn.commit()
             try:
                 table_struct_results_data = self.cur.fetchall()
                 table_struct_results = []
@@ -181,13 +188,14 @@ class MySQL_Database(object):
                 for row in table_struct_results_data:
                     table_struct_results.append(row)
                     row_count += 1
+
                 return "success", table_struct_results, col_titles, row_count
 
             except mysql.connector.Error, err:
-                return "error", err
+                return "error", err, "", ""
 
         except mysql.connector.Error, err:
-            return "error", err
+            return "error", err, "", ""
 
     def delete_table(self, table):
 
@@ -212,32 +220,40 @@ class MySQL_Database(object):
 
     def execute_SQL(self, sql):
 
-        sql_string = sql + ";"
+        sql_string = sql
+        col_titles = []
 
         try:
-            self.cur.execute(sql_string)
-            self.conn.commit()
+            if "select" in sql_string.lower():
+
+                self.cur.execute(sql_string + " LIMIT 0;")
+                col_titles = [desc[0] for desc in self.cur.description]
+
+            self.cur.execute(sql_string + ";")
+            #self.conn.commit()
             sql_results = []
 
             try:
+
                 sql_results_data = self.cur.fetchall()
 
                 if sql_results_data:
+                    row_count = 0
                     for row in sql_results_data:
                         sql_results.append(row)
-                    return "success", sql_results
+                        row_count += 1
+
+                    return "success", sql_results, col_titles, row_count
 
                 else:
-                    #sql_results.append("No results to display")
-                    return "success", sql_results
+                    return "success", sql_results, "", ""
 
             except mysql.connector.Error, err:
                 if str(err) == "No result set to fetch from.":
                     #sql_results.append("Operation completed successfully")
-                    return "success", sql_results
+                    return "success", sql_results, "", ""
                 else:
-                    return "error", err
+                    return "error", err, "", ""
 
         except mysql.connector.Error, err:
             return "error", err
-

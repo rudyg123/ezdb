@@ -1040,7 +1040,7 @@ class SQLButton(npyscreen.ButtonPress):
                 self.parent.parentApp.col_titles = self.results[2]
             if self.results[3]:
                 self.parent.parentApp.num_records = self.results[3]
-            npyscreen.notify_confirm("Operation completed successfully")
+            #npyscreen.notify_confirm("Operation completed successfully")
             self.parent.parentApp.switchForm("RawSQLWindow")
             return
 

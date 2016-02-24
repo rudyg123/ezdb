@@ -181,7 +181,7 @@ class Postgres_Database(object):
             self.cur.execute(sql_string + " LIMIT 0;")
             col_titles = [desc[0] for desc in self.cur.description]
 
-            self.cur.execute(sql_string  + ";")
+            self.cur.execute(sql_string + ";")
             self.conn.commit()
             try:
                 browse_results_data = self.cur.fetchall()
@@ -191,6 +191,7 @@ class Postgres_Database(object):
                 for row in browse_results_data:
                     browse_results.append(row)
                     row_count += 1
+
                 return "success", browse_results, col_titles, row_count
 
             except psycopg2.DatabaseError, err:
