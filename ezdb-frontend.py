@@ -671,7 +671,7 @@ class QueryWindow(npyscreen.ActionForm, npyscreen.SplitForm):
 
 
         # Help menu guidance
-        self.nextrely = 32
+        self.nextrely = 34
         self.nextrelx = 2
         self.add(npyscreen.FixedText, value=" Press ^Q for Help ", editable=False)
 
@@ -1443,27 +1443,27 @@ class App(npyscreen.NPSAppManaged):
     def onStart(self):
 
         # Declare all the forms that will be used within the app
-        self.addFormClass("MAIN", Initial, name="Welcome to ezdb", draw_line_at=33)
-        self.addFormClass("ConnectDBMS", ConnectDBMS, name="ezdb >> DBMS Connection Page", draw_line_at=33)
-        self.addFormClass("DatabaseWindow", DatabaseWindow, name="ezdb >> Database Page", draw_line_at=33)
-        self.addFormClass("TablesWindow", TablesWindow, name="ezdb >> Tables Page", draw_line_at=33)
-        self.addFormClass("QueryWindow", QueryWindow, name="ezdb >> Query >> SELECT Page", draw_line_at=33)
-        self.addFormClass("QueryInsertWindow", QueryInsertWindow, name="ezdb >> Query >> INSERT Page", draw_line_at=33)
-        self.addFormClass("QueryUpdateWindow", QueryUpdateWindow, name="ezdb >> Query >> UPDATE Page", draw_line_at=33)
-        self.addFormClass("QueryDeleteWindow", QueryDeleteWindow, name="ezdb >> Query >> DELETE Page", draw_line_at=33)
-        self.addFormClass("RawSQLWindow", RawSQLWindow, name="ezdb >> Raw SQL Page", draw_line_at=33)
-        self.addFormClass("ExportWindow", ExportWindow, name="ezdb >> Export Page", draw_line_at=33)
-        self.addFormClass("AdminWindow", AdminWindow, name="ezdb >> Admin Page", draw_line_at=33)
+        self.addFormClass("MAIN", Initial, name="Welcome to ezdb", draw_line_at=34)
+        self.addFormClass("ConnectDBMS", ConnectDBMS, name="ezdb >> DBMS Connection Page", draw_line_at=34)
+        self.addFormClass("DatabaseWindow", DatabaseWindow, name="ezdb >> Database Page", draw_line_at=34)
+        self.addFormClass("TablesWindow", TablesWindow, name="ezdb >> Tables Page", draw_line_at=34)
+        self.addFormClass("QueryWindow", QueryWindow, name="ezdb >> Query >> SELECT Page", draw_line_at=34)
+        self.addFormClass("QueryInsertWindow", QueryInsertWindow, name="ezdb >> Query >> INSERT Page", draw_line_at=34)
+        self.addFormClass("QueryUpdateWindow", QueryUpdateWindow, name="ezdb >> Query >> UPDATE Page", draw_line_at=34)
+        self.addFormClass("QueryDeleteWindow", QueryDeleteWindow, name="ezdb >> Query >> DELETE Page", draw_line_at=34)
+        self.addFormClass("RawSQLWindow", RawSQLWindow, name="ezdb >> Raw SQL Page", draw_line_at=34)
+        self.addFormClass("ExportWindow", ExportWindow, name="ezdb >> Export Page", draw_line_at=34)
+        self.addFormClass("AdminWindow", AdminWindow, name="ezdb >> Admin Page", draw_line_at=34)
         self.addFormClass("TableCreatePostgreSQLForm", TableCreatePostgreSQLForm, name="ezdb >> Build/Create Table",
-                          draw_line_at=33)
+                          draw_line_at=34)
         self.addFormClass("TableCreateMySQLForm", TableCreateMySQLForm, name="ezdb >> Build/Create Table",
-                          draw_line_at=33)
+                          draw_line_at=34)
         # for testing:
         # self.addForm("Nav_Bar", Nav_Bar)
 
 if __name__ == "__main__":
 
-    print "Loading program ..."
+    print "Resizing terminal..."
 
     #resizes the terminal to 120 x 35
     print "\x1b[8;37;120t"
