@@ -129,17 +129,20 @@ class DatabaseWindow(npyscreen.ActionForm, npyscreen.SplitForm):
 
     def create(self):
 
-        self.tabDatabases = self.add(TabDatabaseButton, w_id="wDatabaseTab", name="Databases", value="DatabaseWindow",
+        self.tabDatabases = self.add(TabMainButton, w_id="wMainTab", name="Main", value="DatabaseWindow",
                                      rely=1, scroll_exit=True)
+
+        self.tabDatabases = self.add(TabDatabaseButton, w_id="wDatabaseTab", name="Databases", value="DatabaseWindow",
+                                     rely=1, relx=14, scroll_exit=True)
         self.tabTables = self.add(TabTablesButton, w_id="wTablesTab", name="Tables", value="TablesWindow", rely=1,
-                                  relx=15)
-        self.tabQuery = self.add(TabQueryButton, w_id="wQueryTab", name="Query", value="QueryWindow", rely=1, relx=25)
+                                  relx=31)
+        self.tabQuery = self.add(TabQueryButton, w_id="wQueryTab", name="Query", value="QueryWindow", rely=1, relx=45)
         self.tabRawSQL = self.add(TabRawSQLButton, w_id="wRawSQLTab", name="Raw SQL", value="RawSQLWindow", rely=1,
-                                  relx=34)
+                                  relx=58)
         self.tabExport = self.add(TabExportButton, w_id="wExportTab", name="Export", value="ExportWindow", rely=1,
-                                  relx=45)
-        self.tabAdmin = self.add(TabAdminButton, w_id="wAdminTab", name="Admin", value="AdminWindow", rely=1, relx=55)
-        self.tabExit = self.add(ExitButton, name="Exit", rely=1, relx=64)
+                                  relx=74)
+        self.tabAdmin = self.add(TabAdminButton, w_id="wAdminTab", name="Admin", value="AdminWindow", rely=1, relx=89)
+        self.tabExit = self.add(ExitButton, name="Exit", rely=1, relx=103)
 
         self.dbList = self.parentApp.dbms.list_databases()
 
@@ -191,17 +194,20 @@ class TablesWindow(npyscreen.ActionForm, npyscreen.SplitForm):
     tabDatabases, tabTables, tabQuery, tabRawSQL, tabExport, tabAdmin, tabExit = (None,)*7
 
     def create(self):
+        self.tabDatabases = self.add(TabMainButton, w_id="wMainTab", name="Main", value="DatabaseWindow",
+                                     rely=1, scroll_exit=True)
+
         self.tabDatabases = self.add(TabDatabaseButton, w_id="wDatabaseTab", name="Databases", value="DatabaseWindow",
-                                     rely=1)
+                                     rely=1, relx=14, scroll_exit=True)
         self.tabTables = self.add(TabTablesButton, w_id="wTablesTab", name="Tables", value="TablesWindow", rely=1,
-                                  relx=15)
-        self.tabQuery = self.add(TabQueryButton, w_id="wQueryTab", name="Query", value="QueryWindow", rely=1, relx=25)
+                                  relx=31)
+        self.tabQuery = self.add(TabQueryButton, w_id="wQueryTab", name="Query", value="QueryWindow", rely=1, relx=45)
         self.tabRawSQL = self.add(TabRawSQLButton, w_id="wRawSQLTab", name="Raw SQL", value="RawSQLWindow", rely=1,
-                                  relx=34)
+                                  relx=58)
         self.tabExport = self.add(TabExportButton, w_id="wExportTab", name="Export", value="ExportWindow", rely=1,
-                                  relx=45)
-        self.tabAdmin = self.add(TabAdminButton, w_id="wAdminTab", name="Admin", value="AdminWindow", rely=1, relx=55)
-        self.tabExit = self.add(ExitButton, name="Exit", rely=1, relx=64)
+                                  relx=74)
+        self.tabAdmin = self.add(TabAdminButton, w_id="wAdminTab", name="Admin", value="AdminWindow", rely=1, relx=89)
+        self.tabExit = self.add(ExitButton, name="Exit", rely=1, relx=103)
 
         #self.nextrely += 1  # Move down
         #self.add(npyscreen.FixedText, value="Here is the TABLES window", editable=False)
@@ -475,18 +481,20 @@ class QueryWindow(npyscreen.ActionForm, npyscreen.SplitForm):
     c3f1, c3c1, c3f2, c3c2, c3f3, c3c3, c3f4, c3c4, c4f1, c4c1, c4f2, c4c2, c4f3, c4c3, c4f4, c4c4 = (None,)*16
 
     def create(self):
+        self.tabDatabases = self.add(TabMainButton, w_id="wMainTab", name="Main", value="DatabaseWindow",
+                                     rely=1, scroll_exit=True)
+
         self.tabDatabases = self.add(TabDatabaseButton, w_id="wDatabaseTab", name="Databases", value="DatabaseWindow",
-                                     rely=1)
+                                     rely=1, relx=14, scroll_exit=True)
         self.tabTables = self.add(TabTablesButton, w_id="wTablesTab", name="Tables", value="TablesWindow", rely=1,
-                                  relx=15)
-        self.tabQuery = self.add(TabQueryButton, w_id="wQueryTab", name="Query", value="QueryWindow", rely=1, relx=25)
+                                  relx=31)
+        self.tabQuery = self.add(TabQueryButton, w_id="wQueryTab", name="Query", value="QueryWindow", rely=1, relx=45)
         self.tabRawSQL = self.add(TabRawSQLButton, w_id="wRawSQLTab", name="Raw SQL", value="RawSQLWindow", rely=1,
-                                  relx=34)
+                                  relx=58)
         self.tabExport = self.add(TabExportButton, w_id="wExportTab", name="Export", value="ExportWindow", rely=1,
-                                  relx=45)
-        self.tabAdmin = self.add(TabAdminButton, w_id="wAdminTab", name="Admin", value="AdminWindow", rely=1,
-                                 relx=55)
-        self.tabExit = self.add(ExitButton, name="Exit", rely=1, relx=64)
+                                  relx=74)
+        self.tabAdmin = self.add(TabAdminButton, w_id="wAdminTab", name="Admin", value="AdminWindow", rely=1, relx=89)
+        self.tabExit = self.add(ExitButton, name="Exit", rely=1, relx=103)
 
         # Sub-nav for action type
         self.add(npyscreen.FixedText, value="Action: ", editable=False, relx=3, rely=3)
@@ -592,18 +600,20 @@ class QueryInsertWindow(npyscreen.ActionForm, npyscreen.SplitForm):
     tabDatabases, tabTables, tabQuery, tabRawSQL, tabExport, tabAdmin, tabExit, action = (None,)*8
 
     def create(self):
+        self.tabDatabases = self.add(TabMainButton, w_id="wMainTab", name="Main", value="DatabaseWindow",
+                                     rely=1, scroll_exit=True)
+
         self.tabDatabases = self.add(TabDatabaseButton, w_id="wDatabaseTab", name="Databases", value="DatabaseWindow",
-                                     rely=1)
+                                     rely=1, relx=14, scroll_exit=True)
         self.tabTables = self.add(TabTablesButton, w_id="wTablesTab", name="Tables", value="TablesWindow", rely=1,
-                                  relx=15)
-        self.tabQuery = self.add(TabQueryButton, w_id="wQueryTab", name="Query", value="QueryWindow", rely=1, relx=25)
+                                  relx=31)
+        self.tabQuery = self.add(TabQueryButton, w_id="wQueryTab", name="Query", value="QueryWindow", rely=1, relx=45)
         self.tabRawSQL = self.add(TabRawSQLButton, w_id="wRawSQLTab", name="Raw SQL", value="RawSQLWindow", rely=1,
-                                  relx=34)
+                                  relx=58)
         self.tabExport = self.add(TabExportButton, w_id="wExportTab", name="Export", value="ExportWindow", rely=1,
-                                  relx=45)
-        self.tabAdmin = self.add(TabAdminButton, w_id="wAdminTab", name="Admin", value="AdminWindow", rely=1,
-                                 relx=55)
-        self.tabExit = self.add(ExitButton, name="Exit", rely=1, relx=64)
+                                  relx=74)
+        self.tabAdmin = self.add(TabAdminButton, w_id="wAdminTab", name="Admin", value="AdminWindow", rely=1, relx=89)
+        self.tabExit = self.add(ExitButton, name="Exit", rely=1, relx=103)
 
         # Sub-nav for action type
         self.add(npyscreen.FixedText, value="Action: ", editable=False, relx=3, rely=3)
@@ -643,18 +653,20 @@ class QueryUpdateWindow(npyscreen.ActionForm, npyscreen.SplitForm):
     tabDatabases, tabTables, tabQuery, tabRawSQL, tabExport, tabAdmin, tabExit, action = (None,)*8
 
     def create(self):
+        self.tabDatabases = self.add(TabMainButton, w_id="wMainTab", name="Main", value="DatabaseWindow",
+                                     rely=1, scroll_exit=True)
+
         self.tabDatabases = self.add(TabDatabaseButton, w_id="wDatabaseTab", name="Databases", value="DatabaseWindow",
-                                     rely=1)
+                                     rely=1, relx=14, scroll_exit=True)
         self.tabTables = self.add(TabTablesButton, w_id="wTablesTab", name="Tables", value="TablesWindow", rely=1,
-                                  relx=15)
-        self.tabQuery = self.add(TabQueryButton, w_id="wQueryTab", name="Query", value="QueryWindow", rely=1, relx=25)
+                                  relx=31)
+        self.tabQuery = self.add(TabQueryButton, w_id="wQueryTab", name="Query", value="QueryWindow", rely=1, relx=45)
         self.tabRawSQL = self.add(TabRawSQLButton, w_id="wRawSQLTab", name="Raw SQL", value="RawSQLWindow", rely=1,
-                                  relx=34)
+                                  relx=58)
         self.tabExport = self.add(TabExportButton, w_id="wExportTab", name="Export", value="ExportWindow", rely=1,
-                                  relx=45)
-        self.tabAdmin = self.add(TabAdminButton, w_id="wAdminTab", name="Admin", value="AdminWindow", rely=1,
-                                 relx=55)
-        self.tabExit = self.add(ExitButton, name="Exit", rely=1, relx=64)
+                                  relx=74)
+        self.tabAdmin = self.add(TabAdminButton, w_id="wAdminTab", name="Admin", value="AdminWindow", rely=1, relx=89)
+        self.tabExit = self.add(ExitButton, name="Exit", rely=1, relx=103)
 
         # Sub-nav for action type
         self.add(npyscreen.FixedText, value="Action: ", editable=False, relx=3, rely=3)
@@ -694,18 +706,20 @@ class QueryDeleteWindow(npyscreen.ActionForm, npyscreen.SplitForm):
     tabDatabases, tabTables, tabQuery, tabRawSQL, tabExport, tabAdmin, tabExit, action = (None,)*8
 
     def create(self):
+        self.tabDatabases = self.add(TabMainButton, w_id="wMainTab", name="Main", value="DatabaseWindow",
+                                     rely=1, scroll_exit=True)
+
         self.tabDatabases = self.add(TabDatabaseButton, w_id="wDatabaseTab", name="Databases", value="DatabaseWindow",
-                                     rely=1)
+                                     rely=1, relx=14, scroll_exit=True)
         self.tabTables = self.add(TabTablesButton, w_id="wTablesTab", name="Tables", value="TablesWindow", rely=1,
-                                  relx=15)
-        self.tabQuery = self.add(TabQueryButton, w_id="wQueryTab", name="Query", value="QueryWindow", rely=1, relx=25)
+                                  relx=31)
+        self.tabQuery = self.add(TabQueryButton, w_id="wQueryTab", name="Query", value="QueryWindow", rely=1, relx=45)
         self.tabRawSQL = self.add(TabRawSQLButton, w_id="wRawSQLTab", name="Raw SQL", value="RawSQLWindow", rely=1,
-                                  relx=34)
+                                  relx=58)
         self.tabExport = self.add(TabExportButton, w_id="wExportTab", name="Export", value="ExportWindow", rely=1,
-                                  relx=45)
-        self.tabAdmin = self.add(TabAdminButton, w_id="wAdminTab", name="Admin", value="AdminWindow", rely=1,
-                                 relx=55)
-        self.tabExit = self.add(ExitButton, name="Exit", rely=1, relx=64)
+                                  relx=74)
+        self.tabAdmin = self.add(TabAdminButton, w_id="wAdminTab", name="Admin", value="AdminWindow", rely=1, relx=89)
+        self.tabExit = self.add(ExitButton, name="Exit", rely=1, relx=103)
 
         # Sub-nav for action type
         self.add(npyscreen.FixedText, value="Action: ", editable=False, relx=3, rely=3)
@@ -745,17 +759,20 @@ class RawSQLWindow(npyscreen.ActionForm, npyscreen.SplitForm):
     tabDatabases, tabTables, tabQuery, tabRawSQL, tabExport, tabAdmin, tabExit = (None,)*7
 
     def create(self):
+        self.tabDatabases = self.add(TabMainButton, w_id="wMainTab", name="Main", value="DatabaseWindow",
+                                     rely=1, scroll_exit=True)
+
         self.tabDatabases = self.add(TabDatabaseButton, w_id="wDatabaseTab", name="Databases", value="DatabaseWindow",
-                                     rely=1)
+                                     rely=1, relx=14, scroll_exit=True)
         self.tabTables = self.add(TabTablesButton, w_id="wTablesTab", name="Tables", value="TablesWindow", rely=1,
-                                  relx=15)
-        self.tabQuery = self.add(TabQueryButton, w_id="wQueryTab", name="Query", value="QueryWindow", rely=1, relx=25)
+                                  relx=31)
+        self.tabQuery = self.add(TabQueryButton, w_id="wQueryTab", name="Query", value="QueryWindow", rely=1, relx=45)
         self.tabRawSQL = self.add(TabRawSQLButton, w_id="wRawSQLTab", name="Raw SQL", value="RawSQLWindow", rely=1,
-                                  relx=34)
+                                  relx=58)
         self.tabExport = self.add(TabExportButton, w_id="wExportTab", name="Export", value="ExportWindow", rely=1,
-                                  relx=45)
-        self.tabAdmin = self.add(TabAdminButton, w_id="wAdminTab", name="Admin", value="AdminWindow", rely=1, relx=55)
-        self.tabExit = self.add(ExitButton, name="Exit", rely=1, relx=64)
+                                  relx=74)
+        self.tabAdmin = self.add(TabAdminButton, w_id="wAdminTab", name="Admin", value="AdminWindow", rely=1, relx=89)
+        self.tabExit = self.add(ExitButton, name="Exit", rely=1, relx=103)
 
         self.nextrely += 1  # Move down
 
@@ -809,17 +826,20 @@ class ExportWindow(npyscreen.ActionForm, npyscreen.SplitForm):
     tabDatabases, tabTables, tabQuery, tabRawSQL, tabExport, tabAdmin, tabExit = (None,)*7
 
     def create(self):
+        self.tabDatabases = self.add(TabMainButton, w_id="wMainTab", name="Main", value="DatabaseWindow",
+                                     rely=1, scroll_exit=True)
+
         self.tabDatabases = self.add(TabDatabaseButton, w_id="wDatabaseTab", name="Databases", value="DatabaseWindow",
-                                     rely=1)
+                                     rely=1, relx=14, scroll_exit=True)
         self.tabTables = self.add(TabTablesButton, w_id="wTablesTab", name="Tables", value="TablesWindow", rely=1,
-                                  relx=15)
-        self.tabQuery = self.add(TabQueryButton, w_id="wQueryTab", name="Query", value="QueryWindow", rely=1, relx=25)
+                                  relx=31)
+        self.tabQuery = self.add(TabQueryButton, w_id="wQueryTab", name="Query", value="QueryWindow", rely=1, relx=45)
         self.tabRawSQL = self.add(TabRawSQLButton, w_id="wRawSQLTab", name="Raw SQL", value="RawSQLWindow", rely=1,
-                                  relx=34)
+                                  relx=58)
         self.tabExport = self.add(TabExportButton, w_id="wExportTab", name="Export", value="ExportWindow", rely=1,
-                                  relx=45)
-        self.tabAdmin = self.add(TabAdminButton, w_id="wAdminTab", name="Admin", value="AdminWindow", rely=1, relx=55)
-        self.tabExit = self.add(ExitButton, name="Exit", rely=1, relx=64)
+                                  relx=74)
+        self.tabAdmin = self.add(TabAdminButton, w_id="wAdminTab", name="Admin", value="AdminWindow", rely=1, relx=89)
+        self.tabExit = self.add(ExitButton, name="Exit", rely=1, relx=103)
 
         self.add(npyscreen.FixedText, value="Here is the EXPORT window", editable=False)
 
@@ -842,17 +862,20 @@ class AdminWindow(npyscreen.ActionForm, npyscreen.SplitForm):
     tabDatabases, tabTables, tabQuery, tabRawSQL, tabExport, tabAdmin, tabExit = (None,)*7
 
     def create(self):
+        self.tabDatabases = self.add(TabMainButton, w_id="wMainTab", name="Main", value="DatabaseWindow",
+                                     rely=1, scroll_exit=True)
+
         self.tabDatabases = self.add(TabDatabaseButton, w_id="wDatabaseTab", name="Databases", value="DatabaseWindow",
-                                     rely=1)
+                                     rely=1, relx=14, scroll_exit=True)
         self.tabTables = self.add(TabTablesButton, w_id="wTablesTab", name="Tables", value="TablesWindow", rely=1,
-                                  relx=15)
-        self.tabQuery = self.add(TabQueryButton, w_id="wQueryTab", name="Query", value="QueryWindow", rely=1, relx=25)
+                                  relx=31)
+        self.tabQuery = self.add(TabQueryButton, w_id="wQueryTab", name="Query", value="QueryWindow", rely=1, relx=45)
         self.tabRawSQL = self.add(TabRawSQLButton, w_id="wRawSQLTab", name="Raw SQL", value="RawSQLWindow", rely=1,
-                                  relx=34)
+                                  relx=58)
         self.tabExport = self.add(TabExportButton, w_id="wExportTab", name="Export", value="ExportWindow", rely=1,
-                                  relx=45)
-        self.tabAdmin = self.add(TabAdminButton, w_id="wAdminTab", name="Admin", value="AdminWindow", rely=1, relx=55)
-        self.tabExit = self.add(ExitButton, name="Exit", rely=1, relx=64)
+                                  relx=74)
+        self.tabAdmin = self.add(TabAdminButton, w_id="wAdminTab", name="Admin", value="AdminWindow", rely=1, relx=89)
+        self.tabExit = self.add(ExitButton, name="Exit", rely=1, relx=103)
 
         self.add(npyscreen.FixedText, value="Here is the ADMIN window", editable=False)
 
@@ -1246,6 +1269,10 @@ class QueryDeleteBtn(npyscreen.ButtonPress):
         self.parent.parentApp.switchForm("QueryDeleteWindow")
         return
 
+class TabMainButton(npyscreen.ButtonPress):
+    def whenPressed(self):
+        self.parent.parentApp.switchForm("MAIN")
+        return
 
 class TabDatabaseButton(npyscreen.ButtonPress):
     def whenPressed(self):
