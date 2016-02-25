@@ -481,9 +481,24 @@ class QueryWindow(npyscreen.ActionForm, npyscreen.SplitForm):
                                  relx=55)
         self.tabExit = self.add(ExitButton, name="Exit", rely=1, relx=64)
 
+        # Sub-nav for action type
+        self.add(npyscreen.FixedText, value="Action: ", editable=False, relx=3, rely=3)
+        self.nextrelx += 12
+        self.nextrely -= 1
+        self.selectBtn = self.add(QuerySelectBtn, name="SELECT", value="QueryWindow", color="VERYGOOD")
+        self.nextrelx += 12
+        self.nextrely -= 1
+        self.insertBtn = self.add(QueryInsertBtn, name="INSERT", value="QueryInsertWindow")
+        self.nextrelx += 12
+        self.nextrely -= 1
+        self.updateBtn = self.add(QueryUpdateBtn, name="UPDATE", value="QueryUpdateWindow")
+        self.nextrelx += 12
+        self.nextrely -= 1
+        self.deleteBtn = self.add(QueryDeleteBtn, name="DELETE", value="QueryDeleteWindow")
+
         # Table 1
         self.nextrely += 1  # Move down
-        self.nextrelx += 1  # Move right
+        self.nextrelx = 3  # Padding
 
         self.table1 = self.add(npyscreen.TitleText, name="Table:", color="VERYGOOD", begin_entry_at=11, max_width=25)
         self.t1f1 = self.add(npyscreen.TitleText, name="Field 1:", color="VERYGOOD", begin_entry_at=11, max_width=25)
@@ -508,9 +523,14 @@ class QueryWindow(npyscreen.ActionForm, npyscreen.SplitForm):
         self.t3f2 = self.add(npyscreen.TitleText, name="Field 2:", color="VERYGOOD", begin_entry_at=11, max_width=25)
         self.t3f3 = self.add(npyscreen.TitleText, name="Field 3:", color="VERYGOOD", begin_entry_at=11, max_width=25)
 
-        # Table 1 criteria 1
+        # Criteria
         self.nextrely += 1  # Move down
         self.nextrelx = 3  # Add padding
+        self.add(npyscreen.FixedText, value="Criteria: ", editable=False)
+
+        # Table 1 criteria 1
+        self.nextrelx = 3  # Add padding
+        self.nextrely += 1 # Move down
 
         self.c1f1 = self.add(npyscreen.TitleText, name="Field:", color="VERYGOOD", begin_entry_at=11, max_width=25)
         self.c1c1 = self.add(npyscreen.TitleText, name="Condition:", color="VERYGOOD", begin_entry_at=11, max_width=25)
@@ -541,20 +561,11 @@ class QueryWindow(npyscreen.ActionForm, npyscreen.SplitForm):
 
         self.c1op3 = self.add(npyscreen.SelectOne, max_height=2, value=[0], values=["AND", "OR"], scroll_exit=True)
 
-        # Sorting
-        self.nextrely += 1  # Move down
-        
-        self.sortBy = self.add(npyscreen.TitleText, name="Sort by:", color="VERYGOOD", begin_entry_at=11, max_width=25)
-        self.sortOrder = self.add(npyscreen.SelectOne, max_height=2, value=[0], values=["ASC", "DES"], scroll_exit=True)
-
-
-
-        # Action type selection
-        self.nextrely = 24
-        self.nextrelx = 86
-        self.action = self.add(npyscreen.BoxTitle, name=" Action: ", value=[0], scroll_exit=True, max_width=30,
-                               max_height=7)
-        self.action.values = ["SELECT", "INSERT", "UPDATE", "DELETE","CREATE TABLE"]
+        # # Sorting
+        # self.nextrely += 1  # Move down
+        #
+        # self.sortBy = self.add(npyscreen.TitleText, name="Sort by:", color="VERYGOOD", begin_entry_at=11, max_width=25)
+        # self.sortOrder = self.add(npyscreen.SelectOne, max_height=2, value=[0], values=["ASC", "DES"], scroll_exit=True)
 
         # Help menu guidance
         self.nextrely = 32
@@ -566,15 +577,160 @@ class QueryWindow(npyscreen.ActionForm, npyscreen.SplitForm):
 
     @staticmethod
     def display_help(self):
-        help_msg = "First choose the type of action you would like to perform on the database. For example, choose " \
-                   "\"SELECT\" if you would like to display some information from the database, or \"INSERT\" if you " \
-                   "would like to add some information to the database. Next, add the names of the tables for which " \
-                   "you would like the query to select from. Finally, add criteria to the query by using field-" \
-                   "condition pairs. For example, a \"Cars\" table may have a \"color\" field, and the condition " \
-                   "for filtering could be \"red\". This criteria would ensure that the query only affects red cars " \
-                   "in the table. Add more conditions to a table for additional filtering, such as the field " \
-                   "\"type\" and the condition \"truck\", which would would return only red trucks when combined " \
-                   "with the first criteria."
+        help_msg = "Use the SELECT form to query the database for stored data."
+        npyscreen.notify_confirm(help_msg, title='Help Menu')
+
+
+class QueryInsertWindow(npyscreen.ActionForm, npyscreen.SplitForm):
+    tabDatabases, tabTables, tabQuery, tabRawSQL, tabExport, tabAdmin, tabExit, action = (None,)*8
+
+    def create(self):
+        self.tabDatabases = self.add(TabDatabaseButton, w_id="wDatabaseTab", name="Databases", value="DatabaseWindow",
+                                     rely=1)
+        self.tabTables = self.add(TabTablesButton, w_id="wTablesTab", name="Tables", value="TablesWindow", rely=1,
+                                  relx=15)
+        self.tabQuery = self.add(TabQueryButton, w_id="wQueryTab", name="Query", value="QueryWindow", rely=1, relx=25)
+        self.tabRawSQL = self.add(TabRawSQLButton, w_id="wRawSQLTab", name="Raw SQL", value="RawSQLWindow", rely=1,
+                                  relx=34)
+        self.tabExport = self.add(TabExportButton, w_id="wExportTab", name="Export", value="ExportWindow", rely=1,
+                                  relx=45)
+        self.tabAdmin = self.add(TabAdminButton, w_id="wAdminTab", name="Admin", value="AdminWindow", rely=1,
+                                 relx=55)
+        self.tabExit = self.add(ExitButton, name="Exit", rely=1, relx=64)
+
+        # Sub-nav for action type
+        self.add(npyscreen.FixedText, value="Action: ", editable=False, relx=3, rely=3)
+        self.nextrelx += 12
+        self.nextrely -= 1
+        self.selectBtn = self.add(QuerySelectBtn, name="SELECT", value="QueryWindow")
+        self.nextrelx += 12
+        self.nextrely -= 1
+        self.insertBtn = self.add(QueryInsertBtn, name="INSERT", value="QueryInsertWindow", color="VERYGOOD")
+        self.nextrelx += 12
+        self.nextrely -= 1
+        self.updateBtn = self.add(QueryUpdateBtn, name="UPDATE", value="QueryUpdateWindow")
+        self.nextrelx += 12
+        self.nextrely -= 1
+        self.deleteBtn = self.add(QueryDeleteBtn, name="DELETE", value="QueryDeleteWindow")
+
+        # DELETE THIS
+        self.nextrely = 8
+        self.nextrelx = 12
+        self.add(npyscreen.FixedText, value="WELCOME TO THE INSERT FORM", editable=False)
+
+        # Help menu guidance
+        self.nextrely = 32
+        self.nextrelx = 2
+        self.add(npyscreen.FixedText, value=" Press ^Q for Help ", editable=False)
+
+        # Register help key
+        self.add_handlers({'^Q': self.display_help})
+
+    @staticmethod
+    def display_help(self):
+        help_msg = "Use the INSERT form to add rows to the database."
+        npyscreen.notify_confirm(help_msg, title='Help Menu')
+
+
+class QueryUpdateWindow(npyscreen.ActionForm, npyscreen.SplitForm):
+    tabDatabases, tabTables, tabQuery, tabRawSQL, tabExport, tabAdmin, tabExit, action = (None,)*8
+
+    def create(self):
+        self.tabDatabases = self.add(TabDatabaseButton, w_id="wDatabaseTab", name="Databases", value="DatabaseWindow",
+                                     rely=1)
+        self.tabTables = self.add(TabTablesButton, w_id="wTablesTab", name="Tables", value="TablesWindow", rely=1,
+                                  relx=15)
+        self.tabQuery = self.add(TabQueryButton, w_id="wQueryTab", name="Query", value="QueryWindow", rely=1, relx=25)
+        self.tabRawSQL = self.add(TabRawSQLButton, w_id="wRawSQLTab", name="Raw SQL", value="RawSQLWindow", rely=1,
+                                  relx=34)
+        self.tabExport = self.add(TabExportButton, w_id="wExportTab", name="Export", value="ExportWindow", rely=1,
+                                  relx=45)
+        self.tabAdmin = self.add(TabAdminButton, w_id="wAdminTab", name="Admin", value="AdminWindow", rely=1,
+                                 relx=55)
+        self.tabExit = self.add(ExitButton, name="Exit", rely=1, relx=64)
+
+        # Sub-nav for action type
+        self.add(npyscreen.FixedText, value="Action: ", editable=False, relx=3, rely=3)
+        self.nextrelx += 12
+        self.nextrely -= 1
+        self.selectBtn = self.add(QuerySelectBtn, name="SELECT", value="QueryWindow")
+        self.nextrelx += 12
+        self.nextrely -= 1
+        self.insertBtn = self.add(QueryInsertBtn, name="INSERT", value="QueryInsertWindow")
+        self.nextrelx += 12
+        self.nextrely -= 1
+        self.updateBtn = self.add(QueryUpdateBtn, name="UPDATE", value="QueryUpdateWindow", color="VERYGOOD")
+        self.nextrelx += 12
+        self.nextrely -= 1
+        self.deleteBtn = self.add(QueryDeleteBtn, name="DELETE", value="QueryDeleteWindow")
+
+        # DELETE THIS
+        self.nextrely = 8
+        self.nextrelx = 12
+        self.add(npyscreen.FixedText, value="WELCOME TO THE UPDATE FORM", editable=False)
+
+        # Help menu guidance
+        self.nextrely = 32
+        self.nextrelx = 2
+        self.add(npyscreen.FixedText, value=" Press ^Q for Help ", editable=False)
+
+        # Register help key
+        self.add_handlers({'^Q': self.display_help})
+
+    @staticmethod
+    def display_help(self):
+        help_msg = "Use the UPDATE form to update a row in the database."
+        npyscreen.notify_confirm(help_msg, title='Help Menu')
+
+
+class QueryDeleteWindow(npyscreen.ActionForm, npyscreen.SplitForm):
+    tabDatabases, tabTables, tabQuery, tabRawSQL, tabExport, tabAdmin, tabExit, action = (None,)*8
+
+    def create(self):
+        self.tabDatabases = self.add(TabDatabaseButton, w_id="wDatabaseTab", name="Databases", value="DatabaseWindow",
+                                     rely=1)
+        self.tabTables = self.add(TabTablesButton, w_id="wTablesTab", name="Tables", value="TablesWindow", rely=1,
+                                  relx=15)
+        self.tabQuery = self.add(TabQueryButton, w_id="wQueryTab", name="Query", value="QueryWindow", rely=1, relx=25)
+        self.tabRawSQL = self.add(TabRawSQLButton, w_id="wRawSQLTab", name="Raw SQL", value="RawSQLWindow", rely=1,
+                                  relx=34)
+        self.tabExport = self.add(TabExportButton, w_id="wExportTab", name="Export", value="ExportWindow", rely=1,
+                                  relx=45)
+        self.tabAdmin = self.add(TabAdminButton, w_id="wAdminTab", name="Admin", value="AdminWindow", rely=1,
+                                 relx=55)
+        self.tabExit = self.add(ExitButton, name="Exit", rely=1, relx=64)
+
+        # Sub-nav for action type
+        self.add(npyscreen.FixedText, value="Action: ", editable=False, relx=3, rely=3)
+        self.nextrelx += 12
+        self.nextrely -= 1
+        self.selectBtn = self.add(QuerySelectBtn, name="SELECT", value="QueryWindow")
+        self.nextrelx += 12
+        self.nextrely -= 1
+        self.insertBtn = self.add(QueryInsertBtn, name="INSERT", value="QueryInsertWindow")
+        self.nextrelx += 12
+        self.nextrely -= 1
+        self.updateBtn = self.add(QueryUpdateBtn, name="UPDATE", value="QueryUpdateWindow")
+        self.nextrelx += 12
+        self.nextrely -= 1
+        self.deleteBtn = self.add(QueryDeleteBtn, name="DELETE", value="QueryDeleteWindow", color="VERYGOOD")
+
+        # DELETE THIS
+        self.nextrely = 8
+        self.nextrelx = 12
+        self.add(npyscreen.FixedText, value="WELCOME TO THE DELETE FORM", editable=False)
+
+        # Help menu guidance
+        self.nextrely = 32
+        self.nextrelx = 2
+        self.add(npyscreen.FixedText, value=" Press ^Q for Help ", editable=False)
+
+        # Register help key
+        self.add_handlers({'^Q': self.display_help})
+
+    @staticmethod
+    def display_help(self):
+        help_msg = "Use the DELETE form to delete rows from the database."
         npyscreen.notify_confirm(help_msg, title='Help Menu')
 
 
@@ -1045,6 +1201,30 @@ class SQLButton(npyscreen.ButtonPress):
             return
 
 
+class QuerySelectBtn(npyscreen.ButtonPress):
+    def whenPressed(self):
+        self.parent.parentApp.switchForm("QueryWindow")
+        return
+
+
+class QueryInsertBtn(npyscreen.ButtonPress):
+    def whenPressed(self):
+        self.parent.parentApp.switchForm("QueryInsertWindow")
+        return
+
+
+class QueryUpdateBtn(npyscreen.ButtonPress):
+    def whenPressed(self):
+        self.parent.parentApp.switchForm("QueryUpdateWindow")
+        return
+
+
+class QueryDeleteBtn(npyscreen.ButtonPress):
+    def whenPressed(self):
+        self.parent.parentApp.switchForm("QueryDeleteWindow")
+        return
+
+
 class TabDatabaseButton(npyscreen.ButtonPress):
     def whenPressed(self):
         self.parent.parentApp.switchForm("DatabaseWindow")
@@ -1130,7 +1310,10 @@ class App(npyscreen.NPSAppManaged):
         self.addFormClass("ConnectDBMS", ConnectDBMS, name="ezdb >> DBMS Connection Page", draw_line_at=32)
         self.addFormClass("DatabaseWindow", DatabaseWindow, name="ezdb >> Database Page", draw_line_at=32)
         self.addFormClass("TablesWindow", TablesWindow, name="ezdb >> Tables Page", draw_line_at=32)
-        self.addFormClass("QueryWindow", QueryWindow, name="ezdb >> Query Page", draw_line_at=32)
+        self.addFormClass("QueryWindow", QueryWindow, name="ezdb >> Query >> SELECT Page", draw_line_at=32)
+        self.addFormClass("QueryInsertWindow", QueryInsertWindow, name="ezdb >> Query >> INSERT Page", draw_line_at=32)
+        self.addFormClass("QueryUpdateWindow", QueryUpdateWindow, name="ezdb >> Query >> UPDATE Page", draw_line_at=32)
+        self.addFormClass("QueryDeleteWindow", QueryDeleteWindow, name="ezdb >> Query >> DELETE Page", draw_line_at=32)
         self.addFormClass("RawSQLWindow", RawSQLWindow, name="ezdb >> Raw SQL Page", draw_line_at=32)
         self.addFormClass("ExportWindow", ExportWindow, name="ezdb >> Export Page", draw_line_at=32)
         self.addFormClass("AdminWindow", AdminWindow, name="ezdb >> Admin Page", draw_line_at=32)
