@@ -3,6 +3,7 @@
 import npyscreen
 import postgres_db as pdb
 import mysql_db as mdb
+import time
 
 
 # ActionForm includes "Cancel" in addition to "OK"
@@ -28,7 +29,7 @@ class Initial(npyscreen.ActionForm, npyscreen.SplitForm):
                            scroll_exit=True)
 
         # Help menu guidance
-        self.nextrely = 32
+        self.nextrely = 34
         self.nextrelx = 2
         self.add(npyscreen.FixedText, value=" Press ^Q for Help ", editable=False)
 
@@ -83,7 +84,7 @@ class ConnectDBMS(npyscreen.ActionForm, npyscreen.SplitForm):
         self.parentApp.password = self.add(npyscreen.TitleText, name="Password:", value=self.parentApp.password)
 
         # Help menu guidance
-        self.nextrely = 32
+        self.nextrely = 34
         self.nextrelx = 2
         self.add(npyscreen.FixedText, value=" Press ^Q for Help ", editable=False)
 
@@ -166,7 +167,7 @@ class DatabaseWindow(npyscreen.ActionForm, npyscreen.SplitForm):
         self.add(DeleteDBButton, name="Delete Database")
 
         # Help menu guidance
-        self.nextrely = 32
+        self.nextrely = 34
         self.nextrelx = 2
         self.add(npyscreen.FixedText, value=" Press ^Q for Help ", editable=False)
 
@@ -202,29 +203,35 @@ class TablesWindow(npyscreen.ActionForm, npyscreen.SplitForm):
         self.tabAdmin = self.add(TabAdminButton, w_id="wAdminTab", name="Admin", value="AdminWindow", rely=1, relx=55)
         self.tabExit = self.add(ExitButton, name="Exit", rely=1, relx=64)
 
-        self.nextrely += 1  # Move down
-        self.add(npyscreen.FixedText, value="Here is the TABLES window", editable=False)
+        #self.nextrely += 1  # Move down
+        #self.add(npyscreen.FixedText, value="Here is the TABLES window", editable=False)
 
         self.nextrely += 1  # Move down
-        self.add(npyscreen.BoxTitle, w_id="wTables_box", name="{} Tables".format(self.parentApp.active_db),
-                 values=self.parentApp.tableList, max_width=25, max_height=8, scroll_exit=True)
+        self.add(npyscreen.FixedText, value="Database: {}".format(self.parentApp.active_db), relx=3, color="LABEL",
+                 editable=False)
 
         self.nextrely += 1  # Move down
-        self.add(ViewTableStructButton, name="View Table Structure", rely=6, relx=27, max_width=22)
-        self.add(BrowseTableButton, name="Browse Table", rely=6, relx=52, max_width=12)
+        self.add(npyscreen.BoxTitle, w_id="wTables_box", name="Tables",
+                 values=self.parentApp.tableList, max_width=25, max_height=11, scroll_exit=True)
+
+        self.nextrely += 1  # Move down
+        self.add(BrowseTableButton, name="Browse Table", rely=6, relx=30, max_width=12)
+
+        self.nextrely += 1  # Move down
+        self.add(ViewTableStructButton, name="View Table Structure", relx=30, max_width=22)
 
         self.nextrely += 1  # Move down
         self.add(npyscreen.TitleText, w_id="wNewTable_name", name="New Table Name:",
-                 relx=29, max_width=35, use_two_lines=False)
+                 relx=32, max_width=35, use_two_lines=False)
 
-        self.add(BuildTableButton, name="Build", relx=27, max_width=35)
+        self.add(BuildTableButton, name="Build", relx=30, max_width=35)
 
         self.nextrely += 1  # Move down
-        self.add(DeleteTableButton, name="Delete Table", relx=27, max_width=35)
+        self.add(DeleteTableButton, name="Delete Table", relx=30, max_width=35)
 
         self.nextrely += 3  # Move down
         self.add(npyscreen.FixedText, value="Table Results", color="LABEL", editable=False)
-        self.nextrely += 1  # Move down
+        #self.nextrely += 1  # Move down
         self.add(npyscreen.GridColTitles, max_height=12, values=self.parentApp.table_results, default_column_number=10,
                  col_titles=self.parentApp.col_titles, col_margin=1, column_width=20)
 
@@ -232,7 +239,7 @@ class TablesWindow(npyscreen.ActionForm, npyscreen.SplitForm):
         self.add(npyscreen.FixedText, value="{} Records Found".format(self.parentApp.num_records), editable=False)
 
         # Help menu guidance
-        self.nextrely = 32
+        self.nextrely = 34
         self.nextrelx = 2
         self.add(npyscreen.FixedText, value=" Press ^Q for Help ", editable=False)
 
@@ -311,7 +318,7 @@ class TableCreatePostgreSQLForm(npyscreen.ActionForm, npyscreen.SplitForm):
         self.add(CreateTableButton, name="Create Table", relx=40, max_width=13)
 
         # Help menu guidance
-        self.nextrely = 32
+        self.nextrely = 34
         self.nextrelx = 2
         self.add(npyscreen.FixedText, value=" Press ^Q for Help ", editable=False)
 
@@ -344,7 +351,7 @@ class TableCreatePostgreSQLForm(npyscreen.ActionForm, npyscreen.SplitForm):
 class TableCreateMySQLForm(npyscreen.ActionForm, npyscreen.SplitForm):
 
     def create(self):
-        mysql_field_type_list = ['CHAR','VARCHAR','TINYTEXT','TEXT','LONGTEXT',
+        mysql_field_type_list = ['CHAR','VARCHAR','TINYTEXT','TEXT','MEDIUMTEXT','LONGTEXT',
                                  'TINYINT','SMALLINT','MEDIUMINT','INT','BIGINT','FLOAT','DOUBLE',
                                  'DECIMAL','NUMERIC', 'REAL','DATE','DATETIME','TIMESTAMP','TIME','YEAR',
                                  'TINYBLOB','BLOB','MEDIUMBLOB','LONGBLOB',
@@ -432,7 +439,7 @@ class TableCreateMySQLForm(npyscreen.ActionForm, npyscreen.SplitForm):
         self.add(CreateTableButton, name="Create Table", relx=40, max_width=13)
 
         # Help menu guidance
-        self.nextrely = 32
+        self.nextrely = 34
         self.nextrelx = 2
         self.add(npyscreen.FixedText, value=" Press ^Q for Help ", editable=False)
 
@@ -557,7 +564,7 @@ class QueryWindow(npyscreen.ActionForm, npyscreen.SplitForm):
         self.action.values = ["SELECT", "INSERT", "UPDATE", "DELETE","CREATE TABLE"]
 
         # Help menu guidance
-        self.nextrely = 32
+        self.nextrely = 34
         self.nextrelx = 2
         self.add(npyscreen.FixedText, value=" Press ^Q for Help ", editable=False)
 
@@ -611,7 +618,7 @@ class RawSQLWindow(npyscreen.ActionForm, npyscreen.SplitForm):
         self.add(npyscreen.FixedText, value="{} Records Found".format(self.parentApp.num_records), editable=False)
 
         # Help menu guidance
-        self.nextrely = 32
+        self.nextrely = 34
         self.nextrelx = 2
         self.add(npyscreen.FixedText, value=" Press ^Q for Help ", editable=False)
 
@@ -661,7 +668,7 @@ class ExportWindow(npyscreen.ActionForm, npyscreen.SplitForm):
         self.add(npyscreen.FixedText, value="Here is the EXPORT window", editable=False)
 
         # Help menu guidance
-        self.nextrely = 32
+        self.nextrely = 34
         self.nextrelx = 2
         self.add(npyscreen.FixedText, value=" Press ^Q for Help ", editable=False)
 
@@ -694,7 +701,7 @@ class AdminWindow(npyscreen.ActionForm, npyscreen.SplitForm):
         self.add(npyscreen.FixedText, value="Here is the ADMIN window", editable=False)
 
         # Help menu guidance
-        self.nextrely = 32
+        self.nextrely = 34
         self.nextrelx = 2
         self.add(npyscreen.FixedText, value=" Press ^Q for Help ", editable=False)
 
@@ -848,6 +855,10 @@ class AddFieldButton(npyscreen.ButtonPress):
             self.field_type_val += ")"
             self.field_string += (self.field_name + " " + self.field_type + self.field_type_val)
 
+        elif self.parent.parentApp.dbtype == 1 and self.field_type == "VARCHAR":
+            npyscreen.notify_confirm("You must specify a length value for the VARCHAR data type")
+            return
+
         else:
             self.field_string += (self.field_name + " " + self.field_type)
 
@@ -872,10 +883,10 @@ class AddFieldButton(npyscreen.ButtonPress):
                                              "TINYINT, SMALLINT, INT, BIGINT, FLOAT, DOUBLE, REAL, DECIMAL or NUMERIC")
                     return
 
-                elif self.attribute == "on update current_timestamp" and self.field_type not in ("DATETIME", "TIMESTAMP"):
+                elif self.attribute == "on update current_timestamp" and self.field_type != "TIMESTAMP":
 
                     npyscreen.notify_confirm("The 'on update current_timestamp' attribute can only be used with"
-                                             " one of the following data types:\nDATETIME or TIMESTAMP")
+                                             " the TIMESTAMP data type")
                     return
 
                 else:
@@ -883,12 +894,27 @@ class AddFieldButton(npyscreen.ButtonPress):
 
         if self.parent.get_widget("wCollation").get_selected_objects()[0] is not None:
 
-            if self.parent.parentApp.dbtype == 0: #if postgreSQ, collation name needs double quotesL
-                self.collation = "COLLATE \"" + str(self.parent.get_widget("wCollation").get_selected_objects()[0]) + "\""
+            if self.parent.parentApp.dbtype == 0:
+
+                if self.field_type not in ("CHAR", "VARCHAR", "TEXT"):
+                    npyscreen.notify_confirm("Collation can only be used with CHAR, VARCHAR and TEXT data types")
+                    return
+
+                else:
+                    #if postgreSQ, collation name needs double quotesL
+                    self.collation = "COLLATE \"" + str(self.parent.get_widget("wCollation").get_selected_objects()[0])\
+                                     + "\""
 
             else:
-                #if MySQL
-                self.collation = "COLLATE " + str(self.parent.get_widget("wCollation").get_selected_objects()[0])
+
+                if self.field_type not in ("CHAR", "VARCHAR", "TINYTEXT", "TEXT", "MEDIUMTEXT", "LONGTEXT"):
+                    npyscreen.notify_confirm("Collation can only be used with CHAR, VARCHAR, TINYTEXT, TEXT,"
+                                             " MEDIUMTEXT and LONGTEXT data types")
+                    return
+
+                else:
+                    #if MySQL
+                    self.collation = "COLLATE " + str(self.parent.get_widget("wCollation").get_selected_objects()[0])
 
             self.field_string += (" " + self.collation)
 
@@ -929,11 +955,7 @@ class AddFieldButton(npyscreen.ButtonPress):
             self.parent.parentApp.engine = self.parent.get_widget("wStorage_engine").get_selected_objects()[0]
 
         if self.constraint:
-            #if self.parent.parentApp.dbtype == 0:
             self.field_string += (" " + self.constraint)
-
-            #else:
-            #    self.field_string += (", " + self.constraint + " ('" + self.field_name + "')")
 
         add_confirm = npyscreen.notify_yes_no("Add the following field?\n" + self.field_string, editw=2)
         if add_confirm:
@@ -1040,7 +1062,7 @@ class SQLButton(npyscreen.ButtonPress):
                 self.parent.parentApp.col_titles = self.results[2]
             if self.results[3]:
                 self.parent.parentApp.num_records = self.results[3]
-            #npyscreen.notify_confirm("Operation completed successfully")
+
             self.parent.parentApp.switchForm("RawSQLWindow")
             return
 
@@ -1126,24 +1148,30 @@ class App(npyscreen.NPSAppManaged):
     def onStart(self):
 
         # Declare all the forms that will be used within the app
-        self.addFormClass("MAIN", Initial, name="Welcome to ezdb", draw_line_at=32)
-        self.addFormClass("ConnectDBMS", ConnectDBMS, name="ezdb >> DBMS Connection Page", draw_line_at=32)
-        self.addFormClass("DatabaseWindow", DatabaseWindow, name="ezdb >> Database Page", draw_line_at=32)
-        self.addFormClass("TablesWindow", TablesWindow, name="ezdb >> Tables Page", draw_line_at=32)
-        self.addFormClass("QueryWindow", QueryWindow, name="ezdb >> Query Page", draw_line_at=32)
-        self.addFormClass("RawSQLWindow", RawSQLWindow, name="ezdb >> Raw SQL Page", draw_line_at=32)
-        self.addFormClass("ExportWindow", ExportWindow, name="ezdb >> Export Page", draw_line_at=32)
-        self.addFormClass("AdminWindow", AdminWindow, name="ezdb >> Admin Page", draw_line_at=32)
+        self.addFormClass("MAIN", Initial, name="Welcome to ezdb", draw_line_at=33)
+        self.addFormClass("ConnectDBMS", ConnectDBMS, name="ezdb >> DBMS Connection Page", draw_line_at=33)
+        self.addFormClass("DatabaseWindow", DatabaseWindow, name="ezdb >> Database Page", draw_line_at=33)
+        self.addFormClass("TablesWindow", TablesWindow, name="ezdb >> Tables Page", draw_line_at=33)
+        self.addFormClass("QueryWindow", QueryWindow, name="ezdb >> Query Page", draw_line_at=33)
+        self.addFormClass("RawSQLWindow", RawSQLWindow, name="ezdb >> Raw SQL Page", draw_line_at=33)
+        self.addFormClass("ExportWindow", ExportWindow, name="ezdb >> Export Page", draw_line_at=33)
+        self.addFormClass("AdminWindow", AdminWindow, name="ezdb >> Admin Page", draw_line_at=33)
         self.addFormClass("TableCreatePostgreSQLForm", TableCreatePostgreSQLForm, name="ezdb >> Build/Create Table",
-                          draw_line_at=32)
-        self.addFormClass("TableCreateMySQLForm", TableCreateMySQLForm, name="ezdb >> Build/Create Table")
+                          draw_line_at=33)
+        self.addFormClass("TableCreateMySQLForm", TableCreateMySQLForm, name="ezdb >> Build/Create Table",
+                          draw_line_at=33)
         # for testing:
         # self.addForm("Nav_Bar", Nav_Bar)
 
 if __name__ == "__main__":
 
+    print "Loading program ..."
+
     #resizes the terminal to 120 x 35
-    print "\x1b[8;35;120t"
+    print "\x1b[8;37;120t"
+
+    #necessary pause to prevent race condition and allow termnal time to resize before launching npyscreen form
+    time.sleep(1)
 
     # Start an NPSAppManaged application mainloop
     # Activates the default form which has a default ID of "MAIN"
