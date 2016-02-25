@@ -1067,6 +1067,30 @@ class SQLButton(npyscreen.ButtonPress):
             return
 
 
+class QuerySelectBtn(npyscreen.ButtonPress):
+    def whenPressed(self):
+        self.parent.parentApp.switchForm("QueryWindow")
+        return
+
+
+class QueryInsertBtn(npyscreen.ButtonPress):
+    def whenPressed(self):
+        self.parent.parentApp.switchForm("QueryInsertWindow")
+        return
+
+
+class QueryUpdateBtn(npyscreen.ButtonPress):
+    def whenPressed(self):
+        self.parent.parentApp.switchForm("QueryUpdateWindow")
+        return
+
+
+class QueryDeleteBtn(npyscreen.ButtonPress):
+    def whenPressed(self):
+        self.parent.parentApp.switchForm("QueryDeleteWindow")
+        return
+
+
 class TabDatabaseButton(npyscreen.ButtonPress):
     def whenPressed(self):
         self.parent.parentApp.switchForm("DatabaseWindow")
@@ -1148,14 +1172,17 @@ class App(npyscreen.NPSAppManaged):
     def onStart(self):
 
         # Declare all the forms that will be used within the app
-        self.addFormClass("MAIN", Initial, name="Welcome to ezdb", draw_line_at=33)
-        self.addFormClass("ConnectDBMS", ConnectDBMS, name="ezdb >> DBMS Connection Page", draw_line_at=33)
-        self.addFormClass("DatabaseWindow", DatabaseWindow, name="ezdb >> Database Page", draw_line_at=33)
-        self.addFormClass("TablesWindow", TablesWindow, name="ezdb >> Tables Page", draw_line_at=33)
-        self.addFormClass("QueryWindow", QueryWindow, name="ezdb >> Query Page", draw_line_at=33)
-        self.addFormClass("RawSQLWindow", RawSQLWindow, name="ezdb >> Raw SQL Page", draw_line_at=33)
-        self.addFormClass("ExportWindow", ExportWindow, name="ezdb >> Export Page", draw_line_at=33)
-        self.addFormClass("AdminWindow", AdminWindow, name="ezdb >> Admin Page", draw_line_at=33)
+        self.addFormClass("MAIN", Initial, name="Welcome to ezdb", draw_line_at=32)
+        self.addFormClass("ConnectDBMS", ConnectDBMS, name="ezdb >> DBMS Connection Page", draw_line_at=32)
+        self.addFormClass("DatabaseWindow", DatabaseWindow, name="ezdb >> Database Page", draw_line_at=32)
+        self.addFormClass("TablesWindow", TablesWindow, name="ezdb >> Tables Page", draw_line_at=32)
+        self.addFormClass("QueryWindow", QueryWindow, name="ezdb >> Query >> SELECT Page", draw_line_at=32)
+        self.addFormClass("QueryInsertWindow", QueryInsertWindow, name="ezdb >> Query >> INSERT Page", draw_line_at=32)
+        self.addFormClass("QueryUpdateWindow", QueryUpdateWindow, name="ezdb >> Query >> UPDATE Page", draw_line_at=32)
+        self.addFormClass("QueryDeleteWindow", QueryDeleteWindow, name="ezdb >> Query >> DELETE Page", draw_line_at=32)
+        self.addFormClass("RawSQLWindow", RawSQLWindow, name="ezdb >> Raw SQL Page", draw_line_at=32)
+        self.addFormClass("ExportWindow", ExportWindow, name="ezdb >> Export Page", draw_line_at=32)
+        self.addFormClass("AdminWindow", AdminWindow, name="ezdb >> Admin Page", draw_line_at=32)
         self.addFormClass("TableCreatePostgreSQLForm", TableCreatePostgreSQLForm, name="ezdb >> Build/Create Table",
                           draw_line_at=33)
         self.addFormClass("TableCreateMySQLForm", TableCreateMySQLForm, name="ezdb >> Build/Create Table",
