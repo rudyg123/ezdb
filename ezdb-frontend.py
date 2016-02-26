@@ -133,7 +133,7 @@ class DatabaseWindow(npyscreen.ActionForm, npyscreen.SplitForm):
                                      rely=1, scroll_exit=True)
 
         self.tabDatabases = self.add(TabDatabaseButton, w_id="wDatabaseTab", name="Databases", value="DatabaseWindow",
-                                     rely=1, relx=14, scroll_exit=True)
+                                     rely=1, relx=14, scroll_exit=True, color="VERYGOOD")
         self.tabTables = self.add(TabTablesButton, w_id="wTablesTab", name="Tables", value="TablesWindow", rely=1,
                                   relx=31)
         self.tabQuery = self.add(TabQueryButton, w_id="wQueryTab", name="Query", value="QueryWindow", rely=1, relx=45)
@@ -200,7 +200,7 @@ class TablesWindow(npyscreen.ActionForm, npyscreen.SplitForm):
         self.tabDatabases = self.add(TabDatabaseButton, w_id="wDatabaseTab", name="Databases", value="DatabaseWindow",
                                      rely=1, relx=14, scroll_exit=True)
         self.tabTables = self.add(TabTablesButton, w_id="wTablesTab", name="Tables", value="TablesWindow", rely=1,
-                                  relx=31)
+                                  relx=31, color="VERYGOOD")
         self.tabQuery = self.add(TabQueryButton, w_id="wQueryTab", name="Query", value="QueryWindow", rely=1, relx=45)
 
         self.tabRawSQL = self.add(TabRawSQLButton, w_id="wRawSQLTab", name="Raw SQL", value="RawSQLWindow", rely=1,
@@ -512,7 +512,8 @@ class QueryWindow(npyscreen.ActionForm, npyscreen.SplitForm):
                                      rely=1, relx=14, scroll_exit=True)
         self.tabTables = self.add(TabTablesButton, w_id="wTablesTab", name="Tables", value="TablesWindow", rely=1,
                                   relx=31)
-        self.tabQuery = self.add(TabQueryButton, w_id="wQueryTab", name="Query", value="QueryWindow", rely=1, relx=45)
+        self.tabQuery = self.add(TabQueryButton, w_id="wQueryTab", name="Query", value="QueryWindow", rely=1, relx=45,
+                                 color="VERYGOOD")
         self.tabRawSQL = self.add(TabRawSQLButton, w_id="wRawSQLTab", name="Raw SQL", value="RawSQLWindow", rely=1,
                                   relx=58)
         self.tabExport = self.add(TabExportButton, w_id="wExportTab", name="Export", value="ExportWindow", rely=1,
@@ -1092,7 +1093,7 @@ class RawSQLWindow(npyscreen.ActionForm, npyscreen.SplitForm):
                                   relx=31)
         self.tabQuery = self.add(TabQueryButton, w_id="wQueryTab", name="Query", value="QueryWindow", rely=1, relx=45)
         self.tabRawSQL = self.add(TabRawSQLButton, w_id="wRawSQLTab", name="Raw SQL", value="RawSQLWindow", rely=1,
-                                  relx=58)
+                                  relx=58, color="VERYGOOD")
         self.tabExport = self.add(TabExportButton, w_id="wExportTab", name="Export", value="ExportWindow", rely=1,
                                   relx=74)
         self.tabAdmin = self.add(TabAdminButton, w_id="wAdminTab", name="Admin", value="AdminWindow", rely=1, relx=89)
@@ -1105,11 +1106,11 @@ class RawSQLWindow(npyscreen.ActionForm, npyscreen.SplitForm):
 
         self.add(SQLButton, w_id="wSQLButton", relx=51, name="Send Command")
 
-        self.nextrely += 3  # Move down
-        self.add(npyscreen.FixedText, value="SQL Results", color="LABEL", editable=False)
+        self.nextrely += 2  # Move down
+        #self.add(npyscreen.FixedText, value="SQL Results", color="LABEL", editable=False)
         self.nextrely += 1  # Move down
-        self.add(npyscreen.GridColTitles, max_height=12, values=self.parentApp.sql_results, default_column_number=10,
-                 col_titles=self.parentApp.col_titles, col_margin=1, column_width=12, name="SQL Results")
+        self.add(SQL_Box_Results, max_height=14, values=self.parentApp.sql_results, default_column_number=10,
+                 contained_widget_arguments={"col_titles":self.parentApp.col_titles}, col_margin=1, column_width=12, name="SQL Results")
 
         self.nextrely += 1  # Move down
         self.add(npyscreen.FixedText, value="{} Records Found".format(self.parentApp.num_records), editable=False)
@@ -1144,6 +1145,16 @@ class wgSQLCommand(npyscreen.MultiLineEdit):
 
 class wgBoxed_SQLCommand(npyscreen.BoxTitle):
     _contained_widget = wgSQLCommand
+
+
+class SQL_Results(npyscreen.GridColTitles):
+    pass
+    #def display_value(self, vl):
+    #    return
+
+
+class SQL_Box_Results(npyscreen.BoxTitle):
+    _contained_widget = SQL_Results
 
 
 class QB_TableList01(npyscreen.MultiLineAction):
@@ -1207,7 +1218,7 @@ class ExportWindow(npyscreen.ActionForm, npyscreen.SplitForm):
         self.tabRawSQL = self.add(TabRawSQLButton, w_id="wRawSQLTab", name="Raw SQL", value="RawSQLWindow", rely=1,
                                   relx=58)
         self.tabExport = self.add(TabExportButton, w_id="wExportTab", name="Export", value="ExportWindow", rely=1,
-                                  relx=74)
+                                  relx=74, color="VERYGOOD")
         self.tabAdmin = self.add(TabAdminButton, w_id="wAdminTab", name="Admin", value="AdminWindow", rely=1, relx=89)
         self.tabExit = self.add(ExitButton, name="Exit", rely=1, relx=103)
 
@@ -1244,7 +1255,8 @@ class AdminWindow(npyscreen.ActionForm, npyscreen.SplitForm):
                                   relx=58)
         self.tabExport = self.add(TabExportButton, w_id="wExportTab", name="Export", value="ExportWindow", rely=1,
                                   relx=74)
-        self.tabAdmin = self.add(TabAdminButton, w_id="wAdminTab", name="Admin", value="AdminWindow", rely=1, relx=89)
+        self.tabAdmin = self.add(TabAdminButton, w_id="wAdminTab", name="Admin", value="AdminWindow", rely=1, relx=89,
+                                 color="VERYGOOD")
         self.tabExit = self.add(ExitButton, name="Exit", rely=1, relx=103)
 
         self.add(npyscreen.FixedText, value="Here is the ADMIN window", editable=False)
