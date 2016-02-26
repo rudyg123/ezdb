@@ -237,10 +237,10 @@ class TablesWindow(npyscreen.ActionForm, npyscreen.SplitForm):
         self.add(DeleteTableButton, name="Delete Table", relx=30, max_width=35)
 
         self.nextrely += 3  # Move down
-        self.add(npyscreen.FixedText, value="Table Results", color="LABEL", editable=False)
-        #self.nextrely += 1  # Move down
-        self.add(npyscreen.GridColTitles, max_height=12, values=self.parentApp.table_results, default_column_number=10,
-                 col_titles=self.parentApp.col_titles, col_margin=1, column_width=20)
+
+        self.add(Grid_Box_Results, max_height=14, values=self.parentApp.table_results, default_column_number=10,
+                 contained_widget_arguments={"col_titles": self.parentApp.col_titles}, col_margin=1, column_width=20,
+                 name="Table Results")
 
         self.nextrely += 1  # Move down
         self.add(npyscreen.FixedText, value="{} Records Found".format(self.parentApp.num_records), editable=False)
@@ -1109,7 +1109,7 @@ class RawSQLWindow(npyscreen.ActionForm, npyscreen.SplitForm):
         self.nextrely += 2  # Move down
         #self.add(npyscreen.FixedText, value="SQL Results", color="LABEL", editable=False)
         self.nextrely += 1  # Move down
-        self.add(SQL_Box_Results, max_height=14, values=self.parentApp.sql_results, default_column_number=10,
+        self.add(Grid_Box_Results, max_height=14, values=self.parentApp.sql_results, default_column_number=10,
                  contained_widget_arguments={"col_titles":self.parentApp.col_titles}, col_margin=1, column_width=12, name="SQL Results")
 
         self.nextrely += 1  # Move down
@@ -1147,14 +1147,14 @@ class wgBoxed_SQLCommand(npyscreen.BoxTitle):
     _contained_widget = wgSQLCommand
 
 
-class SQL_Results(npyscreen.GridColTitles):
+class Grid_Results(npyscreen.GridColTitles):
     pass
     #def display_value(self, vl):
     #    return
 
 
-class SQL_Box_Results(npyscreen.BoxTitle):
-    _contained_widget = SQL_Results
+class Grid_Box_Results(npyscreen.BoxTitle):
+    _contained_widget = Grid_Results
 
 
 class QB_TableList01(npyscreen.MultiLineAction):
