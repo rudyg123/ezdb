@@ -153,8 +153,11 @@ class DatabaseWindow(npyscreen.ActionForm, npyscreen.SplitForm):
         elif self.parentApp.dbtype == 1:
             self.dbtype_str = "MySQL"
 
-        self.add(npyscreen.TitleSelectOne, w_id="wActiveDB", max_height=10,
-                 name="{} Databases:".format(self.dbtype_str), value=[0], values=self.dbList, scroll_exit=True)
+        #self.add(npyscreen.TitleSelectOne, w_id="wActiveDB", max_height=10,
+        #         name="{} Databases:".format(self.dbtype_str), value=[0], values=self.dbList, scroll_exit=True)
+
+        self.add(npyscreen.BoxTitle, w_id="wDatabases_box", name="{} Databases".format(self.dbtype_str),
+                 values=self.parentApp.dbms.list_databases(), max_width=30, max_height=17, scroll_exit=True)
 
         # Database button options
         self.nextrely += 1  # Move down
@@ -1289,12 +1292,19 @@ class ExitButton(npyscreen.ButtonPress):
 
 class OpenDBButton(npyscreen.ButtonPress):
     def whenPressed(self):
-        self.parent.parentApp.active_db = self.parent.get_widget("wActiveDB").get_selected_objects()[0]
-        self.parent.parentApp.dbms.connect_database(self.parent.parentApp.active_db)
-        self.parent.parentApp.tableList = self.parent.parentApp.dbms.list_database_tables()
 
-        self.parent.parentApp.switchForm("TablesWindow")
-        return self.parent.parentApp.tableList
+        if self.parent.get_widget("wDatabases_box").value is None:
+            npyscreen.notify_confirm("Please select a database by highlighting it and enter")
+            return
+
+        else:
+            selected_db = self.parent.get_widget("wDatabases_box").values[self.parent.get_widget("wDatabases_box").value]
+            self.parent.parentApp.active_db = selected_db
+            self.parent.parentApp.dbms.connect_database(self.parent.parentApp.active_db)
+
+            self.parent.parentApp.tableList = self.parent.parentApp.dbms.list_database_tables()
+
+            self.parent.parentApp.switchForm("TablesWindow")
 
 
 class CreateDBButton(npyscreen.ButtonPress):
@@ -1307,7 +1317,9 @@ class CreateDBButton(npyscreen.ButtonPress):
         if create_confirm:
             servermsg = self.parent.parentApp.dbms.create_database(self.newDB_name)
             npyscreen.notify_confirm(servermsg)
-            self.parent.parentApp.switchForm("DatabaseWindow")
+            self.parent.get_widget("wDatabases_box").values = self.parent.parentApp.dbms.list_databases()
+            self.parent.get_widget("wDatabases_box").display()
+
             return
 
         else:
@@ -1317,20 +1329,26 @@ class CreateDBButton(npyscreen.ButtonPress):
 
 class DeleteDBButton(npyscreen.ButtonPress):
     def whenPressed(self):
-        # self.parent.parentApp.dbms.connect_database()
-        self.parent.parentApp.active_db = self.parent.get_widget("wActiveDB").get_selected_objects()[0]
-        delete_confirm = npyscreen.notify_yes_no("Are you sure you want to delete " +
-                                                 str(self.parent.parentApp.active_db) +
-                                                 "?", "Confirm Deletion", editw=2)
-        if delete_confirm:
-            servermsg = self.parent.parentApp.dbms.delete_database(self.parent.parentApp.active_db)
-            npyscreen.notify_confirm(servermsg)
-            self.parent.parentApp.switchForm("DatabaseWindow")
+
+        if self.parent.get_widget("wDatabases_box").value is None:
+            npyscreen.notify_confirm("Please select a database by highlighting it and enter")
             return
 
         else:
-            npyscreen.blank_terminal() # clears the notification and just goes back to the original form
-        self.parent.get_widget("wActiveDB").display()
+            selected_db = self.parent.get_widget("wDatabases_box").values[self.parent.get_widget("wDatabases_box").value]
+
+            delete_confirm = npyscreen.notify_yes_no("Are you sure you want to delete " + str(selected_db) + "?",
+                                                     "Confirm Deletion", editw=2)
+            if delete_confirm:
+                servermsg = self.parent.parentApp.dbms.delete_database(selected_db)
+                npyscreen.notify_confirm(servermsg)
+                self.parent.get_widget("wDatabases_box").values = self.parent.parentApp.dbms.list_databases()
+                self.parent.get_widget("wDatabases_box").display()
+                return
+
+            else:
+                npyscreen.blank_terminal() # clears the notification and just goes back to the original form
+
 
 
 class ViewTableStructButton(npyscreen.ButtonPress):
