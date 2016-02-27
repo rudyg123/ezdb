@@ -269,11 +269,17 @@ class TablesWindow(npyscreen.ActionForm, npyscreen.SplitForm):
     def beforeEditing(self):
         self.parentApp.tableList = self.parentApp.dbms.list_database_tables()
         self.get_widget("wTables_box").display()
-        self.parentApp.col_titles = []
-        self.parentApp.num_records = 0
 
-        #clear results
+        #clear grid widget results and num records on page load
+        self.parentApp.col_titles = []
+        self.gridbox_results.entry_widget.col_titles = self.parentApp.col_titles
         self.parentApp.table_results = []
+        self.gridbox_results.values = self.parentApp.table_results
+        self.gridbox_results.display()
+
+        self.parentApp.num_records = 0
+        self.numrecords.value = "{} Records Found".format(self.parentApp.num_records)
+        self.numrecords.display()
 
     def on_cancel(self):
         self.parentApp.setNextForm("MAIN")
@@ -708,24 +714,18 @@ class QueryWindow(npyscreen.ActionForm, npyscreen.SplitForm):
         self.tabAdmin = self.add(TabAdminButton, w_id="wAdminTab", name="Admin", value="AdminWindow", rely=1, relx=89)
         self.tabExit = self.add(ExitButton, name="Exit", rely=1, relx=103)
 
-        # Sub-nav for action type
-        self.add(npyscreen.FixedText, value="Action: ", editable=False, relx=3, rely=3)
-        self.nextrelx += 12
-        self.nextrely -= 1
-        self.selectBtn = self.add(QuerySelectBtn, name="SELECT", value="QueryWindow", color="VERYGOOD")
-        self.nextrelx += 12
-        self.nextrely -= 1
-        self.insertBtn = self.add(QueryInsertBtn, name="INSERT", value="QueryInsertWindow")
-        self.nextrelx += 12
-        self.nextrely -= 1
-        self.updateBtn = self.add(QueryUpdateBtn, name="UPDATE", value="QueryUpdateWindow")
-        self.nextrelx += 12
-        self.nextrely -= 1
-        self.deleteBtn = self.add(QueryDeleteBtn, name="DELETE", value="QueryDeleteWindow")
-
-        self.nextrely += 1  # Move down
-        self.add(npyscreen.FixedText, value="Database: {}".format(self.parentApp.active_db), relx=3, color="LABEL",
+        self.add(npyscreen.FixedText, value="Database: {}".format(self.parentApp.active_db), rely=3, relx=3, color="LABEL",
                  editable=False)
+
+        # Sub-nav for action type
+
+        self.selectBtn = self.add(QuerySelectBtn, name="SELECT", value="QueryWindow", color="VERYGOOD", rely=3, relx=37)
+
+        self.insertBtn = self.add(QueryInsertBtn, name="INSERT", value="QueryInsertWindow", rely=3, relx=49)
+
+        self.updateBtn = self.add(QueryUpdateBtn, name="UPDATE", value="QueryUpdateWindow", rely=3, relx=61)
+
+        self.deleteBtn = self.add(QueryDeleteBtn, name="DELETE", value="QueryDeleteWindow", rely=3, relx=73)
 
         self.nextrely += 1  # Move down
 
@@ -739,25 +739,25 @@ class QueryWindow(npyscreen.ActionForm, npyscreen.SplitForm):
         self.field_box1 = self.add(QB_FieldBox01, w_id="wField_list1", name="Fields",
                  values=self.parentApp.field_list1, max_width=22, max_height=7, scroll_exit=True)
 
-        self.tbl1_criteria1 = self.add(npyscreen.TitleText, w_id="wTbl1_criteria1", name="Criteria 1:", max_width=30, use_two_lines=False,
-                 begin_entry_at=12)
+        self.tbl1_criteria1 = self.add(npyscreen.TitleText, w_id="wTbl1_criteria1", name="Criteria:", max_width=28, use_two_lines=False,
+                 begin_entry_at=10)
 
         self.tbl1_condition1 = self.add(npyscreen.SelectOne, max_height=2, value=[0], values=["AND", "OR"], scroll_exit=True, max_width=10)
 
-        self.tbl1_criteria2 = self.add(npyscreen.TitleText, w_id="wTbl1_Criteria2", name="Criteria 2:", max_width=30, use_two_lines=False,
-                 begin_entry_at=12)
+        self.tbl1_criteria2 = self.add(npyscreen.TitleText, w_id="wTbl1_Criteria2", name="Criteria:", max_width=28, use_two_lines=False,
+                 begin_entry_at=10)
 
         self.tbl1_condition2 = self.add(npyscreen.SelectOne, max_height=2, value=[0], values=["AND", "OR"], scroll_exit=True, max_width=10)
 
-        self.tbl1_criteria3 = self.add(npyscreen.TitleText, w_id="wTbl1_Criteria3", name="Criteria 3:", max_width=30, use_two_lines=False,
-                 begin_entry_at=12)
+        self.tbl1_criteria3 = self.add(npyscreen.TitleText, w_id="wTbl1_Criteria3", name="Criteria:", max_width=28, use_two_lines=False,
+                 begin_entry_at=10)
 
         self.nextrely += 1  # Move down
         self.tbl1_sort = self.add(npyscreen.SelectOne, max_height=2, value=[0], max_width=10,
                                                       values=["ASC", "DES"], scroll_exit=True)
 
         ''' TABLE 2 COLUMN '''
-        self.nextrely = 7
+        self.nextrely = 5
         #self.nextrelx = 3  # Padding
         self.add(QB_TableBox02, name="Tables",
                                      values=self.parentApp.tableList, relx=30,
@@ -767,25 +767,25 @@ class QueryWindow(npyscreen.ActionForm, npyscreen.SplitForm):
         self.field_box2 = self.add(QB_FieldBox02, w_id="wField_list2", name="Fields",
                  values=self.parentApp.field_list2, relx=30, max_width=22, max_height=7, scroll_exit=True)
 
-        self.tbl2_criteria1 = self.add(npyscreen.TitleText, w_id="wCriteria1", name="Criteria 1:", relx=30, max_width=30, use_two_lines=False,
-                 begin_entry_at=12)
+        self.tbl2_criteria1 = self.add(npyscreen.TitleText, w_id="wCriteria1", relx=30, name="Criteria:", max_width=28, use_two_lines=False,
+                 begin_entry_at=10)
 
         self.tbl2_condition1 = self.add(npyscreen.SelectOne, max_height=2, relx=30, value=[0], values=["AND", "OR"], scroll_exit=True, max_width=10)
 
-        self.tbl2_criteria2 = self.add(npyscreen.TitleText, w_id="wCriteria2", relx=30,name="Criteria 2:", max_width=30, use_two_lines=False,
-                 begin_entry_at=12)
+        self.tbl2_criteria2 = self.add(npyscreen.TitleText, w_id="wCriteria2", relx=30, name="Criteria:", max_width=28, use_two_lines=False,
+                 begin_entry_at=10)
 
         self.tbl2_condition2 = self.add(npyscreen.SelectOne, max_height=2, relx=30, value=[0], values=["AND", "OR"], scroll_exit=True, max_width=10)
 
-        self.tbl2_criteria3 = self.add(npyscreen.TitleText, w_id="wCriteria3", relx=30, name="Criteria 3:", max_width=30, use_two_lines=False,
-                 begin_entry_at=12)
+        self.tbl2_criteria3 = self.add(npyscreen.TitleText, w_id="wCriteria3", relx=30, name="Criteria:", max_width=28, use_two_lines=False,
+                 begin_entry_at=10)
 
         self.nextrely += 1  # Move down
         self.tbl2_sort = self.add(npyscreen.SelectOne, max_height=2, relx=30, value=[0], max_width=10, values=["ASC", "DES"],
                  scroll_exit=True)
 
         ''' TABLE 3 COLUMN '''
-        self.nextrely = 7
+        self.nextrely = 5
         #self.nextrelx = 3  # Padding
         self.add(QB_TableBox03, name="Tables",
                                      values=self.parentApp.tableList, relx=57,
@@ -795,20 +795,20 @@ class QueryWindow(npyscreen.ActionForm, npyscreen.SplitForm):
         self.field_box3 = self.add(QB_FieldBox03, w_id="wField_list1", name="Fields", values=self.parentApp.field_list1,
                                    relx=57, max_width=22, max_height=7, scroll_exit=True)
 
-        self.tbl3_criteria1 = self.add(npyscreen.TitleText, w_id="wCriteria1", name="Criteria 1:", relx=57, max_width=30, use_two_lines=False,
-                 begin_entry_at=12)
+        self.tbl3_criteria1 = self.add(npyscreen.TitleText, w_id="wCriteria1", relx=57, name="Criteria:", max_width=28, use_two_lines=False,
+                 begin_entry_at=10)
 
         self.tbl3_condition1 = self.add(npyscreen.SelectOne, max_height=2, relx=57, value=[0], values=["AND", "OR"], scroll_exit=True,
                  max_width=10)
 
-        self.tbl3_criteria2 = self.add(npyscreen.TitleText, w_id="wCriteria2", relx=57, name="Criteria 2:", max_width=30, use_two_lines=False,
-                 begin_entry_at=12)
+        self.tbl3_criteria2 = self.add(npyscreen.TitleText, w_id="wCriteria2", relx=57, name="Criteria:", max_width=28, use_two_lines=False,
+                 begin_entry_at=10)
 
         self.tbl3_condition2 = self.add(npyscreen.SelectOne, max_height=2, relx=57, value=[0], values=["AND", "OR"], scroll_exit=True,
                  max_width=10)
 
-        self.tbl3_criteria3 = self.add(npyscreen.TitleText, w_id="wCriteria3", relx=57, name="Criteria 3:", max_width=30, use_two_lines=False,
-                 begin_entry_at=12)
+        self.tbl3_criteria3 = self.add(npyscreen.TitleText, w_id="wCriteria3", relx=57, name="Criteria:", max_width=28, use_two_lines=False,
+                 begin_entry_at=10)
 
         self.nextrely += 1  # Move down
         self.tbl3_sort = self.add(npyscreen.SelectOne, max_height=2, relx=57, value=[0], max_width=10, values=["ASC", "DES"],
@@ -1043,11 +1043,17 @@ class RawSQLWindow(npyscreen.ActionForm, npyscreen.SplitForm):
         npyscreen.notify_confirm(help_msg, title='Help Menu', editw=1)
 
     def beforeEditing(self):
-        #clear results
-        self.parentApp.sql_results = []
-        self.parentApp.col_titles = []
-        self.parentApp.num_records = 0
 
+        #clear grid widget results and num records on page load
+        self.parentApp.col_titles = []
+        self.gridbox_results.entry_widget.col_titles = self.parentApp.col_titles
+        self.parentApp.sql_results = []
+        self.gridbox_results.values = self.parentApp.sql_results
+        self.gridbox_results.display()
+
+        self.parentApp.num_records = 0
+        self.numrecords.value = "{} Records Found".format(self.parentApp.num_records)
+        self.numrecords.display()
 
 class wgSQLCommand(npyscreen.MultiLineEdit):
 
@@ -1523,16 +1529,25 @@ class CreateTableButton(npyscreen.ButtonPress):
     results = None
 
     def whenPressed(self):
+
+        if self.parent.parentApp.dbtype == 1 and not self.parent.parentApp.field_string_array:
+                npyscreen.notify_confirm("Sorry, you can't create an empty table in MySQL")
+                return
+
         create_confirm = npyscreen.notify_yes_no("Are you sure you want to create " +
                                                  str(self.parent.parentApp.table_name) + "?", "Confirm Creation",
                                                  editw=2)
 
         if create_confirm:
-            create_table_string = "CREATE TABLE {} ".format(self.parent.parentApp.table_name) + "("
-            for field in self.parent.parentApp.field_string_array:
-                create_table_string += field
-            create_table_string = create_table_string[:-2]
-            create_table_string += ")"
+            create_table_string = "CREATE TABLE {} ".format(self.parent.parentApp.table_name)
+            field_string = ""
+
+            if self.parent.parentApp.field_string_array is not None:
+                for field in self.parent.parentApp.field_string_array:
+                    field_string += field
+                field_string = field_string[:-2]
+
+            create_table_string += "(" + field_string + ")"
 
             if self.parent.parentApp.dbtype == 1:
                 create_table_string += "ENGINE=" + self.parent.parentApp.engine + ";"
@@ -1723,7 +1738,9 @@ class App(npyscreen.NPSAppManaged):
     dbtype, host, port, username, password, dbms, active_db, tableList, active_table = (None,)*9
 
     # Table creation global variables
-    field_name, field_type, field_length_or_val, field_collation, field_attrib, field_default, engine = (None,)*7
+    field_name, field_type, field_length_or_val, field_collation, field_attrib, field_default = (None,)*6
+
+    engine = "InnoDB" #sets default MySQL engine type
 
     field_autoincrement, field_primarykey, field_unique, field_index = (False,)*4
     # User friendly way of saying if Null is okay for this field
