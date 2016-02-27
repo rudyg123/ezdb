@@ -213,9 +213,6 @@ class TablesWindow(npyscreen.ActionForm, npyscreen.SplitForm):
         self.tabAdmin = self.add(TabAdminButton, w_id="wAdminTab", name="Admin", value="AdminWindow", rely=1, relx=89)
         self.tabExit = self.add(ExitButton, name="Exit", rely=1, relx=103)
 
-        #self.nextrely += 1  # Move down
-        #self.add(npyscreen.FixedText, value="Here is the TABLES window", editable=False)
-
         self.nextrely += 1  # Move down
         self.add(npyscreen.FixedText, value="Database: {}".format(self.parentApp.active_db), relx=3, color="LABEL",
                  editable=False)
@@ -241,12 +238,15 @@ class TablesWindow(npyscreen.ActionForm, npyscreen.SplitForm):
 
         self.nextrely += 3  # Move down
 
-        self.add(Grid_Box_Results, max_height=14, values=self.parentApp.table_results, default_column_number=10,
-                 contained_widget_arguments={"col_titles": self.parentApp.col_titles}, col_margin=1, column_width=20,
-                 name="Table Results")
+        self.gridbox_results = self.add(Grid_Box_Results, max_height=14, values=self.parentApp.table_results,
+                                        default_column_number=10, w_id="wGrid_Box_Results",
+                                        contained_widget_arguments = {"col_titles": self.parentApp.col_titles},
+                                        col_margin=1, column_width=20, name="Table Results")
 
         self.nextrely += 1  # Move down
-        self.add(npyscreen.FixedText, value="{} Records Found".format(self.parentApp.num_records), editable=False)
+        self.numrecords = self.add(npyscreen.FixedText, value="{} Records Found".format(self.parentApp.num_records),
+                                   editable=False)
+
         self.tabQuery = self.add(TabQuery2Button, w_id="wQueryTab2", name="Query2", value="QueryWindow2", relx=100)
 
         # Help menu guidance
@@ -1110,13 +1110,17 @@ class RawSQLWindow(npyscreen.ActionForm, npyscreen.SplitForm):
         self.add(SQLButton, w_id="wSQLButton", relx=51, name="Send Command")
 
         self.nextrely += 2  # Move down
-        #self.add(npyscreen.FixedText, value="SQL Results", color="LABEL", editable=False)
-        self.nextrely += 1  # Move down
-        self.add(Grid_Box_Results, max_height=14, values=self.parentApp.sql_results, default_column_number=10,
-                 contained_widget_arguments={"col_titles":self.parentApp.col_titles}, col_margin=1, column_width=12, name="SQL Results")
 
         self.nextrely += 1  # Move down
-        self.add(npyscreen.FixedText, value="{} Records Found".format(self.parentApp.num_records), editable=False)
+        self.gridbox_results = self.add(Grid_Box_Results, max_height=14, values=self.parentApp.sql_results,
+                                        default_column_number=10,
+                                        contained_widget_arguments={"col_titles":self.parentApp.col_titles},
+                                        col_margin=1, column_width=12,
+                                        name="SQL Results")
+
+        self.nextrely += 1  # Move down
+        self.numrecords = self.add(npyscreen.FixedText, value="{} Records Found".format(self.parentApp.num_records),
+                                   editable=False)
 
         # Help menu guidance
         self.nextrely = 34
@@ -1151,9 +1155,9 @@ class wgBoxed_SQLCommand(npyscreen.BoxTitle):
 
 
 class Grid_Results(npyscreen.GridColTitles):
-    pass
-    #def display_value(self, vl):
-    #    return
+
+    def __init__(self, *args, **keywords):
+        super(Grid_Results, self).__init__(*args, **keywords)
 
 
 class Grid_Box_Results(npyscreen.BoxTitle):
@@ -1324,7 +1328,6 @@ class CreateDBButton(npyscreen.ButtonPress):
 
         else:
             npyscreen.blank_terminal() # clears the notification and just goes back to the original form
-        self.parent.get_widget("wActiveDB").display()
 
 
 class DeleteDBButton(npyscreen.ButtonPress):
@@ -1350,7 +1353,6 @@ class DeleteDBButton(npyscreen.ButtonPress):
                 npyscreen.blank_terminal() # clears the notification and just goes back to the original form
 
 
-
 class ViewTableStructButton(npyscreen.ButtonPress):
     selected_table, results = (None,)*2
 
@@ -1372,7 +1374,14 @@ class ViewTableStructButton(npyscreen.ButtonPress):
             if self.results[3]:
                 self.parent.parentApp.num_records = self.results[3]
 
-            self.parent.parentApp.switchForm("TablesWindow")
+            self.parent.gridbox_results.values = self.parent.parentApp.table_results
+
+            self.parent.gridbox_results.entry_widget.col_titles = self.parent.parentApp.col_titles
+
+            self.parent.numrecords.value = "{} Records Found".format(self.parent.parentApp.num_records)
+
+            self.parent.gridbox_results.display()
+            self.parent.numrecords.display()
             return
 
 
@@ -1396,7 +1405,15 @@ class BrowseTableButton(npyscreen.ButtonPress):
                 self.parent.parentApp.col_titles = self.results[2]
             if self.results[3]:
                 self.parent.parentApp.num_records = self.results[3]
-            self.parent.parentApp.switchForm("TablesWindow")
+
+            self.parent.gridbox_results.values = self.parent.parentApp.table_results
+
+            self.parent.gridbox_results.entry_widget.col_titles = self.parent.parentApp.col_titles
+
+            self.parent.numrecords.value = "{} Records Found".format(self.parent.parentApp.num_records)
+
+            self.parent.gridbox_results.display()
+            self.parent.numrecords.display()
             return
 
 
@@ -1612,7 +1629,8 @@ class DeleteTableButton(npyscreen.ButtonPress):
                 npyscreen.notify_confirm(servermsg)
 
             self.parent.parentApp.tableList = self.parent.parentApp.dbms.list_database_tables()
-            self.parent.parentApp.switchForm("TablesWindow")
+            self.parent.get_widget("wTables_box").values = self.parent.parentApp.tableList
+            self.parent.get_widget("wTables_box").display()
             return
 
         else:
@@ -1642,7 +1660,14 @@ class SQLButton(npyscreen.ButtonPress):
             if self.results[3]:
                 self.parent.parentApp.num_records = self.results[3]
 
-            self.parent.parentApp.switchForm("RawSQLWindow")
+            self.parent.gridbox_results.values = self.parent.parentApp.sql_results
+
+            self.parent.gridbox_results.entry_widget.col_titles = self.parent.parentApp.col_titles
+
+            self.parent.numrecords.value = "{} Records Found".format(self.parent.parentApp.num_records)
+
+            self.parent.gridbox_results.display()
+            self.parent.numrecords.display()
             return
 
 
