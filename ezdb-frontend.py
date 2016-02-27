@@ -247,8 +247,6 @@ class TablesWindow(npyscreen.ActionForm, npyscreen.SplitForm):
         self.numrecords = self.add(npyscreen.FixedText, value="{} Records Found".format(self.parentApp.num_records),
                                    editable=False)
 
-        self.tabQuery = self.add(TabQuery2Button, w_id="wQueryTab2", name="Query2", value="QueryWindow2", relx=100)
-
         # Help menu guidance
         self.nextrely = 34
         self.nextrelx = 2
@@ -480,7 +478,7 @@ class TableCreateMySQLForm(npyscreen.ActionForm, npyscreen.SplitForm):
 
 
 # More specifically, this is QuerySelectWindow, the default landing spot. TODO: Rename class and all references to it
-class QueryWindow(npyscreen.ActionForm, npyscreen.SplitForm):
+class QueryWindow2(npyscreen.ActionForm, npyscreen.SplitForm):
     tabDatabases, tabTables, tabQuery, tabRawSQL, tabExport, tabAdmin, tabExit, action, selectBtn, insertBtn, \
     updateBtn, deleteBtn = (None,)*12
     # Data structure for managing user input for each table column
@@ -689,32 +687,10 @@ class QueryWindow(npyscreen.ActionForm, npyscreen.SplitForm):
         help_msg = "Use the SELECT form to query the database for stored data."
         npyscreen.notify_confirm(help_msg, title='Help Menu')
 
-class QueryWindow2(npyscreen.ActionForm, npyscreen.SplitForm):
+class QueryWindow(npyscreen.ActionForm, npyscreen.SplitForm):
     tabDatabases, tabTables, tabQuery, tabRawSQL, tabExport, tabAdmin, tabExit, action, selectBtn, insertBtn, \
     updateBtn, deleteBtn = (None,)*12
     # Data structure for managing user input for each table column
-    queryData = {
-        1: {
-            'name': None,
-            'field': {1: None,2:None,3:None},
-            'filter': {
-                1: {'operator': None,'field': None,'condition': None},
-                2: {'operator': None,'field': None,'condition': None},
-                3: {'operator': None,'field': None,'condition': None},
-            },
-            'sort': {'by': None,'order': None}
-        },
-        2: {'name': None,'field': {1: None,2:None,3:None},'filter': {
-                1: {'operator': None,'field': None,'condition': None},
-                2: {'operator': None,'field': None,'condition': None},
-                3: {'operator': None,'field': None,'condition': None},}},
-        3: {'name': None,'field': {1: None,2:None,3:None},
-            'filter': {
-                1: {'operator': None,'field': None,'condition': None},
-                2: {'operator': None,'field': None,'condition': None},
-                3: {'operator': None,'field': None,'condition': None},}}}
-
-    field_list = []
 
     def create(self):
         self.tabDatabases = self.add(TabMainButton, w_id="wMainTab", name="Main", value="DatabaseWindow",
@@ -752,164 +728,93 @@ class QueryWindow2(npyscreen.ActionForm, npyscreen.SplitForm):
                  editable=False)
 
         self.nextrely += 1  # Move down
-        self.nextrelx = 3  # Padding
-        self.table_select = self.add(QB_TableBox01, w_id="wTables_list", name="Tables",
-                                     values=self.parentApp.tableList,
-                                     max_width=25, max_height=7, scroll_exit=True)
 
-        #self.table_select.actionHighlighted = self.actionHighlighted
+        ''' TABLE 1 COLUMN '''
+        self.nextrelx = 3  # Padding
+        self.add(QB_TableBox01, name="Tables",
+                                     values=self.parentApp.tableList,
+                                     max_width=22, max_height=7, scroll_exit=True)
 
         self.nextrely += 1  # Move down
         self.field_box1 = self.add(QB_FieldBox01, w_id="wField_list1", name="Fields",
-                 values=self.parentApp.field_list1, max_width=25, max_height=7, scroll_exit=True)
+                 values=self.parentApp.field_list1, max_width=22, max_height=7, scroll_exit=True)
 
+        self.tbl1_criteria1 = self.add(npyscreen.TitleText, w_id="wTbl1_criteria1", name="Criteria 1:", max_width=30, use_two_lines=False,
+                 begin_entry_at=12)
 
-        '''
-        need to grab self.parent.get_widget("wTables_box").value and run query to get field list for table 1.
-        look into using actionHighlighted to run "get_fields" method
-        '''
+        self.tbl1_condition1 = self.add(npyscreen.SelectOne, max_height=2, value=[0], values=["AND", "OR"], scroll_exit=True, max_width=10)
 
-        '''
-        # Table 1
+        self.tbl1_criteria2 = self.add(npyscreen.TitleText, w_id="wTbl1_Criteria2", name="Criteria 2:", max_width=30, use_two_lines=False,
+                 begin_entry_at=12)
+
+        self.tbl1_condition2 = self.add(npyscreen.SelectOne, max_height=2, value=[0], values=["AND", "OR"], scroll_exit=True, max_width=10)
+
+        self.tbl1_criteria3 = self.add(npyscreen.TitleText, w_id="wTbl1_Criteria3", name="Criteria 3:", max_width=30, use_two_lines=False,
+                 begin_entry_at=12)
+
         self.nextrely += 1  # Move down
-        self.nextrelx = 3  # Padding
-
-        self.queryData[1]['name'] = self.add(npyscreen.TitleText, name="Table:", begin_entry_at=11, max_width=35)
-        self.queryData[1]['field'][1] = self.add(npyscreen.TitleText, name="Field 1:", begin_entry_at=11, max_width=35)
-        self.queryData[1]['field'][2] = self.add(npyscreen.TitleText, name="Field 2:", begin_entry_at=11, max_width=35)
-        self.queryData[1]['field'][3] = self.add(npyscreen.TitleText, name="Field 3:", begin_entry_at=11, max_width=35)
-
-        # Table 2
-        self.nextrely -= 4  # Move up
-        self.nextrelx += 36  # Move right
-
-        self.queryData[2]['name'] = self.add(npyscreen.TitleText, name="Table:", begin_entry_at=11, max_width=35)
-        self.queryData[2]['field'][1] = self.add(npyscreen.TitleText, name="Field 1:", begin_entry_at=11, max_width=35)
-        self.queryData[2]['field'][2] = self.add(npyscreen.TitleText, name="Field 2:", begin_entry_at=11, max_width=35)
-        self.queryData[2]['field'][3] = self.add(npyscreen.TitleText, name="Field 3:", begin_entry_at=11, max_width=35)
-
-        # Table 3
-        self.nextrely -= 4  # Move up
-        self.nextrelx += 36  # Move right
-
-        self.queryData[3]['name'] = self.add(npyscreen.TitleText, name="Table:", begin_entry_at=11, max_width=35)
-        self.queryData[3]['field'][1] = self.add(npyscreen.TitleText, name="Field 1:", begin_entry_at=11, max_width=35)
-        self.queryData[3]['field'][2] = self.add(npyscreen.TitleText, name="Field 2:", begin_entry_at=11, max_width=35)
-        self.queryData[3]['field'][3] = self.add(npyscreen.TitleText, name="Field 3:", begin_entry_at=11, max_width=35)
-
-
-        # CRITERIA/FILTER SECTION
-        self.nextrely += 1  # Move down
-        self.nextrelx = 3  # Add padding
-        self.add(npyscreen.FixedText, value="Criteria: ", editable=False)
-
-        # Table 1 criteria 1
-        self.nextrelx = 3  # Add padding
-        self.nextrely += 1 # Move down
-        self.queryData[1]['filter'][1]['field'] = self.add(npyscreen.TitleText, name="Field:", begin_entry_at=13,
-                                                           max_width=35)
-        self.queryData[1]['filter'][1]['condition'] = self.add(npyscreen.TitleText, name="Condition:",
-                                                               begin_entry_at=13, max_width=35)
-        # Table 2 criteria 1
-        self.nextrely -= 2  # Move up
-        self.nextrelx += 36  # Move right
-        self.queryData[2]['filter'][1]['field'] = self.add(npyscreen.TitleText, name="Field:", begin_entry_at=13,
-                                                           max_width=35)
-        self.queryData[2]['filter'][1]['condition'] = self.add(npyscreen.TitleText, name="Condition:",
-                                                               begin_entry_at=13, max_width=35)
-        # Table 3 criteria 1
-        self.nextrely -= 2  # Move up
-        self.nextrelx += 36  # Move right
-        self.queryData[3]['filter'][1]['field'] = self.add(npyscreen.TitleText, name="Field:", begin_entry_at=13,
-                                                           max_width=35)
-        self.queryData[3]['filter'][1]['condition'] = self.add(npyscreen.TitleText, name="Condition:",
-                                                               begin_entry_at=13, max_width=35)
-        # CRITERIA OPERATORS ROW 1
-        self.nextrelx = 3  # Add padding
-        self.nextrely = 14 # Move down
-        self.queryData[1]['filter'][1]['operator'] = self.add(npyscreen.SelectOne, max_height=2, value=[0],
-                                                              values=["AND", "OR"], scroll_exit=True, max_width=35)
-        self.nextrelx += 36  # Add padding
-        self.nextrely -= 2 # Move up
-        self.queryData[2]['filter'][1]['operator'] = self.add(npyscreen.SelectOne, max_height=2, value=[0],
-                                                              values=["AND", "OR"], scroll_exit=True, max_width=35)
-        self.nextrelx += 36  # Add padding
-        self.nextrely -= 2 # Move up
-        self.queryData[3]['filter'][1]['operator'] = self.add(npyscreen.SelectOne, max_height=2, value=[0],
-                                                              values=["AND", "OR"], scroll_exit=True, max_width=35)
-        # Table 1 criteria 2
-        self.nextrelx = 3  # Add padding
-        self.nextrely += 1 # Move down
-        self.queryData[1]['filter'][2]['field'] = self.add(npyscreen.TitleText, name="Field:", begin_entry_at=13,
-                                                           max_width=35)
-        self.queryData[1]['filter'][2]['condition'] = self.add(npyscreen.TitleText, name="Condition:",
-                                                               begin_entry_at=13, max_width=35)
-        # Table 2 criteria 2
-        self.nextrely -= 2  # Move up
-        self.nextrelx += 36  # Move right
-        self.queryData[2]['filter'][2]['field'] = self.add(npyscreen.TitleText, name="Field:", begin_entry_at=13,
-                                                           max_width=35)
-        self.queryData[2]['filter'][2]['condition'] = self.add(npyscreen.TitleText, name="Condition:",
-                                                               begin_entry_at=13, max_width=35)
-        # Table 3 criteria 2
-        self.nextrely -= 2  # Move up
-        self.nextrelx += 36  # Move right
-        self.queryData[3]['filter'][2]['field'] = self.add(npyscreen.TitleText, name="Field:", begin_entry_at=13,
-                                                           max_width=35)
-        self.queryData[3]['filter'][2]['condition'] = self.add(npyscreen.TitleText, name="Condition:",
-                                                               begin_entry_at=13, max_width=35)
-        # CRITERIA OPERATORS ROW 2
-        self.nextrelx = 3  # Add padding
-        self.nextrely = 19 # Move down
-        self.queryData[1]['filter'][2]['operator'] = self.add(npyscreen.SelectOne, max_height=2, value=[0],
-                                                              values=["AND", "OR"], scroll_exit=True, max_width=35)
-        self.nextrelx += 36  # Add padding
-        self.nextrely -= 2 # Move up
-        self.queryData[2]['filter'][2]['operator'] = self.add(npyscreen.SelectOne, max_height=2, value=[0],
-                                                              values=["AND", "OR"], scroll_exit=True, max_width=35)
-        self.nextrelx += 36  # Add padding
-        self.nextrely -= 2 # Move up
-        self.queryData[3]['filter'][2]['operator'] = self.add(npyscreen.SelectOne, max_height=2, value=[0],
-                                                              values=["AND", "OR"], scroll_exit=True, max_width=35)
-        # Table 1 criteria 3
-        self.nextrelx = 3  # Add padding
-        self.nextrely += 1 # Move down
-        self.queryData[1]['filter'][3]['field'] = self.add(npyscreen.TitleText, name="Field:", begin_entry_at=13,
-                                                           max_width=35)
-        self.queryData[1]['filter'][3]['condition'] = self.add(npyscreen.TitleText, name="Condition:",
-                                                               begin_entry_at=13, max_width=35)
-        # Table 2 criteria 3
-        self.nextrely -= 2  # Move up
-        self.nextrelx += 36  # Move right
-        self.queryData[2]['filter'][3]['field'] = self.add(npyscreen.TitleText, name="Field:", begin_entry_at=13,
-                                                           max_width=35)
-        self.queryData[2]['filter'][3]['condition'] = self.add(npyscreen.TitleText, name="Condition:",
-                                                               begin_entry_at=13, max_width=35)
-        # Table 3 criteria 3
-        self.nextrely -= 2  # Move up
-        self.nextrelx += 36  # Move right
-        self.queryData[3]['filter'][3]['field'] = self.add(npyscreen.TitleText, name="Field:", begin_entry_at=13,
-                                                           max_width=35)
-        self.queryData[3]['filter'][3]['condition'] = self.add(npyscreen.TitleText, name="Condition:",
-                                                               begin_entry_at=13, max_width=35)
-        # Sorting
-        self.nextrelx = 3  # Add padding
-        self.nextrely += 1  # Move down
-
-        self.queryData[1]['sort']['by'] = self.add(npyscreen.TitleText, name="Sort by:", begin_entry_at=11,
-                                                   max_width=35)
-        self.queryData[1]['sort']['order'] = self.add(npyscreen.SelectOne, max_height=2, value=[0], max_width=25,
+        self.tbl1_sort = self.add(npyscreen.SelectOne, max_height=2, value=[0], max_width=10,
                                                       values=["ASC", "DES"], scroll_exit=True)
-        # QUERY PREVIEW - This will update to reflect the current form data
-        self.nextrely -= 3  # Move up
-        self.nextrelx = 39  # Move over
-        self.add(npyscreen.FixedText, value="Preview: ", editable=False)
-        self.queryPreview = self.add(npyscreen.FixedText, value="SELECT * FROM Customers WHERE Country='Mexico';",
-                                     color="STANDOUT", editable=False)
 
-        '''
-        self.nextrely = 30  # Move down
-        self.tabQuery = self.add(TabQuery2Button, w_id="wQueryTab2", name="Query2", value="QueryWindow2", relx=50)
+        ''' TABLE 2 COLUMN '''
+        self.nextrely = 7
+        #self.nextrelx = 3  # Padding
+        self.add(QB_TableBox02, name="Tables",
+                                     values=self.parentApp.tableList, relx=30,
+                                     max_width=22, max_height=7, scroll_exit=True)
+
+        self.nextrely += 1  # Move down
+        self.field_box2 = self.add(QB_FieldBox02, w_id="wField_list2", name="Fields",
+                 values=self.parentApp.field_list2, relx=30, max_width=22, max_height=7, scroll_exit=True)
+
+        self.tbl2_criteria1 = self.add(npyscreen.TitleText, w_id="wCriteria1", name="Criteria 1:", relx=30, max_width=30, use_two_lines=False,
+                 begin_entry_at=12)
+
+        self.tbl2_condition1 = self.add(npyscreen.SelectOne, max_height=2, relx=30, value=[0], values=["AND", "OR"], scroll_exit=True, max_width=10)
+
+        self.tbl2_criteria2 = self.add(npyscreen.TitleText, w_id="wCriteria2", relx=30,name="Criteria 2:", max_width=30, use_two_lines=False,
+                 begin_entry_at=12)
+
+        self.tbl2_condition2 = self.add(npyscreen.SelectOne, max_height=2, relx=30, value=[0], values=["AND", "OR"], scroll_exit=True, max_width=10)
+
+        self.tbl2_criteria3 = self.add(npyscreen.TitleText, w_id="wCriteria3", relx=30, name="Criteria 3:", max_width=30, use_two_lines=False,
+                 begin_entry_at=12)
+
+        self.nextrely += 1  # Move down
+        self.tbl2_sort = self.add(npyscreen.SelectOne, max_height=2, relx=30, value=[0], max_width=10, values=["ASC", "DES"],
+                 scroll_exit=True)
+
+        ''' TABLE 3 COLUMN '''
+        self.nextrely = 7
+        #self.nextrelx = 3  # Padding
+        self.add(QB_TableBox03, name="Tables",
+                                     values=self.parentApp.tableList, relx=57,
+                                     max_width=22, max_height=7, scroll_exit=True)
+
+        self.nextrely += 1  # Move down
+        self.field_box3 = self.add(QB_FieldBox03, w_id="wField_list1", name="Fields", values=self.parentApp.field_list1,
+                                   relx=57, max_width=22, max_height=7, scroll_exit=True)
+
+        self.tbl3_criteria1 = self.add(npyscreen.TitleText, w_id="wCriteria1", name="Criteria 1:", relx=57, max_width=30, use_two_lines=False,
+                 begin_entry_at=12)
+
+        self.tbl3_condition1 = self.add(npyscreen.SelectOne, max_height=2, relx=57, value=[0], values=["AND", "OR"], scroll_exit=True,
+                 max_width=10)
+
+        self.tbl3_criteria2 = self.add(npyscreen.TitleText, w_id="wCriteria2", relx=57, name="Criteria 2:", max_width=30, use_two_lines=False,
+                 begin_entry_at=12)
+
+        self.tbl3_condition2 = self.add(npyscreen.SelectOne, max_height=2, relx=57, value=[0], values=["AND", "OR"], scroll_exit=True,
+                 max_width=10)
+
+        self.tbl3_criteria3 = self.add(npyscreen.TitleText, w_id="wCriteria3", relx=57, name="Criteria 3:", max_width=30, use_two_lines=False,
+                 begin_entry_at=12)
+
+        self.nextrely += 1  # Move down
+        self.tbl3_sort = self.add(npyscreen.SelectOne, max_height=2, relx=57, value=[0], max_width=10, values=["ASC", "DES"],
+                 scroll_exit=True)
+
+
 
         # Help menu guidance
         self.nextrely = 34
@@ -1168,47 +1073,94 @@ class QB_TableList01(npyscreen.MultiLineAction):
 
     def actionHighlighted(self, act_on_this, key_press):
 
-        #self.parent.table_select.actionHighlighted = self.actionHighlighted
-        self.parent.parentApp.field_list1 = []
+        field_list = []
 
         #run query
         results = self.parent.parentApp.dbms.get_table_fields(act_on_this)
         if results[0] == "success":
             #npyscreen.notify_confirm("the results returned are :" + str(results[1]))
             for field in results[1]:
-                self.parent.parentApp.field_list1.append(field[0])
-            self.parent.field_box1.values = self.parent.parentApp.field_list1
+                field_list.append(field[0])
+            self.parent.field_box1.values = field_list
             self.parent.field_box1.display()
+            self.parent.parentApp.table1 = act_on_this
 
         else:
             npyscreen.notify_confirm(results[1])
 
+class QB_TableList02(npyscreen.MultiLineAction):
+
+    def actionHighlighted(self, act_on_this, key_press):
+
+        field_list = []
+
+        #run query
+        results = self.parent.parentApp.dbms.get_table_fields(act_on_this)
+        if results[0] == "success":
+            #npyscreen.notify_confirm("the results returned are :" + str(results[1]))
+            for field in results[1]:
+                field_list.append(field[0])
+            self.parent.field_box2.values = field_list
+            self.parent.field_box2.display()
+            self.parent.parentApp.table1 = act_on_this
+
+        else:
+            npyscreen.notify_confirm(results[1])
+
+class QB_TableList03(npyscreen.MultiLineAction):
+
+    def actionHighlighted(self, act_on_this, key_press):
+
+        field_list = []
+
+        #run query
+        results = self.parent.parentApp.dbms.get_table_fields(act_on_this)
+        if results[0] == "success":
+            #npyscreen.notify_confirm("the results returned are :" + str(results[1]))
+            for field in results[1]:
+                field_list.append(field[0])
+            self.parent.field_box3.values = field_list
+            self.parent.field_box3.display()
+            self.parent.parentApp.table1 = act_on_this
+
+        else:
+            npyscreen.notify_confirm(results[1])
 
 class QB_TableBox01(npyscreen.BoxTitle):
     _contained_widget = QB_TableList01
 
+class QB_TableBox02(npyscreen.BoxTitle):
+    _contained_widget = QB_TableList02
+
+class QB_TableBox03(npyscreen.BoxTitle):
+    _contained_widget = QB_TableList03
+
+
 class QB_FieldList01(npyscreen.MultiLineAction):
 
     def actionHighlighted(self, act_on_this, key_press):
-        pass
-        '''
-        self.parent.parentApp.field_list1 = []
+        self.parent.parentApp.field1 = act_on_this
 
-        #run query
-        results = self.parent.parentApp.dbms.get_table_fields(act_on_this)
-        if results[0] == "success":
-            #npyscreen.notify_confirm("the results returned are :" + str(results[1]))
-            for field in results[1]:
-                self.parent.parentApp.field_list1.append(field[0])
-            self.parent.field_box1.values = self.parent.parentApp.field_list1
-            self.parent.field_box1.display()
+class QB_FieldList02(npyscreen.MultiLineAction):
 
-        else:
-            npyscreen.notify_confirm(results[1])
-        '''
+    def actionHighlighted(self, act_on_this, key_press):
+        self.parent.parentApp.field2 = act_on_this
+
+class QB_FieldList03(npyscreen.MultiLineAction):
+
+    def actionHighlighted(self, act_on_this, key_press):
+        self.parent.parentApp.field3 = act_on_this
+
 
 class QB_FieldBox01(npyscreen.BoxTitle):
     _contained_widget = QB_FieldList01
+
+class QB_FieldBox02(npyscreen.BoxTitle):
+    _contained_widget = QB_FieldList02
+
+class QB_FieldBox03(npyscreen.BoxTitle):
+    _contained_widget = QB_FieldList03
+
 
 class ExportWindow(npyscreen.ActionForm, npyscreen.SplitForm):
     tabDatabases, tabTables, tabQuery, tabRawSQL, tabExport, tabAdmin, tabExit = (None,)*7
@@ -1776,6 +1728,9 @@ class App(npyscreen.NPSAppManaged):
     field_autoincrement, field_primarykey, field_unique, field_index = (False,)*4
     # User friendly way of saying if Null is okay for this field
     field_optional = True
+
+    field1, field2, field3, tbl1_criteria1, tbl1_criteria2, tbl1_criteria3, tbl2_criteria1, tbl2_criteria2, \
+    tbl2_criteria3, tbl3_criteria1, tbl3_criteria2, tbl3_criteria3, table1, table2, table3 = (None,)*15
 
     tablefield_cols, sql_results, col_titles, table_results, table_struct_results, field_string_array, field_list1,\
         field_list2, field_list3 = ([],)*9
