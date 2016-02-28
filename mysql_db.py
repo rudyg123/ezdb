@@ -150,7 +150,6 @@ class MySQL_Database(object):
             col_titles = [desc[0] for desc in self.cur.description]
 
             self.cur.execute(sql_string + ";")
-            #self.conn.commit()
 
             try:
                 browse_results_data = self.cur.fetchall()
@@ -179,7 +178,7 @@ class MySQL_Database(object):
             col_titles = [desc[0] for desc in self.cur.description]
 
             self.cur.execute(sql_string + ";")
-            #self.conn.commit()
+
             try:
                 table_struct_results_data = self.cur.fetchall()
                 table_struct_results = []
@@ -230,7 +229,7 @@ class MySQL_Database(object):
                 col_titles = [desc[0] for desc in self.cur.description]
 
             self.cur.execute(sql_string + ";")
-            #self.conn.commit()
+
             sql_results = []
 
             try:
@@ -249,11 +248,38 @@ class MySQL_Database(object):
                     return "success", sql_results, "", ""
 
             except mysql.connector.Error, err:
+
                 if str(err) == "No result set to fetch from.":
-                    #sql_results.append("Operation completed successfully")
                     return "success", sql_results, "", ""
                 else:
                     return "error", err, "", ""
 
         except mysql.connector.Error, err:
+            return "error", err
+
+    def get_table_fields(self, table):
+
+        sql_string = "SELECT column_name from INFORMATION_SCHEMA.COLUMNS where table_name ='{}'".format(table)
+
+        try:
+
+            self.cur.execute(sql_string + ";")
+
+            try:
+                table_fields_results_data = self.cur.fetchall()
+                table_fields_results = []
+
+                for row in table_fields_results_data:
+                    table_fields_results.append(row)
+
+                return "success", table_fields_results
+
+            except mysql.connector.Error, err:
+
+                self.conn.rollback()
+                return "error", err
+
+        except mysql.connector.Error, err:
+
+            self.conn.rollback()
             return "error", err

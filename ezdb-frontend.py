@@ -1168,7 +1168,7 @@ class QB_TableList01(npyscreen.MultiLineAction):
             self.parent.parentApp.table1 = act_on_this
 
         else:
-            npyscreen.notify_confirm(results[1])
+            npyscreen.notify_confirm(str(results[1]))
 
 class QB_TableList02(npyscreen.MultiLineAction):
 
