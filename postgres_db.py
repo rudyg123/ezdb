@@ -307,23 +307,5 @@ class Postgres_Database(object):
             self.conn.rollback()
             return "error", err
 
-    '''
-    def get_collation(self, dbname):
 
-        self.dbname = dbname
-        sql_string = "SELECT '" + str(self.dbname) + "', datcollate FROM pg_database;"
-
-        try:
-            self.cur.execute(sql_string)
-        except psycopg2.DatabaseError, err:
-            return "The following problem occurred during collation retrieval:\n" + str(err)
-
-        collate_data = self.cur.fetchall()
-        collatelist = []
-
-        for row in collate_data:
-            collatelist.append(row[0])
-
-        return collatelist
-    '''
 
