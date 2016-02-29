@@ -513,8 +513,8 @@ class QueryWindow(npyscreen.ActionForm, npyscreen.SplitForm):
         self.deleteBtn = self.add(QueryDeleteBtn, name="DELETE", value="QueryDeleteWindow", rely=3, relx=73)
 
         #label variables for selected table/fields
-        self.lbl_table1_selected, self.lbl_table2_selected, self.lbl_table3_selected, self.lbl_field1_selected, \
-        self.lbl_field2_selected, self.lbl_field3_selected = ("",)*6
+        self.table1_selected, self.table2_selected, self.table3_selected, self.field1_selected, \
+        self.field2_selected, self.field3_selected = (None,)*6
 
         self.nextrely += 1  # Move down
 
@@ -523,27 +523,27 @@ class QueryWindow(npyscreen.ActionForm, npyscreen.SplitForm):
         self.add(QB_TableBox01, name="Tables", values=self.parentApp.tableList, max_width=22, max_height=7,
                  scroll_exit=True)
 
-        self.add(npyscreen.FixedText, w_id="wLabel_table1_selected", value="{}".format(self.lbl_table1_selected),
+        self.label_table1 = self.add(npyscreen.FixedText, w_id="wLabel_table1_selected", value="None",
                  relx=4, max_width=20, color="CURSOR_INVERSE", use_two_lines=False, editable=False)
 
         self.nextrely += 1  # Move down
         self.field_box1 = self.add(QB_FieldBox01, w_id="wField_list1", name="Fields", values=self.parentApp.field_list1,
                                    max_width=22, max_height=7, scroll_exit=True)
 
-        self.add(npyscreen.FixedText, w_id="wLabel_field1_selected", value="{}".format(self.lbl_field1_selected),
+        self.label_field1 = self.add(npyscreen.FixedText, w_id="wLabel_field1_selected", value="None",
                  relx=4, max_width=20, color="CURSOR_INVERSE", use_two_lines=False, editable=False)
 
         self.nextrely += 1  # Move down
         self.tbl1_criteria1 = self.add(npyscreen.TitleText, w_id="wTbl1_criteria1", name="Criteria:", max_width=28,
                                        use_two_lines=False, begin_entry_at=10)
 
-        self.tbl1_condition1 = self.add(npyscreen.SelectOne, max_height=2, value=[0], values=["AND", "OR"],
+        self.condition1 = self.add(npyscreen.SelectOne, max_height=2, value=[0], values=["AND", "OR"],
                                         scroll_exit=True, max_width=10)
 
         self.tbl1_criteria2 = self.add(npyscreen.TitleText, w_id="wTbl1_Criteria2", name="Criteria:", max_width=28,
                                        use_two_lines=False, begin_entry_at=10)
 
-        self.tbl1_condition2 = self.add(npyscreen.SelectOne, max_height=2, value=[0], values=["AND", "OR"],
+        self.condition2 = self.add(npyscreen.SelectOne, max_height=2, value=[0], values=["AND", "OR"],
                                         scroll_exit=True, max_width=10)
 
         self.tbl1_criteria3 = self.add(npyscreen.TitleText, w_id="wTbl1_Criteria3", name="Criteria:", max_width=28,
@@ -559,28 +559,26 @@ class QueryWindow(npyscreen.ActionForm, npyscreen.SplitForm):
         self.add(QB_TableBox02, name="Tables", values=self.parentApp.tableList, relx=30, max_width=22, max_height=7,
                  scroll_exit=True)
 
-        self.add(npyscreen.FixedText, w_id="wLabel_table2_selected", value="{}".format(self.lbl_table2_selected),
+        self.label_table2 = self.add(npyscreen.FixedText, w_id="wLabel_table2_selected", value="None",
                  relx=31, max_width=20, color="CURSOR_INVERSE", use_two_lines=False, editable=False)
 
         self.nextrely += 1  # Move down
         self.field_box2 = self.add(QB_FieldBox02, w_id="wField_list2", name="Fields", values=self.parentApp.field_list2,
                                    relx=30, max_width=22, max_height=7, scroll_exit=True)
 
-        self.add(npyscreen.FixedText, w_id="wLabel_field2_selected", value="{}".format(self.lbl_field2_selected),
+        self.label_field2 = self.add(npyscreen.FixedText, w_id="wLabel_field2_selected", value="None",
                  relx=31, max_width=20, color="CURSOR_INVERSE", use_two_lines=False, editable=False)
 
         self.nextrely += 1  # Move down
         self.tbl2_criteria1 = self.add(npyscreen.TitleText, w_id="wCriteria1", relx=30, name="Criteria:", max_width=28,
                                        use_two_lines=False, begin_entry_at=10)
 
-        self.tbl2_condition1 = self.add(npyscreen.SelectOne, max_height=2, relx=30, value=[0], values=["AND", "OR"],
-                                        scroll_exit=True, max_width=10)
+        self.nextrely += 2  # Move down
 
         self.tbl2_criteria2 = self.add(npyscreen.TitleText, w_id="wCriteria2", relx=30, name="Criteria:", max_width=28,
                                        use_two_lines=False, begin_entry_at=10)
 
-        self.tbl2_condition2 = self.add(npyscreen.SelectOne, max_height=2, relx=30, value=[0], values=["AND", "OR"],
-                                        scroll_exit=True, max_width=10)
+        self.nextrely += 2  # Move down
 
         self.tbl2_criteria3 = self.add(npyscreen.TitleText, w_id="wCriteria3", relx=30, name="Criteria:", max_width=28,
                                        use_two_lines=False, begin_entry_at=10)
@@ -595,28 +593,26 @@ class QueryWindow(npyscreen.ActionForm, npyscreen.SplitForm):
         self.add(QB_TableBox03, name="Tables", values=self.parentApp.tableList, relx=57, max_width=22, max_height=7,
                  scroll_exit=True)
 
-        self.add(npyscreen.FixedText, w_id="wLabel_table3_selected", value="{}".format(self.lbl_table3_selected),
+        self.label_table3 = self.add(npyscreen.FixedText, w_id="wLabel_table3_selected", value="None",
                  relx=58, max_width=20, color="CURSOR_INVERSE", use_two_lines=False, editable=False)
 
         self.nextrely += 1  # Move down
         self.field_box3 = self.add(QB_FieldBox03, w_id="wField_list1", name="Fields", values=self.parentApp.field_list1,
                                    relx=57, max_width=22, max_height=7, scroll_exit=True)
 
-        self.add(npyscreen.FixedText, w_id="wLabel_field3_selected", value="{}".format(self.lbl_field3_selected),
+        self.label_field3 = self.add(npyscreen.FixedText, w_id="wLabel_field3_selected", value="None",
                  relx=58, max_width=20, color="CURSOR_INVERSE", use_two_lines=False, editable=False)
 
         self.nextrely += 1  # Move down
         self.tbl3_criteria1 = self.add(npyscreen.TitleText, w_id="wCriteria1", relx=57, name="Criteria:", max_width=28,
                                        use_two_lines=False, begin_entry_at=10)
 
-        self.tbl3_condition1 = self.add(npyscreen.SelectOne, max_height=2, relx=57, value=[0], values=["AND", "OR"],
-                                        scroll_exit=True, max_width=10)
+        self.nextrely += 2  # Move down
 
         self.tbl3_criteria2 = self.add(npyscreen.TitleText, w_id="wCriteria2", relx=57, name="Criteria:", max_width=28,
                                        use_two_lines=False, begin_entry_at=10)
 
-        self.tbl3_condition2 = self.add(npyscreen.SelectOne, max_height=2, relx=57, value=[0], values=["AND", "OR"],
-                                        scroll_exit=True, max_width=10)
+        self.nextrely += 2  # Move down
 
         self.tbl3_criteria3 = self.add(npyscreen.TitleText, w_id="wCriteria3", relx=57, name="Criteria:", max_width=28,
                                        use_two_lines=False, begin_entry_at=10)
@@ -944,14 +940,17 @@ class QB_TableList01(npyscreen.MultiLineAction):
 
     def actionHighlighted(self, act_on_this, key_press):
 
-        self.parent.get_widget("wLabel_table1_selected").value = "=> {}".format(act_on_this)
-        self.parent.get_widget("wLabel_table1_selected").display()
+        self.parent.label_table1.value = act_on_this
+        self.parent.label_table1.display()
+
+        #npyscreen.notify_confirm("value of table1_selected:" + str(self.parent.table1_selected))
 
         field_list = []
 
         #run query
         results = self.parent.parentApp.dbms.get_table_fields(act_on_this)
         if results[0] == "success":
+            field_list.append('[ALL]')
             #npyscreen.notify_confirm("the results returned are :" + str(results[1]))
             for field in results[1]:
                 field_list.append(field[0])
@@ -967,20 +966,21 @@ class QB_TableList02(npyscreen.MultiLineAction):
 
     def actionHighlighted(self, act_on_this, key_press):
 
-        self.parent.get_widget("wLabel_table2_selected").value = "=> {}".format(act_on_this)
-        self.parent.get_widget("wLabel_table2_selected").display()
+        self.parent.label_table2.value = act_on_this
+        self.parent.label_table2.display()
 
         field_list = []
 
         #run query
         results = self.parent.parentApp.dbms.get_table_fields(act_on_this)
         if results[0] == "success":
+            field_list.append('[ALL]')
             #npyscreen.notify_confirm("the results returned are :" + str(results[1]))
             for field in results[1]:
                 field_list.append(field[0])
             self.parent.field_box2.values = field_list
             self.parent.field_box2.display()
-            self.parent.parentApp.table1 = act_on_this
+            self.parent.parentApp.table2 = act_on_this
 
         else:
             npyscreen.notify_confirm(results[1])
@@ -990,20 +990,21 @@ class QB_TableList03(npyscreen.MultiLineAction):
 
     def actionHighlighted(self, act_on_this, key_press):
 
-        self.parent.get_widget("wLabel_table3_selected").value = "=> {}".format(act_on_this)
-        self.parent.get_widget("wLabel_table3_selected").display()
+        self.parent.label_table3.value = act_on_this
+        self.parent.label_table3.display()
 
         field_list = []
 
         #run query
         results = self.parent.parentApp.dbms.get_table_fields(act_on_this)
         if results[0] == "success":
+            field_list.append('[ALL]')
             #npyscreen.notify_confirm("the results returned are :" + str(results[1]))
             for field in results[1]:
                 field_list.append(field[0])
             self.parent.field_box3.values = field_list
             self.parent.field_box3.display()
-            self.parent.parentApp.table1 = act_on_this
+            self.parent.parentApp.table3 = act_on_this
 
         else:
             npyscreen.notify_confirm(results[1])
@@ -1024,8 +1025,9 @@ class QB_TableBox03(npyscreen.BoxTitle):
 class QB_FieldList01(npyscreen.MultiLineAction):
 
     def actionHighlighted(self, act_on_this, key_press):
-        self.parent.get_widget("wLabel_field1_selected").value = "=> {}".format(act_on_this)
-        self.parent.get_widget("wLabel_field1_selected").display()
+
+        self.parent.label_field1.value = act_on_this
+        self.parent.label_field1.display()
 
         self.parent.parentApp.field1 = act_on_this
 
@@ -1033,8 +1035,9 @@ class QB_FieldList01(npyscreen.MultiLineAction):
 class QB_FieldList02(npyscreen.MultiLineAction):
 
     def actionHighlighted(self, act_on_this, key_press):
-        self.parent.get_widget("wLabel_field2_selected").value = "=> {}".format(act_on_this)
-        self.parent.get_widget("wLabel_field2_selected").display()
+
+        self.parent.label_field2.value = act_on_this
+        self.parent.label_field2.display()
 
         self.parent.parentApp.field2 = act_on_this
 
@@ -1042,8 +1045,9 @@ class QB_FieldList02(npyscreen.MultiLineAction):
 class QB_FieldList03(npyscreen.MultiLineAction):
 
     def actionHighlighted(self, act_on_this, key_press):
-        self.parent.get_widget("wLabel_field3_selected").value = "=> {}".format(act_on_this)
-        self.parent.get_widget("wLabel_field3_selected").display()
+
+        self.parent.label_field3.value = act_on_this
+        self.parent.label_field3.display()
 
         self.parent.parentApp.field3 = act_on_this
 
@@ -1486,11 +1490,199 @@ class DeleteTableButton(npyscreen.ButtonPress):
 
 
 class QB_SQL_Build_Button(npyscreen.ButtonPress):
-    sql_command, results = (None,)*2
 
     def whenPressed(self):
-        pass
+        '''
+        self.parent.table1
+        self.parent.table2
+        self.parent.table3
+        self.parent.field1
+        self.parent.field2
+        self.parent.field3
 
+        self.parent.tbl1_criteria1
+        self.parent.tbl1_criteria2
+        self.parent.tbl1_criteria3
+
+        self.parent.tbl2_criteria1
+        self.parent.tbl2_criteria2
+        self.parent.tbl2_criteria3
+
+        self.parent.tbl3_criteria1
+        self.parent.tbl3_criteria2
+        self.parent.tbl3_criteria3
+
+        self.condition1
+        self.condition2
+        '''
+
+        #npyscreen.notify_confirm("The value of unselected table1 value is " + self.parent.label_table1)
+
+        self.sql_string = "SELECT "
+        self.table_string = ""
+        self.field_string = ""
+
+        #check to make sure at least one table selected
+        if self.parent.label_table1.value == "None" and self.parent.label_table2.value == "None" \
+                and self.parent.label_table3.value == "None":
+            npyscreen.notify_confirm("You must select at least one table")
+            return
+
+        #check to make sure a selected table has field selected
+        if self.parent.label_table1.value != "None" and self.parent.label_field1.value == "None":
+            npyscreen.notify_confirm("Select a field for the {} table".format(self.parent.parentApp.table1))
+            return
+
+        if self.parent.label_table2.value != "None" and self.parent.label_field2.value == "None":
+            npyscreen.notify_confirm("Select a field for the {} table".format(self.parent.parentApp.table2))
+            return
+
+        if self.parent.label_table3.value != "None" and self.parent.label_field3.value == "None":
+            npyscreen.notify_confirm("Select a field for the {} table".format(self.parent.parentApp.table3))
+            return
+
+        #build field_string
+        if self.parent.label_table1.value != "None":
+            self.field_string += self.parent.label_table1.value + "." +self.parent.label_field1.value + ", "
+
+        if self.parent.label_table2.value != "None":
+            self.field_string += self.parent.label_table2.value + "." +self.parent.label_field2.value + ", "
+
+        if self.parent.label_table3.value != "None":
+            self.field_string += self.parent.label_table3.value + "." +self.parent.label_field3.value + ", "
+
+        self.field_string = self.field_string[:-2] #strip last comma from string
+
+        npyscreen.notify_confirm("Field String = " + self.field_string)
+
+        '''
+        self.field_name = self.parent.get_widget("wField_name").value
+        self.field_type = self.parent.get_widget("wField_type").get_selected_objects()[0]
+        self.field_type_val = ""
+        self.attribute = ""
+        self.auto_increment = ""
+
+        if self.parent.get_widget("wField_length_or_val").value:
+            self.field_type_val += "("
+            self.field_type_val += str(self.parent.get_widget("wField_length_or_val").value)
+            self.field_type_val += ")"
+            self.field_string += (self.field_name + " " + self.field_type + self.field_type_val)
+
+        elif self.parent.parentApp.dbtype == 1 and self.field_type == "VARCHAR":
+            npyscreen.notify_confirm("You must specify a length value for the VARCHAR data type")
+            return
+
+        else:
+            self.field_string += (self.field_name + " " + self.field_type)
+
+        if self.parent.parentApp.dbtype == 1:
+
+            if self.parent.get_widget("wAttribute").get_selected_objects()[0] is not None:
+
+                self.attribute = str(self.parent.get_widget("wAttribute").get_selected_objects()[0])
+
+                if self.attribute == "binary" and (self.field_type != "tinytext" or "text" or "mediumtext" or "longtext"):
+
+                    npyscreen.notify_confirm("The 'binary' attribute can only be used with one of the following data"
+                                             " types:\ntinytext, text, mediumtext or longtext")
+                    return
+
+                elif (self.attribute == "unsigned" or self.attribute == "unsigned zerofill") \
+                    and self.field_type not in ("TINYINT", "SMALLINT", "INT", "BIGINT", "FLOAT", "DOUBLE", "REAL",
+                                                "DECIMAL", "NUMERIC"):
+
+                    npyscreen.notify_confirm("The 'unsigned' and 'unsigned zerofill' attribute can only be used with"
+                                             " one of the following data types:\n"
+                                             "TINYINT, SMALLINT, INT, BIGINT, FLOAT, DOUBLE, REAL, DECIMAL or NUMERIC")
+                    return
+
+                elif self.attribute == "on update current_timestamp" and self.field_type != "TIMESTAMP":
+
+                    npyscreen.notify_confirm("The 'on update current_timestamp' attribute can only be used with"
+                                             " the TIMESTAMP data type")
+                    return
+
+                else:
+                    self.field_string += (" " + self.attribute)
+
+        if self.parent.get_widget("wCollation").get_selected_objects()[0] is not None:
+
+            if self.parent.parentApp.dbtype == 0:
+
+                if self.field_type not in ("CHAR", "VARCHAR", "TEXT"):
+                    npyscreen.notify_confirm("Collation can only be used with CHAR, VARCHAR and TEXT data types")
+                    return
+
+                else:
+                    #if postgreSQ, collation name needs double quotesL
+                    self.collation = "COLLATE \"" + str(self.parent.get_widget("wCollation").get_selected_objects()[0])\
+                                     + "\""
+
+            else:
+
+                if self.field_type not in ("CHAR", "VARCHAR", "TINYTEXT", "TEXT", "MEDIUMTEXT", "LONGTEXT"):
+                    npyscreen.notify_confirm("Collation can only be used with CHAR, VARCHAR, TINYTEXT, TEXT,"
+                                             " MEDIUMTEXT and LONGTEXT data types")
+                    return
+
+                else:
+                    #if MySQL
+                    self.collation = "COLLATE " + str(self.parent.get_widget("wCollation").get_selected_objects()[0])
+
+            self.field_string += (" " + self.collation)
+
+        if self.parent.get_widget("wConstraint").get_selected_objects()[0] is not None:
+
+            self.constraint = self.parent.get_widget("wConstraint").get_selected_objects()[0]
+
+        if self.parent.get_widget("wNot_null").value[0] == 1:
+            self.not_null = "NOT NULL"
+
+        elif self.parent.get_widget("wNot_null").value[0] == 0 and self.constraint != "PRIMARY KEY":
+            self.not_null = "NULL"
+
+        else:
+            npyscreen.notify_confirm("A Primary Key cannot be null. Select the 'Required' option.")
+            return
+
+        self.field_string += (" " + self.not_null)
+
+        if self.parent.get_widget("wDefault").value:
+            self.default = "DEFAULT '" + str(self.parent.get_widget("wDefault").value) + "'"
+            self.field_string += (" " + self.default)
+
+        if self.parent.parentApp.dbtype == 1:
+
+            if self.parent.get_widget("wAuto_increment").value[0] == 1 and self.field_type in ("TINYINT", "SMALLINT",
+                                                    "INT", "BIGINT", "FLOAT", "DOUBLE", "REAL", "DECIMAL", "NUMERIC"):
+
+                self.auto_increment = "AUTO_INCREMENT"
+                self.field_string += (" " + self.auto_increment)
+
+            elif self.parent.get_widget("wAuto_increment").value[0] == 1 and self.field_type not in ("TINYINT", "SMALLINT",
+                                                    "INT", "BIGINT", "FLOAT", "DOUBLE", "REAL", "DECIMAL", "NUMERIC"):
+
+                npyscreen.notify_confirm("Auto increment can only be used on a numeric data type")
+                return
+
+            self.parent.parentApp.engine = self.parent.get_widget("wStorage_engine").get_selected_objects()[0]
+
+        if self.constraint:
+            self.field_string += (" " + self.constraint)
+
+        add_confirm = npyscreen.notify_yes_no("Add the following field?\n" + self.field_string, editw=2)
+        if add_confirm:
+            self.parent.parentApp.field_string_array.append(self.field_string + ", ")
+
+            if self.parent.parentApp.dbtype == 0:
+                self.parent.parentApp.switchForm("TableCreatePostgreSQLForm")
+
+            else:
+                self.parent.parentApp.switchForm("TableCreateMySQLForm")
+
+        else:
+            return
+        '''
 
 class QB_SQL_Send_Button(npyscreen.ButtonPress):
     sql_command, results = (None,)*2
