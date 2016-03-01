@@ -622,7 +622,7 @@ class QueryWindow(npyscreen.ActionForm, npyscreen.SplitForm):
                                   values=["NO SORT", "ASC", "DESC"], scroll_exit=True)
 
         self.nextrely = 5
-        self.add(Boxed_SQL_Query, name="SQL Query", w_id="wSQL_query", relx=84, max_height=22, max_width=33,
+        self.query_box = self.add(Boxed_SQL_Query, name="SQL Query", w_id="wSQL_query", relx=84, max_height=22, max_width=33,
                  editable=True, scroll_exit=True)
 
         self.nextrely += 1
@@ -1492,10 +1492,6 @@ class DeleteTableButton(npyscreen.ButtonPress):
 class QB_SQL_Build_Button(npyscreen.ButtonPress):
 
     def whenPressed(self):
-        '''
-        self.condition1
-        self.condition2
-        '''
 
         self.sql_string = "SELECT "
         self.table_string = ""
@@ -1528,14 +1524,32 @@ class QB_SQL_Build_Button(npyscreen.ButtonPress):
 
         '''build table and field_strings'''
         if self.parent.label_table1.value != "None":
+            if self.parent.label_field1.value == "[ALL]":
+                self.parent.label_field1.value = "*"
+
             self.field_string += self.parent.label_table1.value + "." + self.parent.label_field1.value + ", "
-            self.table_string += self.parent.label_table1.value + ", "
+
+            # check for duplicate table name; if found, add later on
+            if self.parent.label_table1.value in [self.parent.label_table2.value, self.parent.label_table3.value]:
+                pass
+            else:
+                self.table_string += self.parent.label_table1.value + ", "
 
         if self.parent.label_table2.value != "None":
+            if self.parent.label_field2.value == "[ALL]":
+                self.parent.label_field2.value = "*"
+
             self.field_string += self.parent.label_table2.value + "." + self.parent.label_field2.value + ", "
-            self.table_string += self.parent.label_table2.value + ", "
+
+            if self.parent.label_table2.value == self.parent.label_table3.value:
+                pass
+            else:
+                self.table_string += self.parent.label_table2.value + ", "
 
         if self.parent.label_table3.value != "None":
+            if self.parent.label_field3.value == "[ALL]":
+                self.parent.label_field3.value = "*"
+
             self.field_string += self.parent.label_table3.value + "." + self.parent.label_field3.value + ", "
             self.table_string += self.parent.label_table3.value + ", "
 
@@ -1703,7 +1717,10 @@ class QB_SQL_Build_Button(npyscreen.ButtonPress):
             self.sql_string += "\nORDER BY " + self.orderby_string
 
 
-        npyscreen.notify_confirm("SQL string = " + self.sql_string)
+        #npyscreen.notify_confirm("SQL string = " + self.sql_string)
+
+        self.parent.query_box.entry_widget.value = self.sql_string
+        self.parent.query_box.display()
 
 
 class QB_SQL_Send_Button(npyscreen.ButtonPress):
