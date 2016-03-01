@@ -1656,16 +1656,22 @@ class QB_SQL_Build_Button(npyscreen.ButtonPress):
             pass
 
         else:
+            # checks if table val and sor val is not 'No Sort' and the field val isn't '*'
+            if self.parent.label_table1.value != "None" and self.parent.tbl1_sort.get_selected_objects()[0] \
+                    != "NO SORT" and self.parent.label_field1.value != "*":
 
-            if self.parent.label_table1.value != "None" and self.parent.tbl1_sort.get_selected_objects()[0] != "NO SORT":
                 self.orderby_string += self.parent.label_table1.value + "." + self.parent.label_field1.value \
                                        + " {}, ".format(self.parent.tbl1_sort.get_selected_objects()[0])
 
-            if self.parent.label_table2.value != "None" and self.parent.tbl2_sort.get_selected_objects()[0] != "NO SORT":
+            if self.parent.label_table2.value != "None" and self.parent.tbl2_sort.get_selected_objects()[0] \
+                    != "NO SORT" and self.parent.label_field2.value != "*":
+
                 self.orderby_string += self.parent.label_table2.value + "." + self.parent.label_field2.value \
                                        + " {}, ".format(self.parent.tbl2_sort.get_selected_objects()[0])
 
-            if self.parent.label_table3.value != "None" and self.parent.tbl3_sort.get_selected_objects()[0] != "NO SORT":
+            if self.parent.label_table3.value != "None" and self.parent.tbl3_sort.get_selected_objects()[0] \
+                    != "NO SORT" and self.parent.label_field3.value != "*":
+
                 self.orderby_string += self.parent.label_table3.value + "." + self.parent.label_field3.value \
                                        + " {}, ".format(self.parent.tbl3_sort.get_selected_objects()[0])
 
