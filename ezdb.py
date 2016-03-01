@@ -528,7 +528,7 @@ class QueryWindow(npyscreen.ActionForm, npyscreen.SplitForm):
 
         self.nextrely += 1  # Move down
         self.field_box1 = self.add(QB_FieldBox01, w_id="wField_list1", name="Fields", values=self.parentApp.field_list1,
-                                   max_width=22, max_height=7, scroll_exit=True)
+                                   max_width=22, max_height=6, scroll_exit=True)
 
         self.label_field1 = self.add(npyscreen.FixedText, w_id="wLabel_field1_selected", value="None",
                  relx=4, max_width=20, color="CURSOR_INVERSE", use_two_lines=False, editable=False)
@@ -550,8 +550,8 @@ class QueryWindow(npyscreen.ActionForm, npyscreen.SplitForm):
                                        use_two_lines=False, begin_entry_at=10)
 
         self.nextrely += 1  # Move down
-        self.tbl1_sort = self.add(npyscreen.SelectOne, max_height=2, value=[0], max_width=10, values=["ASC", "DES"],
-                                  scroll_exit=True)
+        self.tbl1_sort = self.add(npyscreen.SelectOne, max_height=3, value=[0], max_width=14,
+                                  values=["NO SORT", "ASC", "DESC"], scroll_exit=True)
 
         ''' TABLE 2 COLUMN '''
         self.nextrely = 5
@@ -564,7 +564,7 @@ class QueryWindow(npyscreen.ActionForm, npyscreen.SplitForm):
 
         self.nextrely += 1  # Move down
         self.field_box2 = self.add(QB_FieldBox02, w_id="wField_list2", name="Fields", values=self.parentApp.field_list2,
-                                   relx=30, max_width=22, max_height=7, scroll_exit=True)
+                                   relx=30, max_width=22, max_height=6, scroll_exit=True)
 
         self.label_field2 = self.add(npyscreen.FixedText, w_id="wLabel_field2_selected", value="None",
                  relx=31, max_width=20, color="CURSOR_INVERSE", use_two_lines=False, editable=False)
@@ -584,8 +584,8 @@ class QueryWindow(npyscreen.ActionForm, npyscreen.SplitForm):
                                        use_two_lines=False, begin_entry_at=10)
 
         self.nextrely += 1  # Move down
-        self.tbl2_sort = self.add(npyscreen.SelectOne, max_height=2, relx=30, value=[0], max_width=10,
-                                  values=["ASC", "DES"], scroll_exit=True)
+        self.tbl2_sort = self.add(npyscreen.SelectOne, max_height=3, relx=30, value=[0], max_width=14,
+                                  values=["NO SORT", "ASC", "DESC"], scroll_exit=True)
 
         ''' TABLE 3 COLUMN '''
         self.nextrely = 5
@@ -598,7 +598,7 @@ class QueryWindow(npyscreen.ActionForm, npyscreen.SplitForm):
 
         self.nextrely += 1  # Move down
         self.field_box3 = self.add(QB_FieldBox03, w_id="wField_list1", name="Fields", values=self.parentApp.field_list1,
-                                   relx=57, max_width=22, max_height=7, scroll_exit=True)
+                                   relx=57, max_width=22, max_height=6, scroll_exit=True)
 
         self.label_field3 = self.add(npyscreen.FixedText, w_id="wLabel_field3_selected", value="None",
                  relx=58, max_width=20, color="CURSOR_INVERSE", use_two_lines=False, editable=False)
@@ -618,8 +618,8 @@ class QueryWindow(npyscreen.ActionForm, npyscreen.SplitForm):
                                        use_two_lines=False, begin_entry_at=10)
 
         self.nextrely += 1  # Move down
-        self.tbl3_sort = self.add(npyscreen.SelectOne, max_height=2, relx=57, value=[0], max_width=10,
-                                  values=["ASC", "DES"], scroll_exit=True)
+        self.tbl3_sort = self.add(npyscreen.SelectOne, max_height=3, relx=57, value=[0], max_width=14,
+                                  values=["NO SORT", "ASC", "DESC"], scroll_exit=True)
 
         self.nextrely = 5
         self.add(Boxed_SQL_Query, name="SQL Query", w_id="wSQL_query", relx=84, max_height=22, max_width=33,
@@ -1521,6 +1521,12 @@ class QB_SQL_Build_Button(npyscreen.ButtonPress):
         self.sql_string = "SELECT "
         self.table_string = ""
         self.field_string = ""
+        self.criteria1_string = ""
+        self.criteria2_string = ""
+        self.criteria3_string = ""
+        self.orderby_string = ""
+
+        '''table and paired field checks'''
 
         #check to make sure at least one table selected
         if self.parent.label_table1.value == "None" and self.parent.label_table2.value == "None" \
@@ -1541,19 +1547,145 @@ class QB_SQL_Build_Button(npyscreen.ButtonPress):
             npyscreen.notify_confirm("Select a field for the {} table".format(self.parent.parentApp.table3))
             return
 
-        #build field_string
+        '''build table and field_strings'''
         if self.parent.label_table1.value != "None":
             self.field_string += self.parent.label_table1.value + "." +self.parent.label_field1.value + ", "
+            self.table_string += self.parent.label_table1.value + ", "
 
         if self.parent.label_table2.value != "None":
             self.field_string += self.parent.label_table2.value + "." +self.parent.label_field2.value + ", "
+            self.table_string += self.parent.label_table2.value + ", "
 
         if self.parent.label_table3.value != "None":
             self.field_string += self.parent.label_table3.value + "." +self.parent.label_field3.value + ", "
+            self.table_string += self.parent.label_table3.value + ", "
 
         self.field_string = self.field_string[:-2] #strip last comma from string
+        self.table_string = self.table_string[:-2] #strip last comma from string
 
-        npyscreen.notify_confirm("Field String = " + self.field_string)
+        '''build criteria strings'''
+
+        # build criteria 1 string
+
+        if self.parent.tbl1_criteria1.value == "" and self.parent.tbl2_criteria1.value == "" \
+                and self.parent.tbl3_criteria1.value == "": #check if all criteria1 fields are empty
+            pass
+
+        else:
+
+            self.criteria1_string += "("
+
+            if self.parent.tbl1_criteria1.value != "":
+                self.criteria1_string += "(" + self.parent.label_table1.value + "." + self.parent.label_field1.value \
+                                         + " " + self.parent.tbl1_criteria1.value + ")"
+
+                if self.parent.tbl2_criteria1.value != "" or self.parent.tbl3_criteria1.value != "":
+                    self.criteria1_string += " AND " #adds 'AND' operator if at least one other criteria1 value exists
+
+            if self.parent.tbl2_criteria1.value != "":
+                self.criteria1_string += "(" + self.parent.label_table2.value + "." + self.parent.label_field2.value \
+                                         + " " + self.parent.tbl2_criteria1.value + ")"
+
+                if self.parent.tbl3_criteria1.value != "":
+                    self.criteria1_string += " AND " #adds 'AND' operator if table 3 criteria1 value exists
+
+            if self.parent.tbl3_criteria1.value != "":
+                self.criteria1_string += "(" + self.parent.label_table3.value + "." + self.parent.label_field3.value \
+                                         + " " + self.parent.tbl3_criteria1.value + ")"
+
+            self.criteria1_string += ")"
+
+        # build criteria 2 string
+
+        if self.parent.tbl1_criteria2.value == "" and self.parent.tbl2_criteria2.value == "" \
+                and self.parent.tbl3_criteria2.value == "": #check if all criteria1 fields are empty
+            pass
+
+        else:
+
+            self.criteria2_string += "("
+
+            if self.parent.tbl1_criteria2.value != "":
+                self.criteria2_string += "(" + self.parent.label_table1.value + "." + self.parent.label_field1.value \
+                                         + " " + self.parent.tbl1_criteria2.value + ")"
+
+                if self.parent.tbl2_criteria2.value != "" or self.parent.tbl3_criteria2.value != "":
+                    self.criteria2_string += " AND " #adds 'AND' operator if at least one other criteria1 value exists
+
+            if self.parent.tbl2_criteria2.value != "":
+                self.criteria2_string += "(" + self.parent.label_table2.value + "." + self.parent.label_field2.value \
+                                         + " " + self.parent.tbl2_criteria2.value + ")"
+
+                if self.parent.tbl3_criteria2.value != "":
+                    self.criteria2_string += " AND " #adds 'AND' operator if table 3 criteria1 value exists
+
+            if self.parent.tbl3_criteria2.value != "":
+                self.criteria2_string += "(" + self.parent.label_table3.value + "." + self.parent.label_field3.value \
+                                         + " " + self.parent.tbl3_criteria2.value + ")"
+
+            self.criteria2_string += ")"
+
+        # build criteria 3 string
+
+        if self.parent.tbl1_criteria3.value == "" and self.parent.tbl2_criteria3.value == "" \
+                and self.parent.tbl3_criteria3.value == "": #check if all criteria1 fields are empty
+            pass
+
+        else:
+
+            self.criteria3_string += "("
+
+            if self.parent.tbl1_criteria3.value != "":
+                self.criteria3_string += "(" + self.parent.label_table1.value + "." + self.parent.label_field1.value \
+                                         + " " + self.parent.tbl1_criteria3.value + ")"
+
+                if self.parent.tbl2_criteria3.value != "" or self.parent.tbl3_criteria3.value != "":
+                    self.criteria3_string += " AND " #adds 'AND' operator if at least one other criteria1 value exists
+
+            if self.parent.tbl2_criteria3.value != "":
+                self.criteria3_string += "(" + self.parent.label_table2.value + "." + self.parent.label_field2.value \
+                                         + " " + self.parent.tbl2_criteria3.value + ")"
+
+                if self.parent.tbl3_criteria3.value != "":
+                    self.criteria3_string += " AND " #adds 'AND' operator if table 3 criteria1 value exists
+
+            if self.parent.tbl3_criteria3.value != "":
+                self.criteria3_string += "(" + self.parent.label_table3.value + "." + self.parent.label_field3.value \
+                                         + " " + self.parent.tbl3_criteria3.value + ")"
+
+            self.criteria3_string += ")"
+
+        '''build order by string'''
+         #check if no table columns are to be sorted
+        if self.parent.tbl1_sort.get_selected_objects()[0] == "NO SORT" \
+                and self.parent.tbl2_sort.get_selected_objects()[0] == "NO SORT" \
+                and self.parent.tbl3_sort.get_selected_objects()[0] == "NO SORT":
+            pass
+
+        else:
+
+            if self.parent.label_table1.value != "None" and self.parent.tbl1_sort.get_selected_objects()[0] != "NO SORT":
+                self.orderby_string += self.parent.label_table1.value + "." + self.parent.label_field1.value \
+                                       + " {}, ".format(self.parent.tbl1_sort.get_selected_objects()[0])
+
+            if self.parent.label_table2.value != "None" and self.parent.tbl2_sort.get_selected_objects()[0] != "NO SORT":
+                self.orderby_string += self.parent.label_table2.value + "." + self.parent.label_field2.value \
+                                       + " {}, ".format(self.parent.tbl2_sort.get_selected_objects()[0])
+
+            if self.parent.label_table3.value != "None" and self.parent.tbl3_sort.get_selected_objects()[0] != "NO SORT":
+                self.orderby_string += self.parent.label_table3.value + "." + self.parent.label_field3.value \
+                                       + " {}, ".format(self.parent.tbl3_sort.get_selected_objects()[0])
+
+            self.orderby_string = self.orderby_string[:-2]
+
+
+
+        npyscreen.notify_confirm("order by string = " + str(self.orderby_string))
+
+
+
+        #npyscreen.notify_confirm("Field String = " + self.field_string)
+        #npyscreen.notify_confirm("Table String = " + self.table_string)
 
         '''
         self.field_name = self.parent.get_widget("wField_name").value
