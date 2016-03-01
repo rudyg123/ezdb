@@ -1493,30 +1493,9 @@ class QB_SQL_Build_Button(npyscreen.ButtonPress):
 
     def whenPressed(self):
         '''
-        self.parent.table1
-        self.parent.table2
-        self.parent.table3
-        self.parent.field1
-        self.parent.field2
-        self.parent.field3
-
-        self.parent.tbl1_criteria1
-        self.parent.tbl1_criteria2
-        self.parent.tbl1_criteria3
-
-        self.parent.tbl2_criteria1
-        self.parent.tbl2_criteria2
-        self.parent.tbl2_criteria3
-
-        self.parent.tbl3_criteria1
-        self.parent.tbl3_criteria2
-        self.parent.tbl3_criteria3
-
         self.condition1
         self.condition2
         '''
-
-        #npyscreen.notify_confirm("The value of unselected table1 value is " + self.parent.label_table1)
 
         self.sql_string = "SELECT "
         self.table_string = ""
@@ -1528,13 +1507,13 @@ class QB_SQL_Build_Button(npyscreen.ButtonPress):
 
         '''table and paired field checks'''
 
-        #check to make sure at least one table selected
+        # check to make sure at least one table selected
         if self.parent.label_table1.value == "None" and self.parent.label_table2.value == "None" \
                 and self.parent.label_table3.value == "None":
             npyscreen.notify_confirm("You must select at least one table")
             return
 
-        #check to make sure a selected table has field selected
+        # check to make sure a selected table has field selected
         if self.parent.label_table1.value != "None" and self.parent.label_field1.value == "None":
             npyscreen.notify_confirm("Select a field for the {} table".format(self.parent.parentApp.table1))
             return
@@ -1549,26 +1528,26 @@ class QB_SQL_Build_Button(npyscreen.ButtonPress):
 
         '''build table and field_strings'''
         if self.parent.label_table1.value != "None":
-            self.field_string += self.parent.label_table1.value + "." +self.parent.label_field1.value + ", "
+            self.field_string += self.parent.label_table1.value + "." + self.parent.label_field1.value + ", "
             self.table_string += self.parent.label_table1.value + ", "
 
         if self.parent.label_table2.value != "None":
-            self.field_string += self.parent.label_table2.value + "." +self.parent.label_field2.value + ", "
+            self.field_string += self.parent.label_table2.value + "." + self.parent.label_field2.value + ", "
             self.table_string += self.parent.label_table2.value + ", "
 
         if self.parent.label_table3.value != "None":
-            self.field_string += self.parent.label_table3.value + "." +self.parent.label_field3.value + ", "
+            self.field_string += self.parent.label_table3.value + "." + self.parent.label_field3.value + ", "
             self.table_string += self.parent.label_table3.value + ", "
 
-        self.field_string = self.field_string[:-2] #strip last comma from string
-        self.table_string = self.table_string[:-2] #strip last comma from string
+        self.field_string = self.field_string[:-2]  # strip last comma from string
+        self.table_string = self.table_string[:-2]  # strip last comma from string
 
-        '''build criteria strings'''
+        '''build WHERE criteria strings'''
 
         # build criteria 1 string
 
         if self.parent.tbl1_criteria1.value == "" and self.parent.tbl2_criteria1.value == "" \
-                and self.parent.tbl3_criteria1.value == "": #check if all criteria1 fields are empty
+                and self.parent.tbl3_criteria1.value == "":  # check if all criteria1 fields are empty
             pass
 
         else:
@@ -1580,14 +1559,14 @@ class QB_SQL_Build_Button(npyscreen.ButtonPress):
                                          + " " + self.parent.tbl1_criteria1.value + ")"
 
                 if self.parent.tbl2_criteria1.value != "" or self.parent.tbl3_criteria1.value != "":
-                    self.criteria1_string += " AND " #adds 'AND' operator if at least one other criteria1 value exists
+                    self.criteria1_string += " AND "  # adds 'AND' operator if at least one other criteria1 value exists
 
             if self.parent.tbl2_criteria1.value != "":
                 self.criteria1_string += "(" + self.parent.label_table2.value + "." + self.parent.label_field2.value \
                                          + " " + self.parent.tbl2_criteria1.value + ")"
 
                 if self.parent.tbl3_criteria1.value != "":
-                    self.criteria1_string += " AND " #adds 'AND' operator if table 3 criteria1 value exists
+                    self.criteria1_string += " AND "  # adds 'AND' operator if table 3 criteria1 value exists
 
             if self.parent.tbl3_criteria1.value != "":
                 self.criteria1_string += "(" + self.parent.label_table3.value + "." + self.parent.label_field3.value \
@@ -1598,7 +1577,7 @@ class QB_SQL_Build_Button(npyscreen.ButtonPress):
         # build criteria 2 string
 
         if self.parent.tbl1_criteria2.value == "" and self.parent.tbl2_criteria2.value == "" \
-                and self.parent.tbl3_criteria2.value == "": #check if all criteria1 fields are empty
+                and self.parent.tbl3_criteria2.value == "":  # check if all criteria1 fields are empty
             pass
 
         else:
@@ -1610,14 +1589,14 @@ class QB_SQL_Build_Button(npyscreen.ButtonPress):
                                          + " " + self.parent.tbl1_criteria2.value + ")"
 
                 if self.parent.tbl2_criteria2.value != "" or self.parent.tbl3_criteria2.value != "":
-                    self.criteria2_string += " AND " #adds 'AND' operator if at least one other criteria1 value exists
+                    self.criteria2_string += " AND "  # adds 'AND' operator if at least one other criteria1 value exists
 
             if self.parent.tbl2_criteria2.value != "":
                 self.criteria2_string += "(" + self.parent.label_table2.value + "." + self.parent.label_field2.value \
                                          + " " + self.parent.tbl2_criteria2.value + ")"
 
                 if self.parent.tbl3_criteria2.value != "":
-                    self.criteria2_string += " AND " #adds 'AND' operator if table 3 criteria1 value exists
+                    self.criteria2_string += " AND "  # adds 'AND' operator if table 3 criteria1 value exists
 
             if self.parent.tbl3_criteria2.value != "":
                 self.criteria2_string += "(" + self.parent.label_table3.value + "." + self.parent.label_field3.value \
@@ -1628,7 +1607,7 @@ class QB_SQL_Build_Button(npyscreen.ButtonPress):
         # build criteria 3 string
 
         if self.parent.tbl1_criteria3.value == "" and self.parent.tbl2_criteria3.value == "" \
-                and self.parent.tbl3_criteria3.value == "": #check if all criteria1 fields are empty
+                and self.parent.tbl3_criteria3.value == "":  # check if all criteria1 fields are empty
             pass
 
         else:
@@ -1640,14 +1619,14 @@ class QB_SQL_Build_Button(npyscreen.ButtonPress):
                                          + " " + self.parent.tbl1_criteria3.value + ")"
 
                 if self.parent.tbl2_criteria3.value != "" or self.parent.tbl3_criteria3.value != "":
-                    self.criteria3_string += " AND " #adds 'AND' operator if at least one other criteria1 value exists
+                    self.criteria3_string += " AND "  # adds 'AND' operator if at least one other criteria1 value exists
 
             if self.parent.tbl2_criteria3.value != "":
                 self.criteria3_string += "(" + self.parent.label_table2.value + "." + self.parent.label_field2.value \
                                          + " " + self.parent.tbl2_criteria3.value + ")"
 
                 if self.parent.tbl3_criteria3.value != "":
-                    self.criteria3_string += " AND " #adds 'AND' operator if table 3 criteria1 value exists
+                    self.criteria3_string += " AND "  # adds 'AND' operator if table 3 criteria1 value exists
 
             if self.parent.tbl3_criteria3.value != "":
                 self.criteria3_string += "(" + self.parent.label_table3.value + "." + self.parent.label_field3.value \
@@ -1655,8 +1634,8 @@ class QB_SQL_Build_Button(npyscreen.ButtonPress):
 
             self.criteria3_string += ")"
 
-        '''build order by string'''
-         #check if no table columns are to be sorted
+        '''build ORDER BY string'''
+        # check if no table columns are to be sorted
         if self.parent.tbl1_sort.get_selected_objects()[0] == "NO SORT" \
                 and self.parent.tbl2_sort.get_selected_objects()[0] == "NO SORT" \
                 and self.parent.tbl3_sort.get_selected_objects()[0] == "NO SORT":
@@ -1678,143 +1657,54 @@ class QB_SQL_Build_Button(npyscreen.ButtonPress):
 
             self.orderby_string = self.orderby_string[:-2]
 
+        '''build cumulative SQL string'''
 
+        self.sql_string += self.field_string + "\nFROM " + self.table_string
 
-        npyscreen.notify_confirm("order by string = " + str(self.orderby_string))
-
-
-
-        #npyscreen.notify_confirm("Field String = " + self.field_string)
-        #npyscreen.notify_confirm("Table String = " + self.table_string)
-
-        '''
-        self.field_name = self.parent.get_widget("wField_name").value
-        self.field_type = self.parent.get_widget("wField_type").get_selected_objects()[0]
-        self.field_type_val = ""
-        self.attribute = ""
-        self.auto_increment = ""
-
-        if self.parent.get_widget("wField_length_or_val").value:
-            self.field_type_val += "("
-            self.field_type_val += str(self.parent.get_widget("wField_length_or_val").value)
-            self.field_type_val += ")"
-            self.field_string += (self.field_name + " " + self.field_type + self.field_type_val)
-
-        elif self.parent.parentApp.dbtype == 1 and self.field_type == "VARCHAR":
-            npyscreen.notify_confirm("You must specify a length value for the VARCHAR data type")
-            return
+        # check if no criteria fields are specified; if so, add
+        if self.criteria1_string == "" and self.criteria2_string == "" and self.criteria3_string == "":
+            pass
 
         else:
-            self.field_string += (self.field_name + " " + self.field_type)
+            self.sql_string += "\nWHERE "
 
-        if self.parent.parentApp.dbtype == 1:
+            if self.criteria1_string != "":
+                self.sql_string += self.criteria1_string
 
-            if self.parent.get_widget("wAttribute").get_selected_objects()[0] is not None:
+                if self.criteria2_string != "":  # if criteria 2 exists
 
-                self.attribute = str(self.parent.get_widget("wAttribute").get_selected_objects()[0])
+                    # get condition1 value and add it and criteria 2
+                    self.sql_string += "\n" + self.parent.condition1.get_selected_objects()[0] + " " \
+                                       + self.criteria2_string
 
-                if self.attribute == "binary" and (self.field_type != "tinytext" or "text" or "mediumtext" or "longtext"):
+                if self.criteria3_string != "":  # if criteria 3 exists
 
-                    npyscreen.notify_confirm("The 'binary' attribute can only be used with one of the following data"
-                                             " types:\ntinytext, text, mediumtext or longtext")
-                    return
+                    # get condition2 value and add it and criteria 3
+                    self.sql_string += "\n " + self.parent.condition2.get_selected_objects()[0] + " " \
+                                       + self.criteria3_string
 
-                elif (self.attribute == "unsigned" or self.attribute == "unsigned zerofill") \
-                    and self.field_type not in ("TINYINT", "SMALLINT", "INT", "BIGINT", "FLOAT", "DOUBLE", "REAL",
-                                                "DECIMAL", "NUMERIC"):
+            elif self.criteria2_string != "":
+                self.sql_string += self.criteria2_string
 
-                    npyscreen.notify_confirm("The 'unsigned' and 'unsigned zerofill' attribute can only be used with"
-                                             " one of the following data types:\n"
-                                             "TINYINT, SMALLINT, INT, BIGINT, FLOAT, DOUBLE, REAL, DECIMAL or NUMERIC")
-                    return
+                if self.criteria3_string != "":  # if criteria 3 exists
 
-                elif self.attribute == "on update current_timestamp" and self.field_type != "TIMESTAMP":
+                    # get condition2 value and add it and criteria 3
+                    self.sql_string += "\n" + self.parent.condition2.get_selected_objects()[0] + " " \
+                                       + self.criteria3_string
 
-                    npyscreen.notify_confirm("The 'on update current_timestamp' attribute can only be used with"
-                                             " the TIMESTAMP data type")
-                    return
+            elif self.criteria3_string != "":
+                self.sql_string += self.criteria3_string
 
-                else:
-                    self.field_string += (" " + self.attribute)
-
-        if self.parent.get_widget("wCollation").get_selected_objects()[0] is not None:
-
-            if self.parent.parentApp.dbtype == 0:
-
-                if self.field_type not in ("CHAR", "VARCHAR", "TEXT"):
-                    npyscreen.notify_confirm("Collation can only be used with CHAR, VARCHAR and TEXT data types")
-                    return
-
-                else:
-                    #if postgreSQ, collation name needs double quotesL
-                    self.collation = "COLLATE \"" + str(self.parent.get_widget("wCollation").get_selected_objects()[0])\
-                                     + "\""
-
-            else:
-
-                if self.field_type not in ("CHAR", "VARCHAR", "TINYTEXT", "TEXT", "MEDIUMTEXT", "LONGTEXT"):
-                    npyscreen.notify_confirm("Collation can only be used with CHAR, VARCHAR, TINYTEXT, TEXT,"
-                                             " MEDIUMTEXT and LONGTEXT data types")
-                    return
-
-                else:
-                    #if MySQL
-                    self.collation = "COLLATE " + str(self.parent.get_widget("wCollation").get_selected_objects()[0])
-
-            self.field_string += (" " + self.collation)
-
-        if self.parent.get_widget("wConstraint").get_selected_objects()[0] is not None:
-
-            self.constraint = self.parent.get_widget("wConstraint").get_selected_objects()[0]
-
-        if self.parent.get_widget("wNot_null").value[0] == 1:
-            self.not_null = "NOT NULL"
-
-        elif self.parent.get_widget("wNot_null").value[0] == 0 and self.constraint != "PRIMARY KEY":
-            self.not_null = "NULL"
+        # check if order by fields are specified; if so, add
+        if self.orderby_string == "":
+            pass
 
         else:
-            npyscreen.notify_confirm("A Primary Key cannot be null. Select the 'Required' option.")
-            return
+            self.sql_string += "\nORDER BY " + self.orderby_string
 
-        self.field_string += (" " + self.not_null)
 
-        if self.parent.get_widget("wDefault").value:
-            self.default = "DEFAULT '" + str(self.parent.get_widget("wDefault").value) + "'"
-            self.field_string += (" " + self.default)
+        npyscreen.notify_confirm("SQL string = " + self.sql_string)
 
-        if self.parent.parentApp.dbtype == 1:
-
-            if self.parent.get_widget("wAuto_increment").value[0] == 1 and self.field_type in ("TINYINT", "SMALLINT",
-                                                    "INT", "BIGINT", "FLOAT", "DOUBLE", "REAL", "DECIMAL", "NUMERIC"):
-
-                self.auto_increment = "AUTO_INCREMENT"
-                self.field_string += (" " + self.auto_increment)
-
-            elif self.parent.get_widget("wAuto_increment").value[0] == 1 and self.field_type not in ("TINYINT", "SMALLINT",
-                                                    "INT", "BIGINT", "FLOAT", "DOUBLE", "REAL", "DECIMAL", "NUMERIC"):
-
-                npyscreen.notify_confirm("Auto increment can only be used on a numeric data type")
-                return
-
-            self.parent.parentApp.engine = self.parent.get_widget("wStorage_engine").get_selected_objects()[0]
-
-        if self.constraint:
-            self.field_string += (" " + self.constraint)
-
-        add_confirm = npyscreen.notify_yes_no("Add the following field?\n" + self.field_string, editw=2)
-        if add_confirm:
-            self.parent.parentApp.field_string_array.append(self.field_string + ", ")
-
-            if self.parent.parentApp.dbtype == 0:
-                self.parent.parentApp.switchForm("TableCreatePostgreSQLForm")
-
-            else:
-                self.parent.parentApp.switchForm("TableCreateMySQLForm")
-
-        else:
-            return
-        '''
 
 class QB_SQL_Send_Button(npyscreen.ButtonPress):
     sql_command, results = (None,)*2
