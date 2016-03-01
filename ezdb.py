@@ -1889,22 +1889,34 @@ class App(npyscreen.NPSAppManaged):
     def onStart(self):
 
         # Declare all the forms that will be used within the app
-        self.addFormClass("MAIN", Initial, name="Welcome to ezdb", draw_line_at=34, ALLOW_RESIZE=False)
-        self.addFormClass("ConnectDBMS", ConnectDBMS, name="ezdb >> DBMS Connection Page", draw_line_at=34, ALLOW_RESIZE=False)
-        self.addFormClass("DatabaseWindow", DatabaseWindow, name="ezdb >> Database Page", draw_line_at=34, ALLOW_RESIZE=False)
-        self.addFormClass("TablesWindow", TablesWindow, name="ezdb >> Tables Page", draw_line_at=34, ALLOW_RESIZE=False)
-        self.addFormClass("QueryWindow", QueryWindow, name="ezdb >> Query >> SELECT Page", draw_line_at=34, ALLOW_RESIZE=False)
-        self.addFormClass("QueryInsertWindow", QueryInsertWindow, name="ezdb >> Query >> INSERT Page", draw_line_at=34, ALLOW_RESIZE=False)
-        self.addFormClass("QueryUpdateWindow", QueryUpdateWindow, name="ezdb >> Query >> UPDATE Page", draw_line_at=34, ALLOW_RESIZE=False)
-        self.addFormClass("QueryDeleteWindow", QueryDeleteWindow, name="ezdb >> Query >> DELETE Page", draw_line_at=34, ALLOW_RESIZE=False)
-        self.addFormClass("QueryResultsWindow", QueryResultsWindow, name="ezdb >> Query >> Results Page", draw_line_at=34, ALLOW_RESIZE=False)
-        self.addFormClass("RawSQLWindow", RawSQLWindow, name="ezdb >> Raw SQL Page", draw_line_at=34, ALLOW_RESIZE=False)
-        self.addFormClass("ExportWindow", ExportWindow, name="ezdb >> Export Page", draw_line_at=34, ALLOW_RESIZE=False)
-        self.addFormClass("AdminWindow", AdminWindow, name="ezdb >> Admin Page", draw_line_at=34, ALLOW_RESIZE=False)
+        self.addFormClass("MAIN", Initial, name="Welcome to ezdb", draw_line_at=34, minimum_lines=37,
+                          minimum_columns=120, ALLOW_RESIZE=False)
+        self.addFormClass("ConnectDBMS", ConnectDBMS, name="ezdb >> DBMS Connection Page", draw_line_at=34,
+                          minimum_lines=37, minimum_columns=120, ALLOW_RESIZE=False)
+        self.addFormClass("DatabaseWindow", DatabaseWindow, name="ezdb >> Database Page", draw_line_at=34,
+                          minimum_lines=37, minimum_columns=120, ALLOW_RESIZE=False)
+        self.addFormClass("TablesWindow", TablesWindow, name="ezdb >> Tables Page", draw_line_at=34, minimum_lines=37,
+                          minimum_columns=120, ALLOW_RESIZE=False)
+        self.addFormClass("QueryWindow", QueryWindow, name="ezdb >> Query >> SELECT Page", draw_line_at=34,
+                          minimum_lines=37, minimum_columns=120, ALLOW_RESIZE=False)
+        self.addFormClass("QueryInsertWindow", QueryInsertWindow, name="ezdb >> Query >> INSERT Page", draw_line_at=34,
+                          minimum_lines=37, minimum_columns=120, ALLOW_RESIZE=False)
+        self.addFormClass("QueryUpdateWindow", QueryUpdateWindow, name="ezdb >> Query >> UPDATE Page", draw_line_at=34,
+                          minimum_lines=37, minimum_columns=120, ALLOW_RESIZE=False)
+        self.addFormClass("QueryDeleteWindow", QueryDeleteWindow, name="ezdb >> Query >> DELETE Page", draw_line_at=34,
+                          minimum_lines=37, minimum_columns=120, ALLOW_RESIZE=False)
+        self.addFormClass("QueryResultsWindow", QueryResultsWindow, name="ezdb >> Query >> Results Page",
+                          draw_line_at=34, minimum_lines=37, minimum_columns=120, ALLOW_RESIZE=False)
+        self.addFormClass("RawSQLWindow", RawSQLWindow, name="ezdb >> Raw SQL Page", draw_line_at=34, minimum_lines=37,
+                          minimum_columns=120, ALLOW_RESIZE=False)
+        self.addFormClass("ExportWindow", ExportWindow, name="ezdb >> Export Page", draw_line_at=34, minimum_lines=37,
+                          minimum_columns=120, ALLOW_RESIZE=False)
+        self.addFormClass("AdminWindow", AdminWindow, name="ezdb >> Admin Page", draw_line_at=34, minimum_lines=37,
+                          minimum_columns=120, ALLOW_RESIZE=False)
         self.addFormClass("TableCreatePostgreSQLForm", TableCreatePostgreSQLForm, name="ezdb >> Build/Create Table",
-                          draw_line_at=34, ALLOW_RESIZE=False)
+                          draw_line_at=34, minimum_lines=37, minimum_columns=120, ALLOW_RESIZE=False)
         self.addFormClass("TableCreateMySQLForm", TableCreateMySQLForm, name="ezdb >> Build/Create Table",
-                          draw_line_at=34, ALLOW_RESIZE=False)
+                          draw_line_at=34, minimum_lines=37, minimum_columns=120, ALLOW_RESIZE=False)
         # for testing:
         # self.addForm("Nav_Bar", Nav_Bar)
 
