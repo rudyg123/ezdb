@@ -1208,10 +1208,28 @@ class DeleteDBButton(npyscreen.ButtonPress):
 
 '''TABLE BUTTONS'''
 
+
 class ViewTableStructButton(npyscreen.ButtonPress):
-    selected_table, results = (None,)*2
 
     def whenPressed(self):
+
+        # reset page values
+        self.parent.parentApp.page_num = 1
+        self.parent.parentApp.num_pages = 0
+
+        # hides number of pages and page controls as default should results return 0 records
+
+        self.parent.numpages.hidden = True
+        self.parent.numpages.display()
+
+        self.parent.prevpage.hidden = True
+        self.parent.nextpage.hidden = True
+
+        self.parent.prevpage.display()
+        self.parent.nextpage.display()
+
+        # checks if table value is highlighted before browsing, else perform query
+
         if self.parent.get_widget("wTables_box").value is None:
             npyscreen.notify_confirm("Please select a table by highlighting it and enter")
             return
@@ -1223,22 +1241,54 @@ class ViewTableStructButton(npyscreen.ButtonPress):
             npyscreen.notify_confirm(str(self.results[1]))
 
         elif self.results[0] == 'success':
+
             self.parent.parentApp.table_results = self.results[1]
-            if self.results[2]:
-                self.parent.parentApp.col_titles = self.results[2]
-            if self.results[3]:
-                self.parent.parentApp.num_records = self.results[3]
+            self.parent.parentApp.col_titles = self.results[2]
+            self.parent.parentApp.num_records = self.results[3]
 
-            self.parent.gridbox_results.values = self.parent.parentApp.table_results
+            # calculate number of pages (assuming 10 rows per page)
+            self.parent.parentApp.num_pages = int(math.ceil(float(self.parent.parentApp.num_records) / 10))
 
+            # display up to 10 rows
+            self.parent.gridbox_results.values = \
+                self.parent.parentApp.table_results[self.parent.parentApp.row_start-1: self.parent.parentApp.row_end]
+
+            # get column titles
             self.parent.gridbox_results.entry_widget.col_titles = self.parent.parentApp.col_titles
 
+            # return number of records found
             self.parent.numrecords.value = "{} Records Found".format(self.parent.parentApp.num_records)
 
-            self.parent.gridbox_results.display()
-            self.parent.numrecords.display()
-            return
+        # if records found, display page num and num pages information, and page control buttons
+        if self.parent.parentApp.num_records > 0:
 
+            self.parent.numpages.value = \
+                "Page {} of {}".format(self.parent.parentApp.page_num, self.parent.parentApp.num_pages)
+
+            self.parent.numpages.hidden = False
+            self.parent.numpages.display()
+
+            self.parent.prevpage.hidden = False
+            self.parent.nextpage.hidden = False
+
+            self.parent.prevpage.display()
+            self.parent.nextpage.display()
+
+        # no records found, so hide page num and num pages information, and page control buttons
+        else:
+            self.parent.numpages.hidden = True
+            self.parent.numpages.display()
+
+            self.parent.prevpage.hidden = True
+            self.parent.nextpage.hidden = True
+
+            self.parent.prevpage.display()
+            self.parent.nextpage.display()
+
+        # display grid results and number or records
+        self.parent.gridbox_results.display()
+        self.parent.numrecords.display()
+        return
 
 class BrowseTableButton(npyscreen.ButtonPress):
 
@@ -1277,8 +1327,6 @@ class BrowseTableButton(npyscreen.ButtonPress):
                 self.parent.parentApp.table_results = self.results[1]
                 self.parent.parentApp.col_titles = self.results[2]
                 self.parent.parentApp.num_records = self.results[3]
-
-                # npyscreen.notify_confirm("self.results[3] = " + str(self.results[3]))
 
                 # calculate number of pages (assuming 10 rows per page)
                 self.parent.parentApp.num_pages = int(math.ceil(float(self.parent.parentApp.num_records) / 10))
