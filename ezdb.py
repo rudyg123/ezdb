@@ -4,6 +4,7 @@ import npyscreen
 import postgres_db as pdb
 import mysql_db as mdb
 import time
+import math
 
 
 # ActionForm includes "Cancel" in addition to "OK"
@@ -237,9 +238,15 @@ class TablesWindow(npyscreen.ActionForm, npyscreen.SplitForm):
                                         contained_widget_arguments = {"col_titles": self.parentApp.col_titles},
                                         col_margin=1, column_width=20, name="Table Results")
 
-        self.nextrely += 1  # Move down
         self.numrecords = self.add(npyscreen.FixedText, value="{} Records Found".format(self.parentApp.num_records),
-                                   editable=False)
+                                   relx=4, rely=31, max_width=20, editable=False)
+
+        self.numpages = self.add(npyscreen.FixedText,
+                                 value="Page {} of {}".format(self.parentApp.page_num, self.parentApp.num_pages),
+                                 relx=51, rely=31, editable=False, max_width=17, hidden=True)
+
+        self.prevpage = self.add(PrevPage_Button, name="Prev Page", rely=31, relx=90, max_width=9, hidden=True)
+        self.nextpage = self.add(NextPage_Button, name="Next Page", rely=31, relx=103, max_width=9, hidden=True)
 
         # Help menu guidance
         self.nextrely = 34
@@ -264,7 +271,7 @@ class TablesWindow(npyscreen.ActionForm, npyscreen.SplitForm):
         self.parentApp.tableList = self.parentApp.dbms.list_database_tables()
         self.get_widget("wTables_box").display()
 
-        #clear grid widget results and num records on page load
+        # clear grid widget results and num records on page load
         self.parentApp.col_titles = []
         self.gridbox_results.entry_widget.col_titles = self.parentApp.col_titles
         self.parentApp.table_results = []
@@ -845,6 +852,9 @@ class QueryResultsWindow(npyscreen.ActionFormMinimal, npyscreen.SplitForm):
         self.numrecords.display()
 
     def on_ok(self):
+        self.parentApp.sql_results = None
+        self.parentApp.num_records = 0
+
         self.parentApp.switchForm("QueryWindow")
 
 
@@ -1136,6 +1146,7 @@ class AdminWindow(npyscreen.ActionForm, npyscreen.SplitForm):
                    "user accounts and modify user read/write access from this page."
         npyscreen.notify_confirm(help_msg, title='Help Menu', editw=1)
 
+'''DATABASE BUTTONS'''
 
 class OpenDBButton(npyscreen.ButtonPress):
     def whenPressed(self):
@@ -1195,6 +1206,7 @@ class DeleteDBButton(npyscreen.ButtonPress):
             else:
                 npyscreen.blank_terminal() # clears the notification and just goes back to the original form
 
+'''TABLE BUTTONS'''
 
 class ViewTableStructButton(npyscreen.ButtonPress):
     selected_table, results = (None,)*2
@@ -1229,32 +1241,85 @@ class ViewTableStructButton(npyscreen.ButtonPress):
 
 
 class BrowseTableButton(npyscreen.ButtonPress):
-    selected_table, results = (None,)*2
 
     def whenPressed(self):
+
+        # reset page values
+        self.parent.parentApp.page_num = 1
+        self.parent.parentApp.num_pages = 0
+
+        # hides number of pages and page controls as default should results return 0 records
+
+        self.parent.numpages.hidden = True
+        self.parent.numpages.display()
+
+        self.parent.prevpage.hidden = True
+        self.parent.nextpage.hidden = True
+
+        self.parent.prevpage.display()
+        self.parent.nextpage.display()
+
+        # checks if table value is highlighted before browsing, else perform query
+
         if self.parent.get_widget("wTables_box").value is None:
             npyscreen.notify_confirm("Please select a table by highlighting it and enter")
             return
+
         else:
             self.selected_table = self.parent.parentApp.tableList[self.parent.get_widget("wTables_box").value]
             self.results = self.parent.parentApp.dbms.browse_table(self.selected_table)
 
-        if self.results[0] == 'error':
-            npyscreen.notify_confirm(str(self.results[1]))
+            if self.results[0] == 'error':
+                npyscreen.notify_confirm(str(self.results[1]))
 
-        elif self.results[0] == 'success':
-            self.parent.parentApp.table_results = self.results[1]
-            if self.results[2]:
+            elif self.results[0] == 'success':
+
+                self.parent.parentApp.table_results = self.results[1]
                 self.parent.parentApp.col_titles = self.results[2]
-            if self.results[3]:
                 self.parent.parentApp.num_records = self.results[3]
 
-            self.parent.gridbox_results.values = self.parent.parentApp.table_results
+                # npyscreen.notify_confirm("self.results[3] = " + str(self.results[3]))
 
-            self.parent.gridbox_results.entry_widget.col_titles = self.parent.parentApp.col_titles
+                # calculate number of pages (assuming 10 rows per page)
+                self.parent.parentApp.num_pages = int(math.ceil(float(self.parent.parentApp.num_records) / 10))
 
-            self.parent.numrecords.value = "{} Records Found".format(self.parent.parentApp.num_records)
+                # display up to 10 rows
+                self.parent.gridbox_results.values = \
+                    self.parent.parentApp.table_results[self.parent.parentApp.row_start-1: self.parent.parentApp.row_end]
 
+                # get column titles
+                self.parent.gridbox_results.entry_widget.col_titles = self.parent.parentApp.col_titles
+
+                # return number of records found
+                self.parent.numrecords.value = "{} Records Found".format(self.parent.parentApp.num_records)
+
+            # if records found, display page num and num pages information, and page control buttons
+            if self.parent.parentApp.num_records > 0:
+
+                self.parent.numpages.value = \
+                    "Page {} of {}".format(self.parent.parentApp.page_num, self.parent.parentApp.num_pages)
+
+                self.parent.numpages.hidden = False
+                self.parent.numpages.display()
+
+                self.parent.prevpage.hidden = False
+                self.parent.nextpage.hidden = False
+
+                self.parent.prevpage.display()
+                self.parent.nextpage.display()
+
+            # no records found, so hide page num and num pages information, and page control buttons
+            else:
+                self.parent.numpages.hidden = True
+                self.parent.numpages.display()
+
+                self.parent.prevpage.hidden = True
+                self.parent.nextpage.hidden = True
+
+                self.parent.prevpage.display()
+                self.parent.nextpage.display()
+
+            # display grid results and number or records
             self.parent.gridbox_results.display()
             self.parent.numrecords.display()
             return
@@ -1488,6 +1553,7 @@ class DeleteTableButton(npyscreen.ButtonPress):
         else:
             npyscreen.blank_terminal() # clears the notification and just goes back to the original form
 
+'''QUERY BUILDER BUTTONS'''
 
 class QB_SQL_Build_Button(npyscreen.ButtonPress):
 
@@ -1814,6 +1880,50 @@ class QueryDeleteBtn(npyscreen.ButtonPress):
         self.parent.parentApp.switchForm("QueryDeleteWindow")
         return
 
+'''PAGE BUTTONS'''
+
+
+class PrevPage_Button(npyscreen.ButtonPress):
+    def whenPressed(self):
+        if self.parent.parentApp.page_num > 1:
+            self.parent.parentApp.page_num -= 1
+            self.parent.parentApp.row_start -= 10
+            self.parent.parentApp.row_end -= 10
+
+            self.parent.gridbox_results.values = \
+                self.parent.parentApp.table_results[self.parent.parentApp.row_start-1: self.parent.parentApp.row_end]
+
+            self.parent.gridbox_results.display()
+
+
+
+            self.parent.numpages.value = \
+                "Page {} of {}".format(self.parent.parentApp.page_num, self.parent.parentApp.num_pages)
+            self.parent.numpages.display()
+
+            # self.parent.parentApp.switchForm("QueryDeleteWindow")
+            return
+
+
+class NextPage_Button(npyscreen.ButtonPress):
+    def whenPressed(self):
+        if self.parent.parentApp.page_num < self.parent.parentApp.num_pages:
+
+            self.parent.parentApp.page_num += 1
+            self.parent.parentApp.row_start += 10
+            self.parent.parentApp.row_end += 10
+
+            self.parent.gridbox_results.values = \
+                self.parent.parentApp.table_results[self.parent.parentApp.row_start-1: self.parent.parentApp.row_end]
+
+            self.parent.gridbox_results.display()
+
+            self.parent.numpages.value = \
+                "Page {} of {}".format(self.parent.parentApp.page_num, self.parent.parentApp.num_pages)
+            self.parent.numpages.display()
+
+            # self.parent.parentApp.switchForm("QueryDeleteWindow")
+            return
 
 '''NAV BAR BUTTONS'''
 
@@ -1888,7 +1998,7 @@ class ExitButton(npyscreen.ButtonPress):
         return
 
 
-#for testing
+# for testing
 class Nav_Bar(npyscreen.Form):
 
     def create(self):
@@ -1917,19 +2027,22 @@ class App(npyscreen.NPSAppManaged):
     # Table creation global variables
     field_name, field_type, field_length_or_val, field_collation, field_attrib, field_default = (None,)*6
 
-    engine = "InnoDB" #sets default MySQL engine type
+    engine = "InnoDB"  # sets default MySQL engine type
 
     field_autoincrement, field_primarykey, field_unique, field_index = (False,)*4
-    # User friendly way of saying if Null is okay for this field
-    field_optional = True
+
+    field_optional = True  # User friendly way of saying if Null is okay for this field
 
     field1, field2, field3, tbl1_criteria1, tbl1_criteria2, tbl1_criteria3, tbl2_criteria1, tbl2_criteria2, \
-    tbl2_criteria3, tbl3_criteria1, tbl3_criteria2, tbl3_criteria3, table1, table2, table3 = (None,)*15
+        tbl2_criteria3, tbl3_criteria1, tbl3_criteria2, tbl3_criteria3, table1, table2, table3 = (None,)*15
 
     tablefield_cols, sql_results, col_titles, table_results, table_struct_results, field_string_array, field_list1,\
         field_list2, field_list3 = ([],)*9
 
-    num_records = 0
+    page_num = 1
+    num_pages, num_records = (0,)*2
+    row_start = 1
+    row_end = 10
 
     def onStart(self):
 
@@ -1969,10 +2082,10 @@ if __name__ == "__main__":
 
     print "Resizing terminal..."
 
-    #resizes the terminal to 120 x 35
+    # resizes the terminal to 120 x 35
     print "\x1b[8;37;120t"
 
-    #necessary pause to prevent race condition and allow termnal time to resize before launching npyscreen form
+    # necessary pause to prevent race condition and allow termnal time to resize before launching npyscreen form
     time.sleep(1)
 
     # Start an NPSAppManaged application mainloop
