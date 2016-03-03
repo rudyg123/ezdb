@@ -233,7 +233,7 @@ class TablesWindow(npyscreen.ActionForm, npyscreen.SplitForm):
 
         self.nextrely += 3  # Move down
 
-        self.gridbox_results = self.add(Grid_Box_Results, max_height=14, values=self.parentApp.table_results,
+        self.gridbox_results = self.add(Grid_Box_Results, max_height=14, values=self.parentApp.query_results,
                                         default_column_number=10, w_id="wGrid_Box_Results",
                                         contained_widget_arguments = {"col_titles": self.parentApp.col_titles},
                                         col_margin=1, column_width=20, name="Table Results")
@@ -268,14 +268,22 @@ class TablesWindow(npyscreen.ActionForm, npyscreen.SplitForm):
 
     # PEP8 Ignore (external library naming convention)
     def beforeEditing(self):
+
+        # init page values
+        self.parentApp.row_start = 1  #sets the start row range
+        self.parentApp.row_end = 10  #sets the end row range
+        self.parentApp.per_page = 10  #sets the number of rows displayed per page result
+        self.parentApp.page_num = 1
+        self.parentApp.num_pages = 0
+
         self.parentApp.tableList = self.parentApp.dbms.list_database_tables()
         self.get_widget("wTables_box").display()
 
         # clear grid widget results and num records on page load
         self.parentApp.col_titles = []
         self.gridbox_results.entry_widget.col_titles = self.parentApp.col_titles
-        self.parentApp.table_results = []
-        self.gridbox_results.values = self.parentApp.table_results
+        self.parentApp.query_results = []
+        self.gridbox_results.values = self.parentApp.query_results
         self.gridbox_results.display()
 
         self.parentApp.num_records = 0
@@ -814,17 +822,21 @@ class QueryResultsWindow(npyscreen.ActionFormMinimal, npyscreen.SplitForm):
 
     def create(self):
 
-        self.nextrely += 1  # Move down
-
-        self.gridbox_results = self.add(Grid_Box_Results, max_height=27, values=self.parentApp.sql_results,
+        self.gridbox_results = self.add(Grid_Box_Results, max_height=29, values=self.parentApp.query_results,
                                         default_column_number=10,
                                         contained_widget_arguments={"col_titles":self.parentApp.col_titles},
                                         col_margin=1, column_width=12,
                                         name="SQL Results")
 
-        self.nextrely += 1  # Move down
         self.numrecords = self.add(npyscreen.FixedText, value="{} Records Found".format(self.parentApp.num_records),
-                                   editable=False)
+                                   relx=4, rely=31, max_width=20, editable=False)
+
+        self.numpages = self.add(npyscreen.FixedText,
+                                 value="Page {} of {}".format(self.parentApp.page_num, self.parentApp.num_pages),
+                                 relx=51, rely=31, editable=False, max_width=17, hidden=True)
+
+        self.prevpage = self.add(PrevPage_Button, name="Prev Page", rely=31, relx=90, max_width=9, hidden=True)
+        self.nextpage = self.add(NextPage_Button, name="Next Page", rely=31, relx=103, max_width=9, hidden=True)
 
         # Help menu guidance
         self.nextrely = 34
@@ -842,17 +854,63 @@ class QueryResultsWindow(npyscreen.ActionFormMinimal, npyscreen.SplitForm):
 
     def beforeEditing(self):
 
-        self.gridbox_results.values = self.parentApp.sql_results
+        # init page values
+        self.parentApp.row_start = 1  #sets the start row range
+        self.parentApp.row_end = 25  #sets the end row range
+        self.parentApp.per_page = 25  #sets the number of rows displayed per page result
+        self.parentApp.page_num = 1
+        self.parentApp.num_pages = 0
 
         self.gridbox_results.entry_widget.col_titles = self.parentApp.col_titles
 
+        # calculate number of pages (assuming 10 rows per page)
+        self.parentApp.num_pages = int(math.ceil(float(self.parentApp.num_records) / self.parentApp.per_page))
+
+        # display up to 25 rows
+        self.gridbox_results.values = \
+            self.parentApp.query_results[self.parentApp.row_start-1: self.parentApp.row_end]
+
+        # npyscreen.notify_confirm("self.parentApp.row_end =" + str(self.parentApp.row_end))
+
+        # get column titles
+        self.gridbox_results.entry_widget.col_titles = self.parentApp.col_titles
+
+        # return number of records found
         self.numrecords.value = "{} Records Found".format(self.parentApp.num_records)
 
-        self.gridbox_results.display()
-        self.numrecords.display()
+        # if records found, display page num and num pages information, and page control buttons
+        if self.parentApp.num_records > 0:
+
+            self.numpages.value = \
+                "Page {} of {}".format(self.parentApp.page_num, self.parentApp.num_pages)
+
+            self.numpages.hidden = False
+            #self.numpages.display()
+
+            self.prevpage.hidden = False
+            self.nextpage.hidden = False
+
+            #self.prevpage.display()
+            #self.nextpage.display()
+
+        # no records found, so hide page num and num pages information, and page control buttons
+        else:
+            self.numpages.hidden = True
+            #self.numpages.display()
+
+            self.prevpage.hidden = True
+            self.nextpage.hidden = True
+
+            #self.prevpage.display()
+            #self.nextpage.display()
+
+        # display grid results and number or records
+        #self.gridbox_results.display()
+        #self.numrecords.display()
+
 
     def on_ok(self):
-        self.parentApp.sql_results = None
+        self.parentApp.query_results = None
         self.parentApp.num_records = 0
 
         self.parentApp.switchForm("QueryWindow")
@@ -887,7 +945,7 @@ class RawSQLWindow(npyscreen.ActionForm, npyscreen.SplitForm):
         self.nextrely += 2  # Move down
 
         self.nextrely += 1  # Move down
-        self.gridbox_results = self.add(Grid_Box_Results, max_height=14, values=self.parentApp.sql_results,
+        self.gridbox_results = self.add(Grid_Box_Results, max_height=14, values=self.parentApp.query_results,
                                         default_column_number=10,
                                         contained_widget_arguments={"col_titles":self.parentApp.col_titles},
                                         col_margin=1, column_width=12,
@@ -917,8 +975,8 @@ class RawSQLWindow(npyscreen.ActionForm, npyscreen.SplitForm):
         #clear grid widget results and num records on page load
         self.parentApp.col_titles = []
         self.gridbox_results.entry_widget.col_titles = self.parentApp.col_titles
-        self.parentApp.sql_results = []
-        self.gridbox_results.values = self.parentApp.sql_results
+        self.parentApp.query_results = []
+        self.gridbox_results.values = self.parentApp.query_results
         self.gridbox_results.display()
 
         self.parentApp.num_records = 0
@@ -1242,16 +1300,17 @@ class ViewTableStructButton(npyscreen.ButtonPress):
 
         elif self.results[0] == 'success':
 
-            self.parent.parentApp.table_results = self.results[1]
+            self.parent.parentApp.query_results = self.results[1]
             self.parent.parentApp.col_titles = self.results[2]
             self.parent.parentApp.num_records = self.results[3]
 
             # calculate number of pages (assuming 10 rows per page)
-            self.parent.parentApp.num_pages = int(math.ceil(float(self.parent.parentApp.num_records) / 10))
+            self.parent.parentApp.num_pages = \
+                int(math.ceil(float(self.parent.parentApp.num_records) / self.parent.parentApp.per_page))
 
             # display up to 10 rows
             self.parent.gridbox_results.values = \
-                self.parent.parentApp.table_results[self.parent.parentApp.row_start-1: self.parent.parentApp.row_end]
+                self.parent.parentApp.query_results[self.parent.parentApp.row_start - 1: self.parent.parentApp.row_end]
 
             # get column titles
             self.parent.gridbox_results.entry_widget.col_titles = self.parent.parentApp.col_titles
@@ -1324,16 +1383,17 @@ class BrowseTableButton(npyscreen.ButtonPress):
 
             elif self.results[0] == 'success':
 
-                self.parent.parentApp.table_results = self.results[1]
+                self.parent.parentApp.query_results = self.results[1]
                 self.parent.parentApp.col_titles = self.results[2]
                 self.parent.parentApp.num_records = self.results[3]
 
                 # calculate number of pages (assuming 10 rows per page)
-                self.parent.parentApp.num_pages = int(math.ceil(float(self.parent.parentApp.num_records) / 10))
+                self.parent.parentApp.num_pages = \
+                    int(math.ceil(float(self.parent.parentApp.num_records) / self.parent.parentApp.per_page))
 
                 # display up to 10 rows
                 self.parent.gridbox_results.values = \
-                    self.parent.parentApp.table_results[self.parent.parentApp.row_start-1: self.parent.parentApp.row_end]
+                    self.parent.parentApp.query_results[self.parent.parentApp.row_start - 1: self.parent.parentApp.row_end]
 
                 # get column titles
                 self.parent.gridbox_results.entry_widget.col_titles = self.parent.parentApp.col_titles
@@ -1567,7 +1627,7 @@ class CreateTableButton(npyscreen.ButtonPress):
                 npyscreen.notify_confirm("Table {} successfully created".format(self.parent.parentApp.table_name))
 
             self.parent.parentApp.field_string_array = []
-            self.parent.parentApp.table_results = []
+            self.parent.parentApp.query_results = []
             self.parent.parentApp.tableList = self.parent.parentApp.dbms.list_database_tables()
 
             self.parent.parentApp.switchForm("TablesWindow")
@@ -1849,7 +1909,7 @@ class QB_SQL_Send_Button(npyscreen.ButtonPress):
     def whenPressed(self):
 
         #clear results
-        self.parent.parentApp.sql_results = []
+        self.parent.parentApp.query_results = []
         self.parent.parentApp.col_titles = []
 
         self.sql_query = self.parent.get_widget("wSQL_query").value
@@ -1861,7 +1921,7 @@ class QB_SQL_Send_Button(npyscreen.ButtonPress):
 
         elif self.results[0] == 'success':
 
-            self.parent.parentApp.sql_results = self.results[1]
+            self.parent.parentApp.query_results = self.results[1]
             if self.results[2]:
                 self.parent.parentApp.col_titles = self.results[2]
             if self.results[3]:
@@ -1876,7 +1936,7 @@ class SQL_Send_Button(npyscreen.ButtonPress):
     def whenPressed(self):
 
         #clear results
-        self.parent.parentApp.sql_results = []
+        self.parent.parentApp.query_results = []
         self.parent.parentApp.col_titles = []
 
         self.sql_query = self.parent.get_widget("wSQL_query").value
@@ -1888,13 +1948,13 @@ class SQL_Send_Button(npyscreen.ButtonPress):
 
         elif self.results[0] == 'success':
 
-            self.parent.parentApp.sql_results = self.results[1]
+            self.parent.parentApp.query_results = self.results[1]
             if self.results[2]:
                 self.parent.parentApp.col_titles = self.results[2]
             if self.results[3]:
                 self.parent.parentApp.num_records = self.results[3]
 
-            self.parent.gridbox_results.values = self.parent.parentApp.sql_results
+            self.parent.gridbox_results.values = self.parent.parentApp.query_results
 
             self.parent.gridbox_results.entry_widget.col_titles = self.parent.parentApp.col_titles
 
@@ -1933,36 +1993,38 @@ class QueryDeleteBtn(npyscreen.ButtonPress):
 
 class PrevPage_Button(npyscreen.ButtonPress):
     def whenPressed(self):
+        # npyscreen.notify_confirm("self.parent.parentApp.row_start = " + str(self.parent.parentApp.row_start) +
+        #                          "\nself.parent.parentApp.row_end = " + str(self.parent.parentApp.row_end))
+
         if self.parent.parentApp.page_num > 1:
             self.parent.parentApp.page_num -= 1
-            self.parent.parentApp.row_start -= 10
-            self.parent.parentApp.row_end -= 10
+            self.parent.parentApp.row_start -= self.parent.parentApp.per_page
+            self.parent.parentApp.row_end -= self.parent.parentApp.per_page
 
             self.parent.gridbox_results.values = \
-                self.parent.parentApp.table_results[self.parent.parentApp.row_start-1: self.parent.parentApp.row_end]
+                self.parent.parentApp.query_results[self.parent.parentApp.row_start-1: self.parent.parentApp.row_end]
 
             self.parent.gridbox_results.display()
-
-
 
             self.parent.numpages.value = \
                 "Page {} of {}".format(self.parent.parentApp.page_num, self.parent.parentApp.num_pages)
             self.parent.numpages.display()
 
-            # self.parent.parentApp.switchForm("QueryDeleteWindow")
             return
 
 
 class NextPage_Button(npyscreen.ButtonPress):
     def whenPressed(self):
+        # npyscreen.notify_confirm("self.parent.parentApp.row_start = " + str(self.parent.parentApp.row_start) +
+        #                         "\nself.parent.parentApp.row_end = " + str(self.parent.parentApp.row_end))
         if self.parent.parentApp.page_num < self.parent.parentApp.num_pages:
 
             self.parent.parentApp.page_num += 1
-            self.parent.parentApp.row_start += 10
-            self.parent.parentApp.row_end += 10
+            self.parent.parentApp.row_start += self.parent.parentApp.per_page
+            self.parent.parentApp.row_end += self.parent.parentApp.per_page
 
             self.parent.gridbox_results.values = \
-                self.parent.parentApp.table_results[self.parent.parentApp.row_start-1: self.parent.parentApp.row_end]
+                self.parent.parentApp.query_results[self.parent.parentApp.row_start-1: self.parent.parentApp.row_end]
 
             self.parent.gridbox_results.display()
 
@@ -1970,7 +2032,6 @@ class NextPage_Button(npyscreen.ButtonPress):
                 "Page {} of {}".format(self.parent.parentApp.page_num, self.parent.parentApp.num_pages)
             self.parent.numpages.display()
 
-            # self.parent.parentApp.switchForm("QueryDeleteWindow")
             return
 
 '''NAV BAR BUTTONS'''
@@ -2084,13 +2145,14 @@ class App(npyscreen.NPSAppManaged):
     field1, field2, field3, tbl1_criteria1, tbl1_criteria2, tbl1_criteria3, tbl2_criteria1, tbl2_criteria2, \
         tbl2_criteria3, tbl3_criteria1, tbl3_criteria2, tbl3_criteria3, table1, table2, table3 = (None,)*15
 
-    tablefield_cols, sql_results, col_titles, table_results, table_struct_results, field_string_array, field_list1,\
-        field_list2, field_list3 = ([],)*9
+    tablefield_cols, query_results, col_titles, table_struct_results, field_string_array, field_list1, \
+    field_list2, field_list3 = ([],)*8
 
-    page_num = 1
-    num_pages, num_records = (0,)*2
-    row_start = 1
-    row_end = 10
+    page_num = None
+    num_pages, num_records = (None,)*2
+    row_start = None
+    row_end = None  # set by forms
+    per_page = None  # set by forms
 
     def onStart(self):
 
