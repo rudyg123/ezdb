@@ -45,6 +45,7 @@ class MySQL_Database(object):
         
         try:
             self.conn = mysql.connector.connect(**self.conn_config)
+            self.conn.commit()
             self.cur = self.conn.cursor(buffered=True)
 
         except mysql.connector.Error, err:
@@ -60,6 +61,7 @@ class MySQL_Database(object):
         self.conn_config['database'] = self.dbname
         try:
             self.conn = mysql.connector.connect(**self.conn_config)
+
             self.cur = self.conn.cursor(buffered=True)
 
         except mysql.connector.Error, err:
@@ -92,6 +94,8 @@ class MySQL_Database(object):
 
             sql_string = "CREATE DATABASE {}".format(self.dbname)
             self.cur.execute(sql_string)
+            self.conn.commit()
+
             return "{} MySQL database created.".format(self.dbname)
 
         except mysql.connector.Error, err:
@@ -119,16 +123,21 @@ class MySQL_Database(object):
 
             sql_string = "DROP DATABASE {}".format(self.dbname)
             self.cur.execute(sql_string)
+            self.conn.commit()
+
             return "{} MySQL database deleted.".format(self.dbname)
 
         except mysql.connector.Error, err:
+            self.conn.rollback()
             return "The following problem occurred during deletion:\n" + str(err)
 
     def list_database_tables(self):
 
         sql_string = "SHOW TABLES;"
         try:
+
             self.cur.execute(sql_string)
+            self.conn.commit()
             tablelist_data = self.cur.fetchall()
 
             tablelist = []
@@ -147,9 +156,11 @@ class MySQL_Database(object):
 
         try:
             self.cur.execute(sql_string + " LIMIT 0;")
+            self.conn.commit()
             col_titles = [desc[0] for desc in self.cur.description]
 
             self.cur.execute(sql_string + ";")
+            self.conn.commit()
 
             try:
                 browse_results_data = self.cur.fetchall()
@@ -175,9 +186,11 @@ class MySQL_Database(object):
         try:
 
             self.cur.execute(sql_string + " LIMIT 0;")
+            self.conn.commit()
             col_titles = [desc[0] for desc in self.cur.description]
 
             self.cur.execute(sql_string + ";")
+            self.conn.commit()
 
             try:
                 table_struct_results_data = self.cur.fetchall()
@@ -202,6 +215,8 @@ class MySQL_Database(object):
 
         try:
             self.cur.execute(sql_string)
+            self.conn.commit()
+
         except mysql.connector.Error, err:
             return err
 
@@ -221,14 +236,17 @@ class MySQL_Database(object):
 
         sql_string = sql
         col_titles = []
+        row_count = 0
 
         try:
             if "select" in sql_string.lower():
 
                 self.cur.execute(sql_string + " LIMIT 0;")
+                self.conn.commit()
                 col_titles = [desc[0] for desc in self.cur.description]
 
             self.cur.execute(sql_string + ";")
+            self.conn.commit()
 
             sql_results = []
 
@@ -245,12 +263,12 @@ class MySQL_Database(object):
                     return "success", sql_results, col_titles, row_count
 
                 else:
-                    return "success", sql_results, "", ""
+                    return "success", sql_results, col_titles, row_count
 
             except mysql.connector.Error, err:
 
                 if str(err) == "No result set to fetch from.":
-                    return "success", sql_results, "", ""
+                    return "success", sql_results, col_titles, row_count
                 else:
                     return "error", err, "", ""
 
@@ -264,6 +282,7 @@ class MySQL_Database(object):
         try:
 
             self.cur.execute(sql_string + ";")
+            self.conn.commit()
 
             try:
                 table_fields_results_data = self.cur.fetchall()

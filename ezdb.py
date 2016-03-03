@@ -154,7 +154,7 @@ class DatabaseWindow(npyscreen.ActionForm, npyscreen.SplitForm):
         elif self.parentApp.dbtype == 1:
             self.dbtype_str = "MySQL"
 
-        self.add(npyscreen.BoxTitle, w_id="wDatabases_box", name="{} Databases".format(self.dbtype_str),
+        self.db_box = self.add(npyscreen.BoxTitle, w_id="wDatabases_box", name="{} Databases".format(self.dbtype_str),
                  values=self.parentApp.dbms.list_databases(), max_width=30, max_height=17, scroll_exit=True)
 
         # Database button options
@@ -213,7 +213,7 @@ class TablesWindow(npyscreen.ActionForm, npyscreen.SplitForm):
                  editable=False)
 
         self.nextrely += 1  # Move down
-        self.add(npyscreen.BoxTitle, w_id="wTables_box", name="Tables",
+        self.tablebox = self.add(npyscreen.BoxTitle, w_id="wTables_box", name="Tables",
                  values=self.parentApp.tableList, max_width=25, max_height=11, scroll_exit=True)
 
         self.nextrely += 1  # Move down
@@ -277,7 +277,7 @@ class TablesWindow(npyscreen.ActionForm, npyscreen.SplitForm):
         self.parentApp.num_pages = 0
 
         self.parentApp.tableList = self.parentApp.dbms.list_database_tables()
-        self.get_widget("wTables_box").display()
+        self.tablebox.display()
 
         # clear grid widget results and num records on page load
         self.parentApp.col_titles = []
@@ -1201,12 +1201,12 @@ class AdminWindow(npyscreen.ActionForm, npyscreen.SplitForm):
 class OpenDBButton(npyscreen.ButtonPress):
     def whenPressed(self):
 
-        if self.parent.get_widget("wDatabases_box").value is None:
+        if self.parent.db_box.value is None:
             npyscreen.notify_confirm("Please select a database by highlighting it and enter")
             return
 
         else:
-            selected_db = self.parent.get_widget("wDatabases_box").values[self.parent.get_widget("wDatabases_box").value]
+            selected_db = self.parent.db_box.values[self.parent.db_box.value]
             self.parent.parentApp.active_db = selected_db
             self.parent.parentApp.dbms.connect_database(self.parent.parentApp.active_db)
 
@@ -1225,8 +1225,8 @@ class CreateDBButton(npyscreen.ButtonPress):
         if create_confirm:
             servermsg = self.parent.parentApp.dbms.create_database(self.newDB_name)
             npyscreen.notify_confirm(servermsg)
-            self.parent.get_widget("wDatabases_box").values = self.parent.parentApp.dbms.list_databases()
-            self.parent.get_widget("wDatabases_box").display()
+            self.parent.db_box.values = self.parent.parentApp.dbms.list_databases()
+            self.parent.db_box.display()
 
             return
 
@@ -1237,27 +1237,31 @@ class CreateDBButton(npyscreen.ButtonPress):
 class DeleteDBButton(npyscreen.ButtonPress):
     def whenPressed(self):
 
-        if self.parent.get_widget("wDatabases_box").value is None:
+        #npyscreen.notify_confirm("self.parent.db_box.value = " + str(self.parent.db_box.value))
+
+        if self.parent.db_box.value is None:
             npyscreen.notify_confirm("Please select a database by highlighting it and enter")
             return
 
         else:
-            selected_db = self.parent.get_widget("wDatabases_box").values[self.parent.get_widget("wDatabases_box").value]
+            selected_db = self.parent.db_box.values[self.parent.db_box.value]
 
             delete_confirm = npyscreen.notify_yes_no("Are you sure you want to delete " + str(selected_db) + "?",
                                                      "Confirm Deletion", editw=2)
             if delete_confirm:
                 servermsg = self.parent.parentApp.dbms.delete_database(selected_db)
+
                 npyscreen.notify_confirm(servermsg)
-                self.parent.get_widget("wDatabases_box").values = self.parent.parentApp.dbms.list_databases()
-                self.parent.get_widget("wDatabases_box").display()
+                dblist = self.parent.parentApp.dbms.list_databases()
+                self.parent.db_box.value = None
+                self.parent.db_box.values = dblist
+                self.parent.db_box.display()
                 return
 
             else:
                 npyscreen.blank_terminal() # clears the notification and just goes back to the original form
 
 '''TABLE BUTTONS'''
-
 
 class ViewTableStructButton(npyscreen.ButtonPress):
 
@@ -1280,11 +1284,11 @@ class ViewTableStructButton(npyscreen.ButtonPress):
 
         # checks if table value is highlighted before browsing, else perform query
 
-        if self.parent.get_widget("wTables_box").value is None:
+        if self.parent.tablebox.value is None:
             npyscreen.notify_confirm("Please select a table by highlighting it and enter")
             return
         else:
-            self.selected_table = self.parent.parentApp.tableList[self.parent.get_widget("wTables_box").value]
+            self.selected_table = self.parent.parentApp.tableList[self.parent.tablebox.value]
             self.results = self.parent.parentApp.dbms.view_table_struct(self.selected_table)
 
         if self.results[0] == 'error':
@@ -1362,12 +1366,12 @@ class BrowseTableButton(npyscreen.ButtonPress):
 
         # checks if table value is highlighted before browsing, else perform query
 
-        if self.parent.get_widget("wTables_box").value is None:
+        if self.parent.tablebox.value is None:
             npyscreen.notify_confirm("Please select a table by highlighting it and enter")
             return
 
         else:
-            self.selected_table = self.parent.parentApp.tableList[self.parent.get_widget("wTables_box").value]
+            self.selected_table = self.parent.parentApp.tableList[self.parent.tablebox.value]
             self.results = self.parent.parentApp.dbms.browse_table(self.selected_table)
 
             if self.results[0] == 'error':
@@ -1632,22 +1636,23 @@ class DeleteTableButton(npyscreen.ButtonPress):
     selected_table = None
 
     def whenPressed(self):
-        if self.parent.get_widget("wTables_box").value is None:
+        if self.parent.tablebox.value is None:
             npyscreen.notify_confirm("Please select a table by highlighting it and enter")
             return
         else:
-            self.selected_table = self.parent.parentApp.tableList[self.parent.get_widget("wTables_box").value]
+            self.selected_table = self.parent.parentApp.tableList[self.parent.tablebox.value]
 
         delete_confirm = npyscreen.notify_yes_no("Are you sure you want to delete " + str(self.selected_table) + "?",
                                                  "Confirm Deletion", editw=2)
         if delete_confirm:
             servermsg = self.parent.parentApp.dbms.delete_table(self.selected_table)
+            self.parent.tablebox.value = None
             if servermsg:
                 npyscreen.notify_confirm(servermsg)
 
             self.parent.parentApp.tableList = self.parent.parentApp.dbms.list_database_tables()
-            self.parent.get_widget("wTables_box").values = self.parent.parentApp.tableList
-            self.parent.get_widget("wTables_box").display()
+            self.parent.tablebox.values = self.parent.parentApp.tableList
+            self.parent.tablebox.display()
             return
 
         else:
@@ -1923,7 +1928,6 @@ class QB_SQL_Send_Button(npyscreen.ButtonPress):
 
 
 class SQL_Send_Button(npyscreen.ButtonPress):
-    sql_command, results = (None,)*2
 
     def whenPressed(self):
 
