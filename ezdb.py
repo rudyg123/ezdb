@@ -861,16 +861,12 @@ class QueryResultsWindow(npyscreen.ActionFormMinimal, npyscreen.SplitForm):
         self.parentApp.page_num = 1
         self.parentApp.num_pages = 0
 
-        self.gridbox_results.entry_widget.col_titles = self.parentApp.col_titles
-
         # calculate number of pages (assuming 10 rows per page)
         self.parentApp.num_pages = int(math.ceil(float(self.parentApp.num_records) / self.parentApp.per_page))
 
         # display up to 25 rows
         self.gridbox_results.values = \
             self.parentApp.query_results[self.parentApp.row_start-1: self.parentApp.row_end]
-
-        # npyscreen.notify_confirm("self.parentApp.row_end =" + str(self.parentApp.row_end))
 
         # get column titles
         self.gridbox_results.entry_widget.col_titles = self.parentApp.col_titles
@@ -885,29 +881,14 @@ class QueryResultsWindow(npyscreen.ActionFormMinimal, npyscreen.SplitForm):
                 "Page {} of {}".format(self.parentApp.page_num, self.parentApp.num_pages)
 
             self.numpages.hidden = False
-            #self.numpages.display()
-
             self.prevpage.hidden = False
             self.nextpage.hidden = False
-
-            #self.prevpage.display()
-            #self.nextpage.display()
 
         # no records found, so hide page num and num pages information, and page control buttons
         else:
             self.numpages.hidden = True
-            #self.numpages.display()
-
             self.prevpage.hidden = True
             self.nextpage.hidden = True
-
-            #self.prevpage.display()
-            #self.nextpage.display()
-
-        # display grid results and number or records
-        #self.gridbox_results.display()
-        #self.numrecords.display()
-
 
     def on_ok(self):
         self.parentApp.query_results = None
@@ -944,16 +925,23 @@ class RawSQLWindow(npyscreen.ActionForm, npyscreen.SplitForm):
 
         self.nextrely += 2  # Move down
 
-        self.nextrely += 1  # Move down
-        self.gridbox_results = self.add(Grid_Box_Results, max_height=14, values=self.parentApp.query_results,
+        self.gridbox_results = self.add(Grid_Box_Results, max_height=19, values=self.parentApp.query_results,
                                         default_column_number=10,
                                         contained_widget_arguments={"col_titles":self.parentApp.col_titles},
                                         col_margin=1, column_width=12,
                                         name="SQL Results")
 
-        self.nextrely += 1  # Move down
+
         self.numrecords = self.add(npyscreen.FixedText, value="{} Records Found".format(self.parentApp.num_records),
-                                   editable=False)
+                                   relx=4, rely=32, max_width=20, editable=False)
+
+        self.numpages = self.add(npyscreen.FixedText,
+                                 value="Page {} of {}".format(self.parentApp.page_num, self.parentApp.num_pages),
+                                 relx=51, rely=32, editable=False, max_width=17, hidden=True)
+
+        self.prevpage = self.add(PrevPage_Button, name="Prev Page", rely=32, relx=90, max_width=9, hidden=True)
+        self.nextpage = self.add(NextPage_Button, name="Next Page", rely=32, relx=103, max_width=9, hidden=True)
+
 
         # Help menu guidance
         self.nextrely = 34
@@ -982,6 +970,10 @@ class RawSQLWindow(npyscreen.ActionForm, npyscreen.SplitForm):
         self.parentApp.num_records = 0
         self.numrecords.value = "{} Records Found".format(self.parentApp.num_records)
         self.numrecords.display()
+
+    def on_ok(self):
+        self.parentApp.query_results = None
+        self.parentApp.num_records = 0
 
 
 class SQL_Query(npyscreen.MultiLineEdit):
@@ -1935,9 +1927,16 @@ class SQL_Send_Button(npyscreen.ButtonPress):
 
     def whenPressed(self):
 
-        #clear results
+        #clear query results
         self.parent.parentApp.query_results = []
         self.parent.parentApp.col_titles = []
+
+        # init page values
+        self.parent.parentApp.row_start = 1  #sets the start row range
+        self.parent.parentApp.row_end = 15  #sets the end row range
+        self.parent.parentApp.per_page = 15  #sets the number of rows displayed per page result
+        self.parent.parentApp.page_num = 1
+        self.parent.parentApp.num_pages = 0
 
         self.sql_query = self.parent.get_widget("wSQL_query").value
         self.results = self.parent.parentApp.dbms.execute_SQL(self.sql_query)
@@ -1949,19 +1948,46 @@ class SQL_Send_Button(npyscreen.ButtonPress):
         elif self.results[0] == 'success':
 
             self.parent.parentApp.query_results = self.results[1]
-            if self.results[2]:
-                self.parent.parentApp.col_titles = self.results[2]
-            if self.results[3]:
-                self.parent.parentApp.num_records = self.results[3]
+            self.parent.parentApp.col_titles = self.results[2]
+            self.parent.parentApp.num_records = self.results[3]
 
-            self.parent.gridbox_results.values = self.parent.parentApp.query_results
+            # calculate number of pages (assuming 10 rows per page)
+            self.parent.parentApp.num_pages = int(math.ceil(float(self.parent.parentApp.num_records) / self.parent.parentApp.per_page))
 
+            # display up to 25 rows
+            self.parent.gridbox_results.values = \
+                self.parent.parentApp.query_results[self.parent.parentApp.row_start-1: self.parent.parentApp.row_end]
+
+            # get column titles
             self.parent.gridbox_results.entry_widget.col_titles = self.parent.parentApp.col_titles
+
+            # return number of records found
+            self.parent.numrecords.value = "{} Records Found".format(self.parent.parentApp.num_records)
+
+            # if records found, display page num and num pages information, and page control buttons
+            if self.parent.parentApp.num_records > 0:
+
+                self.parent.numpages.value = \
+                    "Page {} of {}".format(self.parent.parentApp.page_num, self.parent.parentApp.num_pages)
+
+                self.parent.numpages.hidden = False
+                self.parent.prevpage.hidden = False
+                self.parent.nextpage.hidden = False
+
+            # no records found, so hide page num and num pages information, and page control buttons
+            else:
+                self.parent.numpages.hidden = True
+                self.parent.prevpage.hidden = True
+                self.parent.nextpage.hidden = True
 
             self.parent.numrecords.value = "{} Records Found".format(self.parent.parentApp.num_records)
 
             self.parent.gridbox_results.display()
             self.parent.numrecords.display()
+            self.parent.numpages.display()
+            self.parent.prevpage.display()
+            self.parent.nextpage.display()
+
             return
 
 
