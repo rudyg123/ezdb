@@ -248,6 +248,7 @@ class Postgres_Database(object):
 
         sql_string = sql
         col_titles = []
+        row_count = 0
 
         try:
             if "select" in sql_string.lower():
@@ -271,11 +272,11 @@ class Postgres_Database(object):
                     return "success", sql_results, col_titles, row_count
 
                 else:
-                    return "success", sql_results, "", ""
+                    return "success", sql_results, col_titles, row_count
 
             except psycopg2.DatabaseError, err:
                 if str(err) == "no results to fetch":
-                    return "success", sql_results, "", ""
+                    return "success", sql_results, col_titles, row_count
                 else:
                     return "error", err
 

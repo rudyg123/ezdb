@@ -209,7 +209,7 @@ class TablesWindow(npyscreen.ActionForm, npyscreen.SplitForm):
         self.tabExit = self.add(ExitButton, name="Exit", rely=1, relx=103)
 
         self.nextrely += 1  # Move down
-        self.add(npyscreen.FixedText, value="Database: {}".format(self.parentApp.active_db), relx=3, color="LABEL",
+        self.add(npyscreen.FixedText, value="Database: {}".format(self.parentApp.active_db), relx=3, color="VERYGOOD",
                  editable=False)
 
         self.nextrely += 1  # Move down
@@ -1128,7 +1128,7 @@ class ExportWindow(npyscreen.ActionForm, npyscreen.SplitForm):
     tabDatabases, tabTables, tabQuery, tabRawSQL, tabExport, tabAdmin, tabExit = (None,)*7
 
     def create(self):
-        self.tabDatabases = self.add(TabMainButton, w_id="wMainTab", name="Main", value="DatabaseWindow",
+        self.tabDatabases = self.add(TabMainButton, w_id="wMainTab", name="Main", value="Main",
                                      rely=1, scroll_exit=True)
 
         self.tabDatabases = self.add(TabDatabaseButton, w_id="wDatabaseTab", name="Databases", value="DatabaseWindow",
@@ -1143,7 +1143,33 @@ class ExportWindow(npyscreen.ActionForm, npyscreen.SplitForm):
         self.tabAdmin = self.add(TabAdminButton, w_id="wAdminTab", name="Admin", value="AdminWindow", rely=1, relx=89)
         self.tabExit = self.add(ExitButton, name="Exit", rely=1, relx=103)
 
-        self.add(npyscreen.FixedText, value="Here is the EXPORT window", editable=False)
+        # adds handler to open file selection dialog when 'f' is pressed
+        self.selectfile_key = '+'
+        self.add_handlers({self.selectfile_key: self.open_file_dialog})
+
+        self.nextrely += 1  # Move down
+
+        self.add(npyscreen.FixedText, value="Database: {}".format(self.parentApp.active_db), color="VERYGOOD",
+                 relx=3, editable=False)
+
+        self.tablebox = self.add(npyscreen.BoxTitle, w_id="wTables_box", name="Tables", values=self.parentApp.tableList,
+                                 rely=5, max_width=25, max_height=20, scroll_exit=True)
+
+        self.add(npyscreen.FixedText, value="Import Table", color="LABEL", relx=30, rely=6, editable=False)
+
+        self.add(npyscreen.FixedText, value="Press '+' to select CSV file to import", relx=30, rely=8, max_width=35,
+                 color="CONTROL")
+
+        self.import_filename = self.add(npyscreen.TitleFixedText, name="File/Path: ", value="", relx=30, rely=9,
+                                        max_width=80, egin_entry_at=7, editable=False, hidden=True)
+
+        self.add(Import_Button, name="Import", relx=28, rely=11, scroll_exit=True)
+
+        self.add(npyscreen.FixedText, value="Export Table", color="LABEL", relx=30, rely=14, editable=False)
+
+
+        #self.nextrely += 1  # Move down
+
 
         # Help menu guidance
         self.nextrely = 34
@@ -1152,6 +1178,15 @@ class ExportWindow(npyscreen.ActionForm, npyscreen.SplitForm):
 
         # Register help key
         self.add_handlers({'^Q': self.display_help})
+
+    def open_file_dialog(self, code_of_key_pressed):
+
+        self.selected_importfile = npyscreen.selectFile()
+        #npyscreen.notify_yes_no('Are you sure you want to import {}'.format(self.selected_importfile) + "?",
+        #                        title='File Selected')
+        self.import_filename.value = self.selected_importfile
+        self.import_filename.hidden = False
+        self.import_filename.display()
 
     @staticmethod
     def display_help(self):
@@ -1955,44 +1990,47 @@ class SQL_Send_Button(npyscreen.ButtonPress):
             self.parent.parentApp.col_titles = self.results[2]
             self.parent.parentApp.num_records = self.results[3]
 
-            # calculate number of pages (assuming 10 rows per page)
-            self.parent.parentApp.num_pages = int(math.ceil(float(self.parent.parentApp.num_records) / self.parent.parentApp.per_page))
+            if self.parent.parentApp.num_records != 0 and self.parent.parentApp.per_page != 0:
 
-            # display up to 25 rows
-            self.parent.gridbox_results.values = \
-                self.parent.parentApp.query_results[self.parent.parentApp.row_start-1: self.parent.parentApp.row_end]
+                # calculate number of pages (assuming 10 rows per page)
+                self.parent.parentApp.num_pages = int(math.ceil(float(self.parent.parentApp.num_records) /
+                                                                self.parent.parentApp.per_page))
 
-            # get column titles
-            self.parent.gridbox_results.entry_widget.col_titles = self.parent.parentApp.col_titles
+                # display up to 25 rows
+                self.parent.gridbox_results.values = \
+                    self.parent.parentApp.query_results[self.parent.parentApp.row_start-1: self.parent.parentApp.row_end]
 
-            # return number of records found
-            self.parent.numrecords.value = "{} Records Found".format(self.parent.parentApp.num_records)
+                # get column titles
+                self.parent.gridbox_results.entry_widget.col_titles = self.parent.parentApp.col_titles
 
-            # if records found, display page num and num pages information, and page control buttons
-            if self.parent.parentApp.num_records > 0:
+                # return number of records found
+                self.parent.numrecords.value = "{} Records Found".format(self.parent.parentApp.num_records)
 
-                self.parent.numpages.value = \
-                    "Page {} of {}".format(self.parent.parentApp.page_num, self.parent.parentApp.num_pages)
+                # if records found, display page num and num pages information, and page control buttons
+                if self.parent.parentApp.num_records > 0:
 
-                self.parent.numpages.hidden = False
-                self.parent.prevpage.hidden = False
-                self.parent.nextpage.hidden = False
+                    self.parent.numpages.value = \
+                        "Page {} of {}".format(self.parent.parentApp.page_num, self.parent.parentApp.num_pages)
 
-            # no records found, so hide page num and num pages information, and page control buttons
-            else:
-                self.parent.numpages.hidden = True
-                self.parent.prevpage.hidden = True
-                self.parent.nextpage.hidden = True
+                    self.parent.numpages.hidden = False
+                    self.parent.prevpage.hidden = False
+                    self.parent.nextpage.hidden = False
 
-            self.parent.numrecords.value = "{} Records Found".format(self.parent.parentApp.num_records)
+                # no records found, so hide page num and num pages information, and page control buttons
+                else:
+                    self.parent.numpages.hidden = True
+                    self.parent.prevpage.hidden = True
+                    self.parent.nextpage.hidden = True
 
-            self.parent.gridbox_results.display()
-            self.parent.numrecords.display()
-            self.parent.numpages.display()
-            self.parent.prevpage.display()
-            self.parent.nextpage.display()
+                self.parent.numrecords.value = "{} Records Found".format(self.parent.parentApp.num_records)
 
-            return
+                self.parent.gridbox_results.display()
+                self.parent.numrecords.display()
+                self.parent.numpages.display()
+                self.parent.prevpage.display()
+                self.parent.nextpage.display()
+
+                return
 
 
 class QuerySelectBtn(npyscreen.ButtonPress):
@@ -2017,6 +2055,35 @@ class QueryDeleteBtn(npyscreen.ButtonPress):
     def whenPressed(self):
         self.parent.parentApp.switchForm("QueryDeleteWindow")
         return
+
+'''IMPORT/EXPORT BUTTONS'''
+
+
+class Import_Button(npyscreen.ButtonPress):
+
+    def whenPressed(self):
+
+        # check if file is selected and if it's a CSV file
+        if str(self.parent.import_filename.value) == "" or str(self.parent.import_filename.value)[-4:] != ".csv":
+            npyscreen.notify_confirm("You must select a CSV file to import. You selected " + str(self.parent.import_filename.value)[-4:])
+            return
+
+        sql_string = "COPY contact_info FROM '{}' DELIMITER ',' CSV HEADER".format(self.parent.selected_importfile)
+
+        self.results = self.parent.parentApp.dbms.execute_SQL(sql_string)
+
+        if self.results[0] == 'error':
+            npyscreen.notify_confirm(str(self.results[1]))
+            return
+
+        elif self.results[0] == 'success':
+
+            npyscreen.notify_confirm("File imported successfully")
+
+            return
+
+
+
 
 '''PAGE BUTTONS'''
 
@@ -2087,7 +2154,7 @@ class TabTablesButton(npyscreen.ButtonPress):
             return
 
         else:
-            self.parent.parentApp.tableList = self.parent.parentApp.dbms.list_database_tables()
+            #self.parent.parentApp.tableList = self.parent.parentApp.dbms.list_database_tables()
             self.parent.parentApp.switchForm("TablesWindow")
 
 
@@ -2116,8 +2183,13 @@ class TabRawSQLButton(npyscreen.ButtonPress):
 
 class TabExportButton(npyscreen.ButtonPress):
     def whenPressed(self):
-        self.parent.parentApp.switchForm("ExportWindow")
-        return
+
+        if self.parent.parentApp.active_db is None:
+            npyscreen.notify_confirm("You must first open a database before accessing the Import/Export page")
+            return
+
+        else:
+            self.parent.parentApp.switchForm("ExportWindow")
 
 
 class TabAdminButton(npyscreen.ButtonPress):
@@ -2178,11 +2250,11 @@ class App(npyscreen.NPSAppManaged):
     tablefield_cols, query_results, col_titles, table_struct_results, field_string_array, field_list1, \
     field_list2, field_list3 = ([],)*8
 
-    page_num = None
-    num_pages, num_records = (None,)*2
-    row_start = None
-    row_end = None  # set by forms
-    per_page = None  # set by forms
+    page_num = 0
+    num_pages, num_records = (0,)*2
+    row_start = 0
+    row_end = 0  # set by forms
+    per_page = 0  # set by forms
 
     def onStart(self):
 
