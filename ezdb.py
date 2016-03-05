@@ -213,8 +213,8 @@ class TablesWindow(npyscreen.ActionForm, npyscreen.SplitForm):
                  editable=False)
 
         self.nextrely += 1  # Move down
-        self.tablebox = self.add(npyscreen.BoxTitle, w_id="wTables_box", name="Tables",
-                 values=self.parentApp.tableList, max_width=25, max_height=11, scroll_exit=True)
+        self.tablebox = self.add(npyscreen.BoxTitle, w_id="wTables_box", name="Tables", values=self.parentApp.tableList,
+                                 max_width=25, max_height=11, scroll_exit=True)
 
         self.nextrely += 1  # Move down
         self.add(BrowseTableButton, name="Browse Table", rely=6, relx=30, max_width=12)
@@ -1161,11 +1161,15 @@ class ExportWindow(npyscreen.ActionForm, npyscreen.SplitForm):
                  color="CONTROL")
 
         self.import_filename = self.add(npyscreen.TitleFixedText, name="File/Path: ", value="", relx=30, rely=9,
-                                        max_width=80, egin_entry_at=7, editable=False, hidden=True)
+                                        max_width=80, egin_entry_at=7, editable=False)
 
-        self.add(Import_Button, name="Import", relx=28, rely=11, scroll_exit=True)
+        self.select_table_msg = self.add(npyscreen.FixedText, value="Select a table from the list to import into",
+                                         relx=30, rely=11, max_width=44, egin_entry_at=7, color="CONTROL",
+                                         editable=False)
 
-        self.add(npyscreen.FixedText, value="Export Table", color="LABEL", relx=30, rely=14, editable=False)
+        self.add(Import_Button, name="Import", relx=28, rely=13, color="CONTROL", scroll_exit=True)
+
+        self.add(npyscreen.FixedText, value="Export Table", color="LABEL", relx=30, rely=18, editable=False)
 
 
         #self.nextrely += 1  # Move down
@@ -1185,8 +1189,8 @@ class ExportWindow(npyscreen.ActionForm, npyscreen.SplitForm):
         #npyscreen.notify_yes_no('Are you sure you want to import {}'.format(self.selected_importfile) + "?",
         #                        title='File Selected')
         self.import_filename.value = self.selected_importfile
-        self.import_filename.hidden = False
         self.import_filename.display()
+
 
     @staticmethod
     def display_help(self):
@@ -2065,10 +2069,17 @@ class Import_Button(npyscreen.ButtonPress):
 
         # check if file is selected and if it's a CSV file
         if str(self.parent.import_filename.value) == "" or str(self.parent.import_filename.value)[-4:] != ".csv":
-            npyscreen.notify_confirm("You must select a CSV file to import. You selected " + str(self.parent.import_filename.value)[-4:])
+            npyscreen.notify_confirm("You must select a CSV file to import")
             return
 
-        sql_string = "COPY contact_info FROM '{}' DELIMITER ',' CSV HEADER".format(self.parent.selected_importfile)
+        elif not self.parent.tablebox.value:
+            npyscreen.notify_confirm("You must select a table from the list to import into")
+            return
+
+        self.selected_table = self.parent.parentApp.tableList[self.parent.tablebox.value]
+
+        sql_string = "COPY {} FROM '{}' DELIMITER ',' CSV HEADER".format(self.selected_table,
+                                                                         self.parent.selected_importfile)
 
         self.results = self.parent.parentApp.dbms.execute_SQL(sql_string)
 
