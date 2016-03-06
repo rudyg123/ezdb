@@ -5,6 +5,10 @@ import postgres_db as pdb
 import mysql_db as mdb
 import time
 import math
+import os
+import stat
+from pwd import getpwnam
+from grp import getgrnam
 
 
 # ActionForm includes "Cancel" in addition to "OK"
@@ -612,7 +616,7 @@ class QueryWindow(npyscreen.ActionForm, npyscreen.SplitForm):
                  relx=58, max_width=20, color="CURSOR_INVERSE", use_two_lines=False, editable=False)
 
         self.nextrely += 1  # Move down
-        self.field_box3 = self.add(QB_FieldBox03, w_id="wField_list1", name="Fields", values=self.parentApp.field_list1,
+        self.field_box3 = self.add(QB_FieldBox03, w_id="wField_list3", name="Fields", values=self.parentApp.field_list3,
                                    relx=57, max_width=22, max_height=6, scroll_exit=True)
 
         self.label_field3 = self.add(npyscreen.FixedText, w_id="wLabel_field3_selected", value="None",
@@ -1157,7 +1161,7 @@ class ExportWindow(npyscreen.ActionForm, npyscreen.SplitForm):
 
         self.add(npyscreen.FixedText, value="Import Table", color="LABEL", relx=30, rely=6, editable=False)
 
-        self.add(npyscreen.FixedText, value="Press '+' to select CSV file to import", relx=30, rely=8, max_width=35,
+        self.add(npyscreen.FixedText, value="Press '+' to select CSV file to import", relx=30, rely=8, max_width=45,
                  color="CONTROL")
 
         self.import_filename = self.add(npyscreen.TitleFixedText, name="File/Path: ", value="", relx=30, rely=9,
@@ -1185,7 +1189,7 @@ class ExportWindow(npyscreen.ActionForm, npyscreen.SplitForm):
 
     def open_file_dialog(self, code_of_key_pressed):
 
-        self.selected_importfile = npyscreen.selectFile()
+        self.selected_importfile = npyscreen.selectFile(starting_value="/tmp")
         #npyscreen.notify_yes_no('Are you sure you want to import {}'.format(self.selected_importfile) + "?",
         #                        title='File Selected')
         self.import_filename.value = self.selected_importfile
@@ -1193,9 +1197,16 @@ class ExportWindow(npyscreen.ActionForm, npyscreen.SplitForm):
 
 
     @staticmethod
-    def display_help(self):
-        help_msg = "Use this page to export contents from a specified table to a CSV text file. This may be useful " \
-                   "for importing database information to another program, such as Microsoft Excel."
+    def display_help():
+        help_msg = "Use this page to import or export contents between database tables and CSV files.\n\n" \
+                   "In order to import data from a CSV file into a database, you must first create a table containing\n" \
+                   "matching column field names and types matching the CSV file. Then, to import a CSV file, press the\n" \
+                   "'+' key to select the file. Select the table in the list and then choose the 'Import' button.\n\n" \
+                   "A note regarding MySQL file import: Linux AppArmor access control limits visibility to files to be\n" \
+                   "imported by MySQL's LOAD DATA functionality. To workaround this in ezdb, AppArmor's config file has\n" \
+                   "been modified to provide import file visibility in the top level '/tmp' directory. Because of this,\n" \
+                   "be sure to place any file you wish to import using MySQL into the '/tmp' directory."
+
         npyscreen.notify_confirm(help_msg, title='Help Menu', editw=1)
 
 
@@ -2076,10 +2087,20 @@ class Import_Button(npyscreen.ButtonPress):
             npyscreen.notify_confirm("You must select a table from the list to import into")
             return
 
+        sql_string = ""
+
         self.selected_table = self.parent.parentApp.tableList[self.parent.tablebox.value]
 
-        sql_string = "COPY {} FROM '{}' DELIMITER ',' CSV HEADER".format(self.selected_table,
-                                                                         self.parent.selected_importfile)
+        if self.parent.parentApp.dbtype == 0: # if postgresql
+
+            sql_string = "COPY {} FROM '{}' DELIMITER ',' CSV HEADER".format(self.selected_table,
+                                                                             self.parent.selected_importfile)
+
+        elif self.parent.parentApp.dbtype == 1: # if mysql
+
+            sql_string = "LOAD DATA INFILE '{}' INTO TABLE {} FIELDS TERMINATED BY ',' LINES TERMINATED BY " \
+                         "'\\r' IGNORE 1 LINES".format(self.parent.selected_importfile, self.selected_table)
+            npyscreen.notify_confirm(sql_string)
 
         self.results = self.parent.parentApp.dbms.execute_SQL(sql_string)
 
