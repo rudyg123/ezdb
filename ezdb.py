@@ -5,11 +5,6 @@ import postgres_db as pdb
 import mysql_db as mdb
 import time
 import math
-import os
-import stat
-from pwd import getpwnam
-from grp import getgrnam
-
 
 # ActionForm includes "Cancel" in addition to "OK"
 class Initial(npyscreen.ActionForm, npyscreen.SplitForm):
@@ -530,13 +525,13 @@ class QueryWindow(npyscreen.ActionForm, npyscreen.SplitForm):
 
         # Sub-nav for action type
 
-        self.selectBtn = self.add(QuerySelectBtn, name="SELECT", value="QueryWindow", color="VERYGOOD", rely=3, relx=37)
+        self.add(QuerySelectBtn, name="SELECT", value="QueryWindow", color="VERYGOOD", rely=3, relx=37)
 
-        self.insertBtn = self.add(QueryInsertBtn, name="INSERT", value="QueryInsertWindow", rely=3, relx=49)
+        self.add(QueryInsertBtn, name="INSERT", value="QueryInsertWindow", rely=3, relx=49)
 
-        self.updateBtn = self.add(QueryUpdateBtn, name="UPDATE", value="QueryUpdateWindow", rely=3, relx=61)
+        self.add(QueryUpdateBtn, name="UPDATE", value="QueryUpdateWindow", rely=3, relx=61)
 
-        self.deleteBtn = self.add(QueryDeleteBtn, name="DELETE", value="QueryDeleteWindow", rely=3, relx=73)
+        self.add(QueryDeleteBtn, name="DELETE", value="QueryDeleteWindow", rely=3, relx=73)
 
         #label variables for selected table/fields
         self.table1_selected, self.table2_selected, self.table3_selected, self.field1_selected, \
@@ -692,28 +687,32 @@ class QueryInsertWindow(npyscreen.ActionForm, npyscreen.SplitForm):
 
         self.add(NavExitButton, w_id="wNavExit", name="Exit", value="AdminWindow", rely=1, relx=109)
 
-        # Sub-nav for action type
-        self.add(npyscreen.FixedText, value="Action: ", editable=False, relx=3, rely=3)
-        self.nextrelx += 12
-        self.nextrely -= 1
-        self.selectBtn = self.add(QuerySelectBtn, name="SELECT", value="QueryWindow")
-        self.nextrelx += 12
-        self.nextrely -= 1
-        self.insertBtn = self.add(QueryInsertBtn, name="INSERT", value="QueryInsertWindow", color="VERYGOOD")
-        self.nextrelx += 12
-        self.nextrely -= 1
-        self.updateBtn = self.add(QueryUpdateBtn, name="UPDATE", value="QueryUpdateWindow")
-        self.nextrelx += 12
-        self.nextrely -= 1
-        self.deleteBtn = self.add(QueryDeleteBtn, name="DELETE", value="QueryDeleteWindow")
+        self.add(npyscreen.FixedText, value="Database: {}".format(self.parentApp.active_db), rely=3, relx=3,
+                 color="LABEL", editable=False)
 
-        # DELETE THIS
-        self.nextrely = 8
-        self.nextrelx = 12
-        self.add(npyscreen.FixedText, value="WELCOME TO THE INSERT FORM", editable=False)
+        # Sub-nav for action type
+
+        self.add(QuerySelectBtn, name="SELECT", value="QueryWindow", rely=3, relx=37)
+
+        self.add(QueryInsertBtn, name="INSERT", value="QueryInsertWindow", rely=3, relx=49, color="VERYGOOD")
+
+        self.add(QueryUpdateBtn, name="UPDATE", value="QueryUpdateWindow", rely=3, relx=61)
+
+        self.add(QueryDeleteBtn, name="DELETE", value="QueryDeleteWindow", rely=3, relx=73)
+
+        self.add(QB_InsertTableBox, name="Select Table", values=self.parentApp.tableList, max_width=30, max_height=22,
+                 relx=3, rely=6, scroll_exit=True)
+
+        self.insertfield_box = self.add(QB_InsertFieldBox, w_id="wInsertField_list", name="Choose Fields: ",
+                                        values=self.parentApp.insertfield_list, max_width=30, max_height=22,
+                                        relx=36, rely=6, scroll_exit=True)
+
+    def beforeEditing(self):
+
+        self.parentApp.tableList = self.parentApp.dbms.list_database_tables()
 
         # Help menu guidance
-        self.nextrely = 32
+        self.nextrely = 34
         self.nextrelx = 2
         self.add(npyscreen.FixedText, value=" Press ^Q for Help ", editable=False)
 
@@ -748,29 +747,21 @@ class QueryUpdateWindow(npyscreen.ActionForm, npyscreen.SplitForm):
 
         self.add(NavExitButton, w_id="wNavExit", name="Exit", value="AdminWindow", rely=1, relx=109)
 
+        self.add(npyscreen.FixedText, value="Database: {}".format(self.parentApp.active_db), rely=3, relx=3,
+                 color="LABEL", editable=False)
 
         # Sub-nav for action type
-        self.add(npyscreen.FixedText, value="Action: ", editable=False, relx=3, rely=3)
-        self.nextrelx += 12
-        self.nextrely -= 1
-        self.selectBtn = self.add(QuerySelectBtn, name="SELECT", value="QueryWindow")
-        self.nextrelx += 12
-        self.nextrely -= 1
-        self.insertBtn = self.add(QueryInsertBtn, name="INSERT", value="QueryInsertWindow")
-        self.nextrelx += 12
-        self.nextrely -= 1
-        self.updateBtn = self.add(QueryUpdateBtn, name="UPDATE", value="QueryUpdateWindow", color="VERYGOOD")
-        self.nextrelx += 12
-        self.nextrely -= 1
-        self.deleteBtn = self.add(QueryDeleteBtn, name="DELETE", value="QueryDeleteWindow")
 
-        # DELETE THIS
-        self.nextrely = 8
-        self.nextrelx = 12
-        self.add(npyscreen.FixedText, value="WELCOME TO THE UPDATE FORM", editable=False)
+        self.add(QuerySelectBtn, name="SELECT", value="QueryWindow", rely=3, relx=37)
+
+        self.add(QueryInsertBtn, name="INSERT", value="QueryInsertWindow", rely=3, relx=49)
+
+        self.add(QueryUpdateBtn, name="UPDATE", value="QueryUpdateWindow", rely=3, relx=61, color="VERYGOOD")
+
+        self.add(QueryDeleteBtn, name="DELETE", value="QueryDeleteWindow", rely=3, relx=73)
 
         # Help menu guidance
-        self.nextrely = 32
+        self.nextrely = 34
         self.nextrelx = 2
         self.add(npyscreen.FixedText, value=" Press ^Q for Help ", editable=False)
 
@@ -805,28 +796,21 @@ class QueryDeleteWindow(npyscreen.ActionForm, npyscreen.SplitForm):
 
         self.add(NavExitButton, w_id="wNavExit", name="Exit", value="AdminWindow", rely=1, relx=109)
 
-        # Sub-nav for action type
-        self.add(npyscreen.FixedText, value="Action: ", editable=False, relx=3, rely=3)
-        self.nextrelx += 12
-        self.nextrely -= 1
-        self.selectBtn = self.add(QuerySelectBtn, name="SELECT", value="QueryWindow")
-        self.nextrelx += 12
-        self.nextrely -= 1
-        self.insertBtn = self.add(QueryInsertBtn, name="INSERT", value="QueryInsertWindow")
-        self.nextrelx += 12
-        self.nextrely -= 1
-        self.updateBtn = self.add(QueryUpdateBtn, name="UPDATE", value="QueryUpdateWindow")
-        self.nextrelx += 12
-        self.nextrely -= 1
-        self.deleteBtn = self.add(QueryDeleteBtn, name="DELETE", value="QueryDeleteWindow", color="VERYGOOD")
+        self.add(npyscreen.FixedText, value="Database: {}".format(self.parentApp.active_db), rely=3, relx=3,
+                 color="LABEL", editable=False)
 
-        # DELETE THIS
-        self.nextrely = 8
-        self.nextrelx = 12
-        self.add(npyscreen.FixedText, value="WELCOME TO THE DELETE FORM", editable=False)
+        # Sub-nav for action type
+
+        self.add(QuerySelectBtn, name="SELECT", value="QueryWindow", rely=3, relx=37)
+
+        self.add(QueryInsertBtn, name="INSERT", value="QueryInsertWindow", rely=3, relx=49)
+
+        self.add(QueryUpdateBtn, name="UPDATE", value="QueryUpdateWindow", rely=3, relx=61)
+
+        self.add(QueryDeleteBtn, name="DELETE", value="QueryDeleteWindow", color="VERYGOOD", rely=3, relx=73)
 
         # Help menu guidance
-        self.nextrely = 32
+        self.nextrely = 34
         self.nextrelx = 2
         self.add(npyscreen.FixedText, value=" Press ^Q for Help ", editable=False)
 
@@ -1149,6 +1133,51 @@ class QB_FieldBox03(npyscreen.BoxTitle):
     _contained_widget = QB_FieldList03
 
 
+class QB_InsertTableList(npyscreen.MultiLineAction):
+
+    def actionHighlighted(self, act_on_this, key_press):
+
+        # self.parent.label_table1.value = act_on_this
+        # self.parent.label_table1.display()
+
+        #npyscreen.notify_confirm("value of table1_selected:" + str(self.parent.table1_selected))
+
+        field_list = []
+
+        #run query
+        results = self.parent.parentApp.dbms.get_table_fields(act_on_this)
+        if results[0] == "success":
+            field_list.append('[ALL]')
+
+            for field in results[1]:
+                field_list.append(field[0])
+            self.parent.insertfield_box.values = field_list
+            self.parent.insertfield_box.display()
+
+            self.parent.parentApp.insertTable = act_on_this
+
+        else:
+            npyscreen.notify_confirm(str(results[1]))
+
+
+class QB_InsertTableBox(npyscreen.BoxTitle):
+    _contained_widget = QB_InsertTableList
+
+
+class QB_InsertFieldList(npyscreen.MultiSelect):
+
+    def actionSelected(self, act_on_these, key_press):
+        pass
+        #self.parent.label_field1.value = act_on_this
+        #self.parent.label_field1.display()
+
+        #self.parent.parentApp.field1 = act_on_this
+
+
+class QB_InsertFieldBox(npyscreen.BoxTitle):
+    _contained_widget = QB_InsertFieldList
+
+
 class ImportExportWindow(npyscreen.ActionForm, npyscreen.SplitForm):
 
     def create(self):
@@ -1181,25 +1210,37 @@ class ImportExportWindow(npyscreen.ActionForm, npyscreen.SplitForm):
         self.add(npyscreen.FixedText, value="Database: {}".format(self.parentApp.active_db), color="VERYGOOD",
                  relx=3, editable=False)
 
+        self.add(npyscreen.FixedText, value="Select a table to import",
+                 relx=3, rely=5, max_width=33, color="CONTROL",editable=False)
+
+        self.add(npyscreen.FixedText, value="into or to export to an",
+                 relx=3, rely=6, max_width=33, color="CONTROL",editable=False)
+
+        self.add(npyscreen.FixedText, value="external CSV file",
+                 relx=3, rely=7, max_width=33, color="CONTROL",editable=False)
+
         self.tablebox = self.add(npyscreen.BoxTitle, w_id="wTables_box", name="Tables", values=self.parentApp.tableList,
-                                 rely=5, max_width=25, max_height=20, scroll_exit=True)
+                                 rely=9, max_width=25, max_height=20, scroll_exit=True)
 
-        self.add(npyscreen.FixedText, value="Import Table", color="LABEL", relx=30, rely=6, editable=False)
+        self.add(npyscreen.FixedText, value="IMPORT CSV Table Data", color="LABEL", relx=30, rely=10, editable=False)
 
-        self.add(npyscreen.FixedText, value="Press '+' to select CSV file to import", relx=30, rely=8, max_width=45,
+        self.add(npyscreen.FixedText, value="Press '+' to select CSV file to import", relx=30, rely=12, max_width=45,
                  color="CONTROL")
 
-        self.import_filename = self.add(npyscreen.TitleFixedText, name="File/Path: ", value="", relx=30, rely=9,
-                                        max_width=80, egin_entry_at=7, editable=False)
+        self.import_filename = self.add(npyscreen.TitleFixedText, name="Import File/Path: ", value="", relx=30, rely=13,
+                                        max_width=80, begin_entry_at=7, editable=False)
 
-        self.select_table_msg = self.add(npyscreen.FixedText, value="Select a table from the list to import into",
-                                         relx=30, rely=11, max_width=44, egin_entry_at=7, color="CONTROL",
-                                         editable=False)
+        self.add(Import_Button, name="Import", relx=28, rely=15, color="CONTROL", scroll_exit=True)
 
-        self.add(Import_Button, name="Import", relx=28, rely=13, color="CONTROL", scroll_exit=True)
+        self.add(npyscreen.FixedText, value="---------------------------------------", relx=30, rely=17, max_width=45,
+                 color="CONTROL")
 
-        self.add(npyscreen.FixedText, value="Export Table", color="LABEL", relx=30, rely=18, editable=False)
+        self.add(npyscreen.FixedText, value="EXPORT Table to CSV File", color="LABEL", relx=30, rely=19, editable=False)
 
+        self.export_filename = self.add(npyscreen.TitleText, name="CSV Path/Filename: ", value="", relx=30,
+                                        rely=21, max_width=80, begin_entry_at=20, use_two_lines=False)
+
+        self.add(Export_Button, name="Export", relx=28, rely=23, color="CONTROL", scroll_exit=True)
 
         #self.nextrely += 1  # Move down
 
@@ -1214,7 +1255,7 @@ class ImportExportWindow(npyscreen.ActionForm, npyscreen.SplitForm):
 
     def open_file_dialog(self, code_of_key_pressed):
 
-        self.selected_importfile = npyscreen.selectFile(starting_value="/tmp")
+        self.selected_importfile = npyscreen.selectFile(starting_value="/home/csv_files")
         #npyscreen.notify_yes_no('Are you sure you want to import {}'.format(self.selected_importfile) + "?",
         #                        title='File Selected')
         self.import_filename.value = self.selected_importfile
@@ -2110,7 +2151,7 @@ class Import_Button(npyscreen.ButtonPress):
             npyscreen.notify_confirm("You must select a CSV file to import")
             return
 
-        elif not self.parent.tablebox.value:
+        elif self.parent.tablebox.value is None:
             npyscreen.notify_confirm("You must select a table from the list to import into")
             return
 
@@ -2125,8 +2166,8 @@ class Import_Button(npyscreen.ButtonPress):
 
         elif self.parent.parentApp.dbtype == 1: # if mysql
 
-            sql_string = "LOAD DATA INFILE '{}' INTO TABLE {} FIELDS TERMINATED BY ',' LINES TERMINATED BY " \
-                         "'\\r' IGNORE 1 LINES".format(self.parent.selected_importfile, self.selected_table)
+            sql_string = "LOAD DATA INFILE '{}' INTO TABLE {} FIELDS TERMINATED BY ',' LINES TERMINATED BY '\\r\\n' " \
+                         "IGNORE 1 LINES".format(self.parent.selected_importfile, self.selected_table)
             npyscreen.notify_confirm(sql_string)
 
         self.results = self.parent.parentApp.dbms.execute_SQL(sql_string)
@@ -2141,6 +2182,47 @@ class Import_Button(npyscreen.ButtonPress):
 
             return
 
+
+class Export_Button(npyscreen.ButtonPress):
+
+    def whenPressed(self):
+
+        # check if export file specified has a CSV extension
+        if str(self.parent.export_filename.value) == "" or str(self.parent.export_filename.value)[-4:] != ".csv":
+            npyscreen.notify_confirm("You must specify filename with a CSV extension to export")
+            return
+
+        elif self.parent.tablebox.value is None:
+            npyscreen.notify_confirm("You must choose a table from the list to export")
+            return
+
+        sql_string = ""
+
+        self.selected_table = self.parent.parentApp.tableList[self.parent.tablebox.value]
+
+        if self.parent.parentApp.dbtype == 0: # if postgresql
+
+            sql_string = "COPY {} TO '{}' DELIMITER ',' CSV HEADER".format(self.selected_table,
+                                                                           self.parent.export_filename.value)
+
+        elif self.parent.parentApp.dbtype == 1: # if mysql
+
+            sql_string = "SELECT * INTO OUTFILE '{}' FIELDS TERMINATED BY ',' ENCLOSED BY '\"' " \
+                         "LINES TERMINATED BY '\\r\\n' FROM {}".format(self.parent.export_filename.value, self.selected_table)
+
+        npyscreen.notify_confirm(sql_string)
+        self.results = self.parent.parentApp.dbms.execute_SQL(sql_string)
+
+        if self.results[0] == 'error':
+            npyscreen.notify_confirm(str(self.results[1]))
+            return
+
+        elif self.results[0] == 'success':
+            #os.chmod(self.parent.export_filename.value, 0o777)
+            #os.chown(self.parent.export_filename.value, os.getuid(), os.getgid())
+            npyscreen.notify_confirm("File exported successfully")
+
+            return
 
 '''PAGE BUTTONS'''
 
@@ -2276,10 +2358,10 @@ class App(npyscreen.NPSAppManaged):
     field_optional = True  # User friendly way of saying if Null is okay for this field
 
     field1, field2, field3, tbl1_criteria1, tbl1_criteria2, tbl1_criteria3, tbl2_criteria1, tbl2_criteria2, \
-        tbl2_criteria3, tbl3_criteria1, tbl3_criteria2, tbl3_criteria3, table1, table2, table3 = (None,)*15
+        tbl2_criteria3, tbl3_criteria1, tbl3_criteria2, tbl3_criteria3, table1, table2, table3, insertTable = (None,)*16
 
     tablefield_cols, query_results, col_titles, table_struct_results, field_string_array, field_list1, \
-    field_list2, field_list3 = ([],)*8
+    field_list2, field_list3, insertfield_list = ([],)*9
 
     page_num = 0
     num_pages, num_records = (0,)*2

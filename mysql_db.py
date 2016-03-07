@@ -239,7 +239,7 @@ class MySQL_Database(object):
         row_count = 0
 
         try:
-            if "select" in sql_string.lower():
+            if "select" in sql_string.lower() and "outfile" not in sql_string.lower():
 
                 self.cur.execute(sql_string + " LIMIT 0;")
                 self.conn.commit()
