@@ -2337,12 +2337,10 @@ class QueryInsert_InsertButton(npyscreen.ButtonPress):
             if insertfield.value is not None:
                 npyscreen.notify_confirm("insertfield.value = " + insertfield.value)
                 values_string += "'" + insertfield.value + "', "
-        npyscreen.notify_confirm("values_string = " + values_string)
-        values_string = values_string[:-2]
-        npyscreen.notify_confirm("values_string = " + values_string)
-        sql_string = "INSERT INTO {}({}) VALUES({})".format(self.parent.parentApp.insertTable, field_string, values_string)
 
-        npyscreen.notify_confirm(sql_string)
+        values_string = values_string[:-2]
+
+        sql_string = "INSERT INTO {}({}) VALUES({})".format(self.parent.parentApp.insertTable, field_string, values_string)
 
         self.results = self.parent.parentApp.dbms.execute_SQL(sql_string)
 
