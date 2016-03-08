@@ -704,8 +704,135 @@ class QueryInsertWindow(npyscreen.ActionForm, npyscreen.SplitForm):
                  relx=3, rely=6, scroll_exit=True)
 
         self.insertfield_box = self.add(QB_InsertFieldBox, w_id="wInsertField_list", name="Choose Fields: ",
-                                        values=self.parentApp.insertfield_list, max_width=30, max_height=22,
+                                        max_width=30, max_height=22,
+                                        contained_widget_arguments={"values": self.parentApp.insertfield_list},
                                         relx=36, rely=6, scroll_exit=True)
+
+        self.add(QueryInsert_LoadFieldsButton, name="Load Fields", relx=44, rely=29, max_width=12)
+
+        self.add(QueryInsert_InsertButton, name="Insert Values", relx=43, rely=31, max_width=12)
+
+        self.label_field01 = self.add(npyscreen.FixedText, value="", relx=70, rely=7, max_width=15, color="LABEL",
+                                      hidden=True, editable=False)
+
+        self.label_field02 = self.add(npyscreen.FixedText, value="", relx=70, rely=8, max_width=15, color="LABEL",
+                                      hidden=True, editable=False)
+
+        self.label_field03 = self.add(npyscreen.FixedText, value="", relx=70, rely=9, max_width=15, color="LABEL",
+                                      hidden=True, editable=False)
+
+        self.label_field04 = self.add(npyscreen.FixedText, value="", relx=70, rely=10, max_width=15, color="LABEL",
+                                      hidden=True, editable=False)
+
+        self.label_field05 = self.add(npyscreen.FixedText, value="", relx=70, rely=11, max_width=15, color="LABEL",
+                                      hidden=True, editable=False)
+
+        self.label_field06 = self.add(npyscreen.FixedText, value="", relx=70, rely=12, max_width=15, color="LABEL",
+                                      hidden=True, editable=False)
+
+        self.label_field07 = self.add(npyscreen.FixedText, value="", relx=70, rely=13, max_width=15, color="LABEL",
+                                      hidden=True, editable=False)
+
+        self.label_field08 = self.add(npyscreen.FixedText, value="", relx=70, rely=14, max_width=15, color="LABEL",
+                                      hidden=True, editable=False)
+
+        self.label_field09 = self.add(npyscreen.FixedText, value="", relx=70, rely=15, max_width=15, color="LABEL",
+                                      hidden=True, editable=False)
+
+        self.label_field10 = self.add(npyscreen.FixedText, value="", relx=70, rely=16, max_width=15, color="LABEL",
+                                      hidden=True, editable=False)
+
+        self.label_field11 = self.add(npyscreen.FixedText, value="", relx=70, rely=17, max_width=15, color="LABEL",
+                                      hidden=True, editable=False)
+
+        self.label_field12 = self.add(npyscreen.FixedText, value="", relx=70, rely=18, max_width=15, color="LABEL",
+                                      hidden=True, editable=False)
+
+        self.label_field13 = self.add(npyscreen.FixedText, value="", relx=70, rely=19, max_width=15, color="LABEL",
+                                      hidden=True, editable=False)
+
+        self.label_field14 = self.add(npyscreen.FixedText, value="", relx=70, rely=20, max_width=15, color="LABEL",
+                                      hidden=True, editable=False)
+
+        self.label_field15 = self.add(npyscreen.FixedText, value="", relx=70, rely=21, max_width=15, color="LABEL",
+                                      hidden=True, editable=False)
+
+        self.label_field16 = self.add(npyscreen.FixedText, value="", relx=70, rely=22, max_width=15, color="LABEL",
+                                      hidden=True, editable=False)
+
+        self.label_field17 = self.add(npyscreen.FixedText, value="", relx=70, rely=23, max_width=15, color="LABEL",
+                                      hidden=True, editable=False)
+
+        self.label_field18 = self.add(npyscreen.FixedText, value="", relx=70, rely=24, max_width=15, color="LABEL",
+                                      hidden=True, editable=False)
+
+        self.label_field19 = self.add(npyscreen.FixedText, value="", relx=70, rely=25, max_width=15, color="LABEL",
+                                      hidden=True, editable=False)
+
+        self.label_field20 = self.add(npyscreen.FixedText, value="", relx=70, rely=26, max_width=15, color="LABEL",
+                                      hidden=True, editable=False)
+
+        self.insertfield01 = self.add(npyscreen.TitleText, name=" ", relx=87, rely=7, max_width=30, begin_entry_at=1,
+                                      use_two_lines=False, hidden=True)
+
+        self.insertfield02 = self.add(npyscreen.TitleText, name=" ", relx=87, rely=8, max_width=30, begin_entry_at=1,
+                                      use_two_lines=False, hidden=True)
+
+        self.insertfield03 = self.add(npyscreen.TitleText, name=" ", relx=87, rely=9, max_width=30, begin_entry_at=1,
+                                      use_two_lines=False, hidden=True)
+
+        self.insertfield04 = self.add(npyscreen.TitleText, name=" ", relx=87, rely=10, max_width=30, begin_entry_at=1,
+                                      use_two_lines=False, hidden=True)
+
+        self.insertfield05 = self.add(npyscreen.TitleText, name=" ", relx=87, rely=11, max_width=30, begin_entry_at=1,
+                                      use_two_lines=False, hidden=True)
+
+        self.insertfield06 = self.add(npyscreen.TitleText, name=" ", relx=87, rely=12, max_width=30, begin_entry_at=1,
+                                      use_two_lines=False, hidden=True)
+
+        self.insertfield07 = self.add(npyscreen.TitleText, name=" ", relx=87, rely=13, max_width=30, begin_entry_at=1,
+                                      use_two_lines=False, hidden=True)
+
+        self.insertfield08 = self.add(npyscreen.TitleText, name=" ", relx=87, rely=14, max_width=30, begin_entry_at=1,
+                                      use_two_lines=False, hidden=True)
+
+        self.insertfield09 = self.add(npyscreen.TitleText, name=" ", relx=87, rely=15, max_width=30, begin_entry_at=1,
+                                      use_two_lines=False, hidden=True)
+
+        self.insertfield10 = self.add(npyscreen.TitleText, name=" ", relx=87, rely=16, max_width=30, begin_entry_at=1,
+                                      use_two_lines=False, hidden=True)
+
+        self.insertfield11 = self.add(npyscreen.TitleText, name=" ", relx=87, rely=17, max_width=30, begin_entry_at=1,
+                                      use_two_lines=False, hidden=True)
+
+        self.insertfield12 = self.add(npyscreen.TitleText, name=" ", relx=87, rely=18, max_width=30, begin_entry_at=1,
+                                      use_two_lines=False, hidden=True)
+
+        self.insertfield13 = self.add(npyscreen.TitleText, name=" ", relx=87, rely=19, max_width=30, begin_entry_at=1,
+                                      use_two_lines=False, hidden=True)
+
+        self.insertfield14 = self.add(npyscreen.TitleText, name=" ", relx=87, rely=20, max_width=30, begin_entry_at=1,
+                                      use_two_lines=False, hidden=True)
+
+        self.insertfield15 = self.add(npyscreen.TitleText, name=" ", relx=87, rely=21, max_width=30, begin_entry_at=1,
+                                      use_two_lines=False, hidden=True)
+
+        self.insertfield16 = self.add(npyscreen.TitleText, name=" ", relx=87, rely=22, max_width=30, begin_entry_at=1,
+                                      use_two_lines=False, hidden=True)
+
+        self.insertfield17 = self.add(npyscreen.TitleText, name=" ", relx=87, rely=23, max_width=30, begin_entry_at=1,
+                                      use_two_lines=False, hidden=True)
+
+        self.insertfield18 = self.add(npyscreen.TitleText, name=" ", relx=87, rely=24, max_width=30, begin_entry_at=1,
+                                      use_two_lines=False, hidden=True)
+
+        self.insertfield19 = self.add(npyscreen.TitleText, name=" ", relx=87, rely=25, max_width=30, begin_entry_at=1,
+                                      use_two_lines=False, hidden=True)
+
+        self.insertfield20 = self.add(npyscreen.TitleText, name=" ", relx=87, rely=26, max_width=30, begin_entry_at=1,
+                                      use_two_lines=False, hidden=True)
+
+
 
     def beforeEditing(self):
 
@@ -1165,9 +1292,9 @@ class QB_InsertTableBox(npyscreen.BoxTitle):
 
 
 class QB_InsertFieldList(npyscreen.MultiSelect):
-
-    def actionSelected(self, act_on_these, key_press):
-        pass
+    pass
+    #def actionSelected(self, act_on_these, key_press):
+    #    pass
         #self.parent.label_field1.value = act_on_this
         #self.parent.label_field1.display()
 
@@ -1462,6 +1589,7 @@ class ViewTableStructButton(npyscreen.ButtonPress):
         self.parent.gridbox_results.display()
         self.parent.numrecords.display()
         return
+
 
 class BrowseTableButton(npyscreen.ButtonPress):
 
@@ -2122,10 +2250,110 @@ class QuerySelectBtn(npyscreen.ButtonPress):
         return
 
 
+
 class QueryInsertBtn(npyscreen.ButtonPress):
     def whenPressed(self):
         self.parent.parentApp.switchForm("QueryInsertWindow")
         return
+
+
+class QueryInsert_LoadFieldsButton(npyscreen.ButtonPress):
+
+    def whenPressed(self):
+
+        field_select_list = self.parent.insertfield_box.entry_widget.get_selected_objects()
+        field_list_control = [self.parent.insertfield01, self.parent.insertfield02, self.parent.insertfield03,
+                              self.parent.insertfield04, self.parent.insertfield05, self.parent.insertfield06,
+                              self.parent.insertfield07, self.parent.insertfield08, self.parent.insertfield09,
+                              self.parent.insertfield10, self.parent.insertfield11, self.parent.insertfield12,
+                              self.parent.insertfield13, self.parent.insertfield14, self.parent.insertfield15,
+                              self.parent.insertfield16, self.parent.insertfield17, self.parent.insertfield18,
+                              self.parent.insertfield19, self.parent.insertfield20]
+
+        field_label_control = [self.parent.label_field01, self.parent.label_field02, self.parent.label_field03,
+                              self.parent.label_field04, self.parent.label_field05, self.parent.label_field06,
+                              self.parent.label_field07, self.parent.label_field08, self.parent.label_field09,
+                              self.parent.label_field10, self.parent.label_field11, self.parent.label_field12,
+                              self.parent.label_field13, self.parent.label_field14, self.parent.label_field15,
+                              self.parent.label_field16, self.parent.label_field17, self.parent.label_field18,
+                              self.parent.label_field19, self.parent.label_field20]
+        0
+
+        fieldSelectlist_length = len(field_select_list)
+
+        if fieldSelectlist_length == 0 or fieldSelectlist_length > 20:
+            npyscreen.notify_confirm("Please select at least 1 and no more than 20 fields for the insert operation")
+            return
+
+        fieldSelectList_idx = 0
+
+        self.parent.label_field01.value = field_select_list[fieldSelectList_idx]
+        self.parent.label_field01.hidden = False
+        self.parent.label_field01.display()
+
+        for label in field_label_control:
+            if fieldSelectList_idx == fieldSelectlist_length:
+                break
+
+            else:
+                label.value = str(field_select_list[fieldSelectList_idx] + ":")
+                label.hidden = False
+                field_list_control[fieldSelectList_idx].hidden = False
+
+                label.display()
+                field_list_control[fieldSelectList_idx].display()
+                fieldSelectList_idx += 1
+
+
+class QueryInsert_InsertButton(npyscreen.ButtonPress):
+
+    def whenPressed(self):
+
+        field_list_control = [self.parent.insertfield01, self.parent.insertfield02, self.parent.insertfield03,
+                              self.parent.insertfield04, self.parent.insertfield05, self.parent.insertfield06,
+                              self.parent.insertfield07, self.parent.insertfield08, self.parent.insertfield09,
+                              self.parent.insertfield10, self.parent.insertfield11, self.parent.insertfield12,
+                              self.parent.insertfield13, self.parent.insertfield14, self.parent.insertfield15,
+                              self.parent.insertfield16, self.parent.insertfield17, self.parent.insertfield18,
+                              self.parent.insertfield19, self.parent.insertfield20]
+
+        field_select_list = self.parent.insertfield_box.entry_widget.get_selected_objects()
+
+        fieldSelectlist_length = len(field_select_list)
+
+        if fieldSelectlist_length == 0 or fieldSelectlist_length > 20:
+            npyscreen.notify_confirm("Please select the table and fields first")
+            return
+
+        field_string = ""
+        values_string = ""
+
+        for field in field_select_list:
+            field_string += field + ", "
+
+        field_string = field_string[:-2]
+
+        for insertfield in field_list_control:
+            if insertfield.value is not None:
+                npyscreen.notify_confirm("insertfield.value = " + insertfield.value)
+                values_string += "'" + insertfield.value + "', "
+        npyscreen.notify_confirm("values_string = " + values_string)
+        values_string = values_string[:-2]
+        npyscreen.notify_confirm("values_string = " + values_string)
+        sql_string = "INSERT INTO {}({}) VALUES({})".format(self.parent.parentApp.insertTable, field_string, values_string)
+
+        npyscreen.notify_confirm(sql_string)
+
+        self.results = self.parent.parentApp.dbms.execute_SQL(sql_string)
+
+        if self.results[0] == 'error':
+            npyscreen.notify_confirm(str(self.results[1]))
+            return
+
+        elif self.results[0] == 'success':
+
+            npyscreen.notify_confirm("The insert operation completed successfully")
+            return
 
 
 class QueryUpdateBtn(npyscreen.ButtonPress):
