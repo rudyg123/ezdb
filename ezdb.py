@@ -710,7 +710,6 @@ class QueryInsertWindow(npyscreen.ActionForm, npyscreen.SplitForm):
 
         self.add(QueryInsert_LoadFieldsButton, name="Load Fields", relx=44, rely=29, max_width=12)
 
-        self.add(QueryInsert_InsertButton, name="Insert Values", relx=43, rely=31, max_width=12)
 
         self.label_field01 = self.add(npyscreen.FixedText, value="", relx=70, rely=7, max_width=15, color="LABEL",
                                       hidden=True, editable=False)
@@ -832,7 +831,7 @@ class QueryInsertWindow(npyscreen.ActionForm, npyscreen.SplitForm):
         self.insertfield20 = self.add(npyscreen.TitleText, name=" ", relx=87, rely=26, max_width=30, begin_entry_at=1,
                                       use_two_lines=False, hidden=True)
 
-
+        self.add(QueryInsert_InsertButton, name="Insert Values", relx=84, rely=29, max_width=12)
 
     def beforeEditing(self):
 
@@ -936,6 +935,92 @@ class QueryDeleteWindow(npyscreen.ActionForm, npyscreen.SplitForm):
 
         self.add(QueryDeleteBtn, name="DELETE", value="QueryDeleteWindow", color="VERYGOOD", rely=3, relx=73)
 
+        #label variables for selected table/fields
+        self.table1_selected, self.table2_selected, self.table3_selected, self.field1_selected, \
+        self.field2_selected, self.field3_selected = (None,)*6
+
+        self.nextrely += 1  # Move down
+
+        ''' TABLE '''
+
+        self.add(QBDelete_TableBox, name="Tables", values=self.parentApp.tableList, max_width=22, max_height=26,
+                 relx=3, rely=5, scroll_exit=True)
+
+        self.label_table = self.add(npyscreen.FixedText, value="Unselected", relx=4,
+                                    rely=31, max_width=20, color="CURSOR_INVERSE", use_two_lines=False, editable=False)
+
+
+        ''' FIELD 1 COLUMN '''
+
+        self.field_box1 = self.add(QB_FieldBox01, name="Fields", values=self.parentApp.field_list1,
+                                   relx=28, rely=5, max_width=22, max_height=17, scroll_exit=True)
+
+        self.label_field1 = self.add(npyscreen.FixedText, value="Unselected", relx=28,
+                                     rely=22, max_width=20, color="CURSOR_INVERSE", use_two_lines=False, editable=False)
+
+        self.nextrely += 1  # Move down
+        self.field1_criteria1 = self.add(npyscreen.TitleText, name="Criteria:", max_width=28, relx=28,
+                                       use_two_lines=False, begin_entry_at=10)
+
+        self.condition1 = self.add(npyscreen.SelectOne, max_height=2, relx=28, value=[0], values=["AND", "OR"],
+                                        scroll_exit=True, max_width=10)
+
+        self.field1_criteria2 = self.add(npyscreen.TitleText, name="Criteria:", relx=28, max_width=28,
+                                       use_two_lines=False, begin_entry_at=10)
+
+        self.condition2 = self.add(npyscreen.SelectOne, max_height=2, relx=28, value=[0], values=["AND", "OR"],
+                                        scroll_exit=True, max_width=10)
+
+        self.field1_criteria3 = self.add(npyscreen.TitleText, name="Criteria:", max_width=28, relx=28,
+                                       use_two_lines=False, begin_entry_at=10)
+
+        ''' FIELD 2 COLUMN '''
+
+        self.field_box2 = self.add(QB_FieldBox02, name="Fields", values=self.parentApp.field_list2,
+                                   relx=55, rely=5, max_width=22, max_height=17, scroll_exit=True)
+
+        self.label_field2 = self.add(npyscreen.FixedText, value="Unselected", relx=56,
+                                     rely=22, max_width=20, color="CURSOR_INVERSE", use_two_lines=False, editable=False)
+
+        self.nextrely += 1  # Move down
+        self.field2_criteria1 = self.add(npyscreen.TitleText, relx=55, name="Criteria:", max_width=28,
+                                       use_two_lines=False, begin_entry_at=10)
+
+        self.nextrely += 2  # Move down
+
+        self.field2_criteria2 = self.add(npyscreen.TitleText, relx=55, name="Criteria:", max_width=28,
+                                       use_two_lines=False, begin_entry_at=10)
+
+        self.nextrely += 2  # Move down
+
+        self.field2_criteria3 = self.add(npyscreen.TitleText, relx=55, name="Criteria:", max_width=28,
+                                       use_two_lines=False, begin_entry_at=10)
+
+        ''' FIELD 3 COLUMN '''
+
+        self.field_box3 = self.add(QB_FieldBox03, name="Fields", values=self.parentApp.field_list3,
+                                   relx=82, rely=5, max_width=22, max_height=17, scroll_exit=True)
+
+        self.label_field3 = self.add(npyscreen.FixedText, value="Unselected", relx=83, rely=22,
+                                     max_width=20, color="CURSOR_INVERSE", use_two_lines=False, editable=False)
+
+        self.nextrely += 1  # Move down
+        self.field3_criteria1 = self.add(npyscreen.TitleText, relx=82, name="Criteria:", max_width=28,
+                                         use_two_lines=False, begin_entry_at=10)
+
+        self.nextrely += 2  # Move down
+
+        self.field3_criteria2 = self.add(npyscreen.TitleText, relx=82, name="Criteria:", max_width=28,
+                                         use_two_lines=False, begin_entry_at=10)
+
+        self.nextrely += 2  # Move down
+
+        self.field3_criteria3 = self.add(npyscreen.TitleText, relx=82, name="Criteria:", max_width=28,
+                                         use_two_lines=False, begin_entry_at=10)
+
+        self.nextrely += 1  # Move down
+        self.add(QBDelete_Button, w_id="wDelete_Button", relx=55, max_width=12, name="Delete")
+
         # Help menu guidance
         self.nextrely = 34
         self.nextrelx = 2
@@ -946,7 +1031,12 @@ class QueryDeleteWindow(npyscreen.ActionForm, npyscreen.SplitForm):
 
     @staticmethod
     def display_help(self):
-        help_msg = "Use the DELETE form to delete rows from the database."
+        help_msg = "Use the DELETE form to delete rows from the database using the specified criteria.\n" \
+                   "The criteria statements are executed left to right on each criteria row with an assumed\n" \
+                   "AND operator. The AND/OR operators you specify apply to connect each criteria row to form\n" \
+                   "the full delete query.\n\n" \
+                   "Note: You must enclose criteria values within single quotes (e.g. LIKE '%Bi' or ='Tom')\n" \
+                   "Also, criteria values are case sensitive."
         npyscreen.notify_confirm(help_msg, title='Help Menu')
 
 
@@ -1139,15 +1229,13 @@ class QB_TableList01(npyscreen.MultiLineAction):
         self.parent.label_table1.value = act_on_this
         self.parent.label_table1.display()
 
-        #npyscreen.notify_confirm("value of table1_selected:" + str(self.parent.table1_selected))
-
         field_list = []
 
         #run query
         results = self.parent.parentApp.dbms.get_table_fields(act_on_this)
         if results[0] == "success":
             field_list.append('[ALL]')
-            #npyscreen.notify_confirm("the results returned are :" + str(results[1]))
+
             for field in results[1]:
                 field_list.append(field[0])
             self.parent.field_box1.values = field_list
@@ -1293,16 +1381,43 @@ class QB_InsertTableBox(npyscreen.BoxTitle):
 
 class QB_InsertFieldList(npyscreen.MultiSelect):
     pass
-    #def actionSelected(self, act_on_these, key_press):
-    #    pass
-        #self.parent.label_field1.value = act_on_this
-        #self.parent.label_field1.display()
-
-        #self.parent.parentApp.field1 = act_on_this
 
 
 class QB_InsertFieldBox(npyscreen.BoxTitle):
     _contained_widget = QB_InsertFieldList
+
+
+class QBDelete_TableList(npyscreen.MultiLineAction):
+
+    def actionHighlighted(self, act_on_this, key_press):
+
+        self.parent.label_table.value = act_on_this
+        self.parent.label_table.display()
+
+        field_list = []
+
+        #run query
+        results = self.parent.parentApp.dbms.get_table_fields(act_on_this)
+        if results[0] == "success":
+            field_list.append('[ALL]')
+
+            for field in results[1]:
+                field_list.append(field[0])
+            self.parent.field_box1.values = field_list
+            self.parent.field_box1.display()
+            self.parent.field_box2.values = field_list
+            self.parent.field_box2.display()
+            self.parent.field_box3.values = field_list
+            self.parent.field_box3.display()
+
+            self.parent.parentApp.table1 = act_on_this
+
+        else:
+            npyscreen.notify_confirm(str(results[1]))
+
+
+class QBDelete_TableBox(npyscreen.BoxTitle):
+    _contained_widget = QBDelete_TableList
 
 
 class ImportExportWindow(npyscreen.ActionForm, npyscreen.SplitForm):
@@ -2244,11 +2359,181 @@ class SQL_Send_Button(npyscreen.ButtonPress):
                 return
 
 
+class QBDelete_Button(npyscreen.ButtonPress):
+
+    def whenPressed(self):
+
+        ''' table and paired field checks '''
+
+        # check to make sure at least one table selected
+        if self.parent.label_table.value == "Unselected":
+            npyscreen.notify_confirm("You must select a table")
+            return
+
+        # check to make sure a selected table has field selected
+        if self.parent.label_table.value != "Unselected" and self.parent.label_field1.value == "Unselected" and \
+                        self.parent.label_field2.value == "Unselected" and \
+                        self.parent.label_field3.value == "Unselected":
+            npyscreen.notify_confirm("Select at least 1 field for the {} table".format(self.parent.parentApp.table1))
+            return
+
+        self.sql_string = "DELETE FROM {} ".format(self.parent.parentApp.table1)
+        #self.field_string = ""
+        self.criteria1_string = ""
+        self.criteria2_string = ""
+        self.criteria3_string = ""
+
+        if self.parent.label_field1.value == "[ALL]":
+            self.parent.label_field1.value = "*"
+        elif self.parent.label_field2.value == "[ALL]":
+            self.parent.label_field2.value = "*"
+        elif self.parent.label_field3.value == "[ALL]":
+            self.parent.label_field3.value = "*"
+
+        '''build WHERE criteria strings'''
+
+        # build criteria 1 string
+
+        if self.parent.field1_criteria1.value == "" and self.parent.field2_criteria1.value == "" \
+                and self.parent.field3_criteria1.value == "":  # check if all criteria1 fields are empty
+            pass
+
+        else:
+
+            self.criteria1_string += "("
+
+            if self.parent.field1_criteria1.value != "":
+                self.criteria1_string += "(" + self.parent.label_table.value + "." + self.parent.label_field1.value \
+                                         + " " + self.parent.field1_criteria1.value + ")"
+
+                if self.parent.field2_criteria1.value != "" or self.parent.field3_criteria1.value != "":
+                    self.criteria1_string += " AND "  # adds 'AND' operator if at least one other criteria1 value exists
+
+            if self.parent.field2_criteria1.value != "":
+                self.criteria1_string += "(" + self.parent.label_table.value + "." + self.parent.label_field2.value \
+                                         + " " + self.parent.field2_criteria1.value + ")"
+
+                if self.parent.field3_criteria1.value != "":
+                    self.criteria1_string += " AND "  # adds 'AND' operator if table 3 criteria1 value exists
+
+            if self.parent.field3_criteria1.value != "":
+                self.criteria1_string += "(" + self.parent.label_table.value + "." + self.parent.label_field3.value \
+                                         + " " + self.parent.field3_criteria1.value + ")"
+
+            self.criteria1_string += ")"
+
+        # build criteria 2 string
+
+        if self.parent.field1_criteria2.value == "" and self.parent.field2_criteria2.value == "" \
+                and self.parent.field3_criteria2.value == "":  # check if all criteria1 fields are empty
+            pass
+
+        else:
+
+            self.criteria2_string += "("
+
+            if self.parent.field1_criteria2.value != "":
+                self.criteria2_string += "(" + self.parent.label_table.value + "." + self.parent.label_field1.value \
+                                         + " " + self.parent.field1_criteria2.value + ")"
+
+                if self.parent.field2_criteria2.value != "" or self.parent.field3_criteria2.value != "":
+                    self.criteria2_string += " AND "  # adds 'AND' operator if at least one other criteria1 value exists
+
+            if self.parent.field2_criteria2.value != "":
+                self.criteria2_string += "(" + self.parent.label_table.value + "." + self.parent.label_field2.value \
+                                         + " " + self.parent.field2_criteria2.value + ")"
+
+                if self.parent.field3_criteria2.value != "":
+                    self.criteria2_string += " AND "  # adds 'AND' operator if table 3 criteria1 value exists
+
+            if self.parent.field3_criteria2.value != "":
+                self.criteria2_string += "(" + self.parent.label_table.value + "." + self.parent.label_field3.value \
+                                         + " " + self.parent.field3_criteria2.value + ")"
+
+            self.criteria2_string += ")"
+
+        # build criteria 3 string
+
+        if self.parent.field1_criteria3.value == "" and self.parent.field2_criteria3.value == "" \
+                and self.parent.field3_criteria3.value == "":  # check if all criteria1 fields are empty
+            pass
+
+        else:
+
+            self.criteria3_string += "("
+
+            if self.parent.field1_criteria3.value != "":
+                self.criteria3_string += "(" + self.parent.label_table.value + "." + self.parent.label_field1.value \
+                                         + " " + self.parent.field1_criteria3.value + ")"
+
+                if self.parent.field2_criteria3.value != "" or self.parent.field3_criteria3.value != "":
+                    self.criteria3_string += " AND "  # adds 'AND' operator if at least one other criteria1 value exists
+
+            if self.parent.field2_criteria3.value != "":
+                self.criteria3_string += "(" + self.parent.label_table.value + "." + self.parent.label_field2.value \
+                                         + " " + self.parent.field2_criteria3.value + ")"
+
+                if self.parent.field3_criteria3.value != "":
+                    self.criteria3_string += " AND "  # adds 'AND' operator if table 3 criteria1 value exists
+
+            if self.parent.field3_criteria3.value != "":
+                self.criteria3_string += "(" + self.parent.label_table.value + "." + self.parent.label_field3.value \
+                                         + " " + self.parent.field3_criteria3.value + ")"
+
+            self.criteria3_string += ")"
+
+        '''build cumulative SQL string'''
+
+        # check if no criteria fields are specified; if so, add
+        if self.criteria1_string == "" and self.criteria2_string == "" and self.criteria3_string == "":
+            npyscreen.notify_confirm("You haven't specified any criteria for deletion")
+            return
+
+        else:
+            self.sql_string += "\nWHERE "
+
+            if self.criteria1_string != "":
+                self.sql_string += self.criteria1_string
+
+                if self.criteria2_string != "":  # if criteria 2 exists
+
+                    # get condition1 value and add it and criteria 2
+                    self.sql_string += "\n" + self.parent.condition1.get_selected_objects()[0] + " " \
+                                       + self.criteria2_string
+
+                if self.criteria3_string != "":  # if criteria 3 exists
+
+                    # get condition2 value and add it and criteria 3
+                    self.sql_string += "\n " + self.parent.condition2.get_selected_objects()[0] + " " \
+                                       + self.criteria3_string
+
+            elif self.criteria2_string != "":
+                self.sql_string += self.criteria2_string
+
+                if self.criteria3_string != "":  # if criteria 3 exists
+
+                    # get condition2 value and add it and criteria 3
+                    self.sql_string += "\n" + self.parent.condition2.get_selected_objects()[0] + " " \
+                                       + self.criteria3_string
+
+            elif self.criteria3_string != "":
+                self.sql_string += self.criteria3_string
+
+        # npyscreen.notify_confirm("SQL string = " + self.sql_string)
+
+        self.results = self.parent.parentApp.dbms.execute_SQL(self.sql_string)
+
+        if self.results[0] == 'error':
+            npyscreen.notify_confirm(str(self.results[1]))
+            return
+
+        else:
+            npyscreen.notify_confirm("Delete operation completed successfully")
+
 class QuerySelectBtn(npyscreen.ButtonPress):
     def whenPressed(self):
         self.parent.parentApp.switchForm("QueryWindow")
         return
-
 
 
 class QueryInsertBtn(npyscreen.ButtonPress):
@@ -2335,7 +2620,6 @@ class QueryInsert_InsertButton(npyscreen.ButtonPress):
 
         for insertfield in field_list_control:
             if insertfield.value is not None:
-                npyscreen.notify_confirm("insertfield.value = " + insertfield.value)
                 values_string += "'" + insertfield.value + "', "
 
         values_string = values_string[:-2]
