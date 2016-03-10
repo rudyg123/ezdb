@@ -705,11 +705,10 @@ class QueryInsertWindow(npyscreen.ActionForm, npyscreen.SplitForm):
 
         self.insertfield_box = self.add(QB_InsertFieldBox, w_id="wInsertField_list", name="Choose Fields: ",
                                         max_width=30, max_height=22,
-                                        contained_widget_arguments={"values": self.parentApp.insertfield_list},
+                                        contained_widget_arguments={"values": ""},
                                         relx=36, rely=6, scroll_exit=True)
 
         self.add(QueryInsert_LoadFieldsButton, name="Load Fields", relx=44, rely=29, max_width=12)
-
 
         self.label_field01 = self.add(npyscreen.FixedText, value="", relx=70, rely=7, max_width=15, color="LABEL",
                                       hidden=True, editable=False)
@@ -831,7 +830,7 @@ class QueryInsertWindow(npyscreen.ActionForm, npyscreen.SplitForm):
         self.insertfield20 = self.add(npyscreen.TitleText, name=" ", relx=87, rely=26, max_width=30, begin_entry_at=1,
                                       use_two_lines=False, hidden=True)
 
-        self.add(QueryInsert_InsertButton, name="Insert Values", relx=84, rely=29, max_width=12)
+        self.add(QueryInsertButton, name="Insert Values", relx=84, rely=29, max_width=12)
 
     def beforeEditing(self):
 
@@ -885,6 +884,214 @@ class QueryUpdateWindow(npyscreen.ActionForm, npyscreen.SplitForm):
         self.add(QueryUpdateBtn, name="UPDATE", value="QueryUpdateWindow", rely=3, relx=61, color="VERYGOOD")
 
         self.add(QueryDeleteBtn, name="DELETE", value="QueryDeleteWindow", rely=3, relx=73)
+
+        self.nextrely += 1  # Move down
+
+        ''' TABLE '''
+
+        self.add(QBUpdate_TableBox, name="Tables", values=self.parentApp.tableList, max_width=25, max_height=8,
+                 relx=14, rely=5, scroll_exit=True)
+
+        self.label_table = self.add(npyscreen.FixedText, value="Unselected", relx=15,
+                                    rely=13, max_width=20, color="CURSOR_INVERSE", use_two_lines=False, editable=False)
+
+
+        ''' FIELD CHOOSER BOX '''
+        self.updatefield_box = self.add(QB_UpdateFieldBox, name="Choose Fields",
+                                        max_width=25, max_height=8,
+                                        contained_widget_arguments={"values": ""},
+                                        relx=41, rely=5, scroll_exit=True)
+
+        ''' FIELD CRITERIA 1 COLUMN '''
+
+        self.field_box1 = self.add(QB_FieldBox01, name="Criteria", values=self.parentApp.field_list1,
+                                   relx=3, rely=15, max_width=20, max_height=9, scroll_exit=True)
+
+        self.label_field1 = self.add(npyscreen.FixedText, value="Unselected", relx=4,
+                                     rely=24, max_width=20, color="CURSOR_INVERSE", use_two_lines=False, editable=False)
+
+        self.nextrely += 1  # Move down
+        self.field1_criteria1 = self.add(npyscreen.TitleText, name="Criteria:", max_width=25, relx=3,
+                                       use_two_lines=False, begin_entry_at=10)
+
+        self.condition1 = self.add(npyscreen.SelectOne, max_height=2, relx=3, value=[0], values=["AND", "OR"],
+                                        scroll_exit=True, max_width=10)
+
+        self.field1_criteria2 = self.add(npyscreen.TitleText, name="Criteria:", relx=3, max_width=25,
+                                       use_two_lines=False, begin_entry_at=10)
+
+        self.condition2 = self.add(npyscreen.SelectOne, max_height=2, relx=3, value=[0], values=["AND", "OR"],
+                                        scroll_exit=True, max_width=10)
+
+        self.field1_criteria3 = self.add(npyscreen.TitleText, name="Criteria:", max_width=25, relx=3,
+                                       use_two_lines=False, begin_entry_at=10)
+
+        ''' FIELD CRITERIA 2 COLUMN '''
+
+        self.field_box2 = self.add(QB_FieldBox02, name="Criteria", values=self.parentApp.field_list2,
+                                   relx=30, rely=15, max_width=20, max_height=9, scroll_exit=True)
+
+        self.label_field2 = self.add(npyscreen.FixedText, value="Unselected", relx=31,
+                                     rely=24, max_width=20, color="CURSOR_INVERSE", use_two_lines=False, editable=False)
+
+        self.nextrely += 1  # Move down
+        self.field2_criteria1 = self.add(npyscreen.TitleText, relx=30, name="Criteria:", max_width=25,
+                                       use_two_lines=False, begin_entry_at=10)
+
+        self.nextrely += 2  # Move down
+
+        self.field2_criteria2 = self.add(npyscreen.TitleText, relx=30, name="Criteria:", max_width=25,
+                                       use_two_lines=False, begin_entry_at=10)
+
+        self.nextrely += 2  # Move down
+
+        self.field2_criteria3 = self.add(npyscreen.TitleText, relx=30, name="Criteria:", max_width=25,
+                                       use_two_lines=False, begin_entry_at=10)
+
+        ''' FIELD CRITERIA 3 COLUMN '''
+
+        self.field_box3 = self.add(QB_FieldBox03, name="Criteria", values=self.parentApp.field_list3,
+                                   relx=57, rely=15, max_width=20, max_height=9, scroll_exit=True)
+
+        self.label_field3 = self.add(npyscreen.FixedText, value="Unselected", relx=58, rely=24,
+                                     max_width=20, color="CURSOR_INVERSE", use_two_lines=False, editable=False)
+
+        self.nextrely += 1  # Move down
+        self.field3_criteria1 = self.add(npyscreen.TitleText, relx=57, name="Criteria:", max_width=25,
+                                         use_two_lines=False, begin_entry_at=10)
+
+        self.nextrely += 2  # Move down
+
+        self.field3_criteria2 = self.add(npyscreen.TitleText, relx=57, name="Criteria:", max_width=25,
+                                         use_two_lines=False, begin_entry_at=10)
+
+        self.nextrely += 2  # Move down
+
+        self.field3_criteria3 = self.add(npyscreen.TitleText, relx=57, name="Criteria:", max_width=25,
+                                         use_two_lines=False, begin_entry_at=10)
+
+        self.add(QueryUpdate_LoadFieldsButton, name="Load Fields", relx=84, rely=29, max_width=12)
+        self.add(QBUpdate_Button, relx=84, rely=31, max_width=12, name="Update Values")
+
+        self.label_field01 = self.add(npyscreen.FixedText, value="", relx=79, rely=7, max_width=15, color="LABEL",
+                                      hidden=True, editable=False)
+
+        self.label_field02 = self.add(npyscreen.FixedText, value="", relx=79, rely=8, max_width=15, color="LABEL",
+                                      hidden=True, editable=False)
+
+        self.label_field03 = self.add(npyscreen.FixedText, value="", relx=79, rely=9, max_width=15, color="LABEL",
+                                      hidden=True, editable=False)
+
+        self.label_field04 = self.add(npyscreen.FixedText, value="", relx=79, rely=10, max_width=15, color="LABEL",
+                                      hidden=True, editable=False)
+
+        self.label_field05 = self.add(npyscreen.FixedText, value="", relx=79, rely=11, max_width=15, color="LABEL",
+                                      hidden=True, editable=False)
+
+        self.label_field06 = self.add(npyscreen.FixedText, value="", relx=79, rely=12, max_width=15, color="LABEL",
+                                      hidden=True, editable=False)
+
+        self.label_field07 = self.add(npyscreen.FixedText, value="", relx=79, rely=13, max_width=15, color="LABEL",
+                                      hidden=True, editable=False)
+
+        self.label_field08 = self.add(npyscreen.FixedText, value="", relx=79, rely=14, max_width=15, color="LABEL",
+                                      hidden=True, editable=False)
+
+        self.label_field09 = self.add(npyscreen.FixedText, value="", relx=79, rely=15, max_width=15, color="LABEL",
+                                      hidden=True, editable=False)
+
+        self.label_field10 = self.add(npyscreen.FixedText, value="", relx=79, rely=16, max_width=15, color="LABEL",
+                                      hidden=True, editable=False)
+
+        self.label_field11 = self.add(npyscreen.FixedText, value="", relx=79, rely=17, max_width=15, color="LABEL",
+                                      hidden=True, editable=False)
+
+        self.label_field12 = self.add(npyscreen.FixedText, value="", relx=79, rely=18, max_width=15, color="LABEL",
+                                      hidden=True, editable=False)
+
+        self.label_field13 = self.add(npyscreen.FixedText, value="", relx=79, rely=19, max_width=15, color="LABEL",
+                                      hidden=True, editable=False)
+
+        self.label_field14 = self.add(npyscreen.FixedText, value="", relx=79, rely=20, max_width=15, color="LABEL",
+                                      hidden=True, editable=False)
+
+        self.label_field15 = self.add(npyscreen.FixedText, value="", relx=79, rely=21, max_width=15, color="LABEL",
+                                      hidden=True, editable=False)
+
+        self.label_field16 = self.add(npyscreen.FixedText, value="", relx=79, rely=22, max_width=15, color="LABEL",
+                                      hidden=True, editable=False)
+
+        self.label_field17 = self.add(npyscreen.FixedText, value="", relx=79, rely=23, max_width=15, color="LABEL",
+                                      hidden=True, editable=False)
+
+        self.label_field18 = self.add(npyscreen.FixedText, value="", relx=79, rely=24, max_width=15, color="LABEL",
+                                      hidden=True, editable=False)
+
+        self.label_field19 = self.add(npyscreen.FixedText, value="", relx=79, rely=25, max_width=15, color="LABEL",
+                                      hidden=True, editable=False)
+
+        self.label_field20 = self.add(npyscreen.FixedText, value="", relx=79, rely=26, max_width=15, color="LABEL",
+                                      hidden=True, editable=False)
+
+        self.updatefield01 = self.add(npyscreen.TitleText, name=" ", relx=96, rely=7, max_width=20, begin_entry_at=1,
+                                      use_two_lines=False, hidden=True)
+
+        self.updatefield02 = self.add(npyscreen.TitleText, name=" ", relx=96, rely=8, max_width=20, begin_entry_at=1,
+                                      use_two_lines=False, hidden=True)
+
+        self.updatefield03 = self.add(npyscreen.TitleText, name=" ", relx=96, rely=9, max_width=20, begin_entry_at=1,
+                                      use_two_lines=False, hidden=True)
+
+        self.updatefield04 = self.add(npyscreen.TitleText, name=" ", relx=96, rely=10, max_width=20, begin_entry_at=1,
+                                      use_two_lines=False, hidden=True)
+
+        self.updatefield05 = self.add(npyscreen.TitleText, name=" ", relx=96, rely=11, max_width=20, begin_entry_at=1,
+                                      use_two_lines=False, hidden=True)
+
+        self.updatefield06 = self.add(npyscreen.TitleText, name=" ", relx=96, rely=12, max_width=20, begin_entry_at=1,
+                                      use_two_lines=False, hidden=True)
+
+        self.updatefield07 = self.add(npyscreen.TitleText, name=" ", relx=96, rely=13, max_width=20, begin_entry_at=1,
+                                      use_two_lines=False, hidden=True)
+
+        self.updatefield08 = self.add(npyscreen.TitleText, name=" ", relx=96, rely=14, max_width=20, begin_entry_at=1,
+                                      use_two_lines=False, hidden=True)
+
+        self.updatefield09 = self.add(npyscreen.TitleText, name=" ", relx=96, rely=15, max_width=20, begin_entry_at=1,
+                                      use_two_lines=False, hidden=True)
+
+        self.updatefield10 = self.add(npyscreen.TitleText, name=" ", relx=96, rely=16, max_width=20, begin_entry_at=1,
+                                      use_two_lines=False, hidden=True)
+
+        self.updatefield11 = self.add(npyscreen.TitleText, name=" ", relx=96, rely=17, max_width=20, begin_entry_at=1,
+                                      use_two_lines=False, hidden=True)
+
+        self.updatefield12 = self.add(npyscreen.TitleText, name=" ", relx=96, rely=18, max_width=20, begin_entry_at=1,
+                                      use_two_lines=False, hidden=True)
+
+        self.updatefield13 = self.add(npyscreen.TitleText, name=" ", relx=96, rely=19, max_width=20, begin_entry_at=1,
+                                      use_two_lines=False, hidden=True)
+
+        self.updatefield14 = self.add(npyscreen.TitleText, name=" ", relx=96, rely=20, max_width=20, begin_entry_at=1,
+                                      use_two_lines=False, hidden=True)
+
+        self.updatefield15 = self.add(npyscreen.TitleText, name=" ", relx=96, rely=21, max_width=20, begin_entry_at=1,
+                                      use_two_lines=False, hidden=True)
+
+        self.updatefield16 = self.add(npyscreen.TitleText, name=" ", relx=96, rely=22, max_width=20, begin_entry_at=1,
+                                      use_two_lines=False, hidden=True)
+
+        self.updatefield17 = self.add(npyscreen.TitleText, name=" ", relx=96, rely=23, max_width=20, begin_entry_at=1,
+                                      use_two_lines=False, hidden=True)
+
+        self.updatefield18 = self.add(npyscreen.TitleText, name=" ", relx=96, rely=24, max_width=20, begin_entry_at=1,
+                                      use_two_lines=False, hidden=True)
+
+        self.updatefield19 = self.add(npyscreen.TitleText, name=" ", relx=96, rely=25, max_width=20, begin_entry_at=1,
+                                      use_two_lines=False, hidden=True)
+
+        self.updatefield20 = self.add(npyscreen.TitleText, name=" ", relx=96, rely=26, max_width=20, begin_entry_at=1,
+                                      use_two_lines=False, hidden=True)
 
         # Help menu guidance
         self.nextrely = 34
@@ -955,7 +1162,7 @@ class QueryDeleteWindow(npyscreen.ActionForm, npyscreen.SplitForm):
         self.field_box1 = self.add(QB_FieldBox01, name="Fields", values=self.parentApp.field_list1,
                                    relx=28, rely=5, max_width=22, max_height=17, scroll_exit=True)
 
-        self.label_field1 = self.add(npyscreen.FixedText, value="Unselected", relx=28,
+        self.label_field1 = self.add(npyscreen.FixedText, value="Unselected", relx=29,
                                      rely=22, max_width=20, color="CURSOR_INVERSE", use_two_lines=False, editable=False)
 
         self.nextrely += 1  # Move down
@@ -1352,12 +1559,9 @@ class QB_InsertTableList(npyscreen.MultiLineAction):
 
     def actionHighlighted(self, act_on_this, key_press):
 
-        # self.parent.label_table1.value = act_on_this
-        # self.parent.label_table1.display()
-
-        #npyscreen.notify_confirm("value of table1_selected:" + str(self.parent.table1_selected))
-
         field_list = []
+        self.parent.insertfield_box.value = None
+        self.parent.insertfield_box.display()
 
         #run query
         results = self.parent.parentApp.dbms.get_table_fields(act_on_this)
@@ -1385,6 +1589,200 @@ class QB_InsertFieldList(npyscreen.MultiSelect):
 
 class QB_InsertFieldBox(npyscreen.BoxTitle):
     _contained_widget = QB_InsertFieldList
+
+
+class QBUpdate_TableList(npyscreen.MultiLineAction):
+
+    def actionHighlighted(self, act_on_this, key_press):
+
+        # reset form values on table switch
+        field_list = []
+        self.parent.label_table.value = act_on_this
+        self.parent.label_table.display()
+
+        self.parent.label_field1.value = "Unselected"
+        self.parent.label_field2.value = "Unselected"
+        self.parent.label_field3.value = "Unselected"
+        self.parent.label_field1.display()
+        self.parent.label_field2.display()
+        self.parent.label_field3.display()
+
+        self.parent.updatefield_box.value = None
+        self.parent.updatefield_box.display()
+
+        self.parent.label_field01.hidden = True
+        self.parent.updatefield01.hidden = True
+        self.parent.label_field01.value = ""
+        self.parent.updatefield01.value = None
+        self.parent.label_field01.display()
+        self.parent.updatefield01.display()
+
+        self.parent.label_field02.hidden = True
+        self.parent.updatefield02.hidden = True
+        self.parent.label_field02.value = ""
+        self.parent.updatefield02.value = None
+        self.parent.label_field02.display()
+        self.parent.updatefield02.display()
+
+        self.parent.label_field03.hidden = True
+        self.parent.updatefield03.hidden = True
+        self.parent.label_field03.value = ""
+        self.parent.updatefield03.value = None
+        self.parent.label_field03.display()
+        self.parent.updatefield03.display()
+
+        self.parent.label_field04.hidden = True
+        self.parent.updatefield04.hidden = True
+        self.parent.label_field04.value = ""
+        self.parent.updatefield04.value = None
+        self.parent.label_field04.display()
+        self.parent.updatefield04.display()
+
+        self.parent.label_field05.hidden = True
+        self.parent.updatefield05.hidden = True
+        self.parent.label_field05.value = ""
+        self.parent.updatefield05.value = None
+        self.parent.label_field05.display()
+        self.parent.updatefield05.display()
+
+        self.parent.label_field06.hidden = True
+        self.parent.updatefield06.hidden = True
+        self.parent.label_field06.value = ""
+        self.parent.updatefield06.value = None
+        self.parent.label_field06.display()
+        self.parent.updatefield06.display()
+
+        self.parent.label_field07.hidden = True
+        self.parent.updatefield07.hidden = True
+        self.parent.label_field07.value = ""
+        self.parent.updatefield07.value = None
+        self.parent.label_field07.display()
+        self.parent.updatefield07.display()
+
+        self.parent.label_field08.hidden = True
+        self.parent.updatefield08.hidden = True
+        self.parent.label_field08.value = ""
+        self.parent.updatefield08.value = None
+        self.parent.label_field08.display()
+        self.parent.updatefield08.display()
+
+        self.parent.label_field09.hidden = True
+        self.parent.updatefield09.hidden = True
+        self.parent.label_field09.value = ""
+        self.parent.updatefield09.value = None
+        self.parent.label_field09.display()
+        self.parent.updatefield09.display()
+
+        self.parent.label_field10.hidden = True
+        self.parent.updatefield10.hidden = True
+        self.parent.label_field10.value = ""
+        self.parent.updatefield10.value = None
+        self.parent.label_field10.display()
+        self.parent.updatefield10.display()
+
+        self.parent.label_field11.hidden = True
+        self.parent.updatefield11.hidden = True
+        self.parent.label_field11.value = ""
+        self.parent.updatefield11.value = None
+        self.parent.label_field11.display()
+        self.parent.updatefield11.display()
+
+        self.parent.label_field12.hidden = True
+        self.parent.updatefield12.hidden = True
+        self.parent.label_field12.value = ""
+        self.parent.updatefield12.value = None
+        self.parent.label_field12.display()
+        self.parent.updatefield12.display()
+
+        self.parent.label_field13.hidden = True
+        self.parent.updatefield13.hidden = True
+        self.parent.label_field13.value = ""
+        self.parent.updatefield13.value = None
+        self.parent.label_field13.display()
+        self.parent.updatefield13.display()
+
+        self.parent.label_field14.hidden = True
+        self.parent.updatefield14.hidden = True
+        self.parent.label_field14.value = ""
+        self.parent.updatefield14.value = None
+        self.parent.label_field14.display()
+        self.parent.updatefield14.display()
+
+        self.parent.label_field15.hidden = True
+        self.parent.updatefield15.hidden = True
+        self.parent.label_field15.value = ""
+        self.parent.updatefield15.value = None
+        self.parent.label_field15.display()
+        self.parent.updatefield15.display()
+
+        self.parent.label_field16.hidden = True
+        self.parent.updatefield16.hidden = True
+        self.parent.label_field16.value = ""
+        self.parent.updatefield16.value = None
+        self.parent.label_field16.display()
+        self.parent.updatefield16.display()
+
+        self.parent.label_field17.hidden = True
+        self.parent.updatefield17.hidden = True
+        self.parent.label_field17.value = ""
+        self.parent.updatefield17.value = None
+        self.parent.label_field17.display()
+        self.parent.updatefield17.display()
+
+        self.parent.label_field18.hidden = True
+        self.parent.updatefield18.hidden = True
+        self.parent.label_field18.value = ""
+        self.parent.updatefield18.value = None
+        self.parent.label_field18.display()
+        self.parent.updatefield18.display()
+
+        self.parent.label_field19.hidden = True
+        self.parent.updatefield19.hidden = True
+        self.parent.label_field19.value = ""
+        self.parent.updatefield19.value = None
+        self.parent.label_field19.display()
+        self.parent.updatefield19.display()
+
+        self.parent.label_field20.hidden = True
+        self.parent.updatefield20.hidden = True
+        self.parent.label_field20.value = ""
+        self.parent.updatefield20.value = None
+        self.parent.label_field20.display()
+        self.parent.updatefield20.display()
+
+        # get field values and populates field chooser and field criteria boxes
+        results = self.parent.parentApp.dbms.get_table_fields(act_on_this)
+        if results[0] == "success":
+            field_list.append('[ALL]')
+
+            for field in results[1]:
+                field_list.append(field[0])
+            self.parent.field_box1.values = field_list
+            self.parent.field_box1.display()
+            self.parent.field_box2.values = field_list
+            self.parent.field_box2.display()
+            self.parent.field_box3.values = field_list
+            self.parent.field_box3.display()
+
+            self.parent.updatefield_box.values = field_list
+            self.parent.updatefield_box.display()
+
+            self.parent.parentApp.table1 = act_on_this
+
+        else:
+            npyscreen.notify_confirm(str(results[1]))
+
+
+class QBUpdate_TableBox(npyscreen.BoxTitle):
+    _contained_widget = QBUpdate_TableList
+
+
+class QB_UpdateFieldList(npyscreen.MultiSelect):
+    pass
+
+
+class QB_UpdateFieldBox(npyscreen.BoxTitle):
+    _contained_widget = QB_UpdateFieldList
 
 
 class QBDelete_TableList(npyscreen.MultiLineAction):
@@ -2530,17 +2928,6 @@ class QBDelete_Button(npyscreen.ButtonPress):
         else:
             npyscreen.notify_confirm("Delete operation completed successfully")
 
-class QuerySelectBtn(npyscreen.ButtonPress):
-    def whenPressed(self):
-        self.parent.parentApp.switchForm("QueryWindow")
-        return
-
-
-class QueryInsertBtn(npyscreen.ButtonPress):
-    def whenPressed(self):
-        self.parent.parentApp.switchForm("QueryInsertWindow")
-        return
-
 
 class QueryInsert_LoadFieldsButton(npyscreen.ButtonPress):
 
@@ -2590,7 +2977,7 @@ class QueryInsert_LoadFieldsButton(npyscreen.ButtonPress):
                 fieldSelectList_idx += 1
 
 
-class QueryInsert_InsertButton(npyscreen.ButtonPress):
+class QueryInsertButton(npyscreen.ButtonPress):
 
     def whenPressed(self):
 
@@ -2636,6 +3023,235 @@ class QueryInsert_InsertButton(npyscreen.ButtonPress):
 
             npyscreen.notify_confirm("The insert operation completed successfully")
             return
+
+
+class QueryUpdate_LoadFieldsButton(npyscreen.ButtonPress):
+
+    def whenPressed(self):
+
+        field_select_list = self.parent.updatefield_box.entry_widget.get_selected_objects()
+        field_list_control = [self.parent.updatefield01, self.parent.updatefield02, self.parent.updatefield03,
+                              self.parent.updatefield04, self.parent.updatefield05, self.parent.updatefield06,
+                              self.parent.updatefield07, self.parent.updatefield08, self.parent.updatefield09,
+                              self.parent.updatefield10, self.parent.updatefield11, self.parent.updatefield12,
+                              self.parent.updatefield13, self.parent.updatefield14, self.parent.updatefield15,
+                              self.parent.updatefield16, self.parent.updatefield17, self.parent.updatefield18,
+                              self.parent.updatefield19, self.parent.updatefield20]
+
+        field_label_control = [self.parent.label_field01, self.parent.label_field02, self.parent.label_field03,
+                              self.parent.label_field04, self.parent.label_field05, self.parent.label_field06,
+                              self.parent.label_field07, self.parent.label_field08, self.parent.label_field09,
+                              self.parent.label_field10, self.parent.label_field11, self.parent.label_field12,
+                              self.parent.label_field13, self.parent.label_field14, self.parent.label_field15,
+                              self.parent.label_field16, self.parent.label_field17, self.parent.label_field18,
+                              self.parent.label_field19, self.parent.label_field20]
+        0
+
+        fieldSelectlist_length = len(field_select_list)
+
+        if fieldSelectlist_length == 0 or fieldSelectlist_length > 20:
+            npyscreen.notify_confirm("Please select at least 1 and no more than 20 fields for the update operation")
+            return
+
+        fieldSelectList_idx = 0
+
+        for label in field_label_control:
+            if fieldSelectList_idx == fieldSelectlist_length:
+                break
+
+            else:
+                label.value = str(field_select_list[fieldSelectList_idx] + ":")
+                label.hidden = False
+                field_list_control[fieldSelectList_idx].hidden = False
+
+                label.display()
+                field_list_control[fieldSelectList_idx].display()
+                fieldSelectList_idx += 1
+
+
+class QBUpdate_Button(npyscreen.ButtonPress):
+
+    def whenPressed(self):
+
+        ''' table and paired field checks '''
+
+        # check to make sure at least one table selected
+        if self.parent.label_table.value == "Unselected":
+            npyscreen.notify_confirm("You must select a table")
+            return
+
+        # check to make sure a selected table has field selected
+        if self.parent.label_table.value != "Unselected" and self.parent.label_field1.value == "Unselected" and \
+                        self.parent.label_field2.value == "Unselected" and \
+                        self.parent.label_field3.value == "Unselected":
+            npyscreen.notify_confirm("Select at least 1 field for the {} table".format(self.parent.parentApp.table1))
+            return
+
+        self.sql_string = "DELETE FROM {} ".format(self.parent.parentApp.table1)
+        #self.field_string = ""
+        self.criteria1_string = ""
+        self.criteria2_string = ""
+        self.criteria3_string = ""
+
+        if self.parent.label_field1.value == "[ALL]":
+            self.parent.label_field1.value = "*"
+        elif self.parent.label_field2.value == "[ALL]":
+            self.parent.label_field2.value = "*"
+        elif self.parent.label_field3.value == "[ALL]":
+            self.parent.label_field3.value = "*"
+
+        '''build WHERE criteria strings'''
+
+        # build criteria 1 string
+
+        if self.parent.field1_criteria1.value == "" and self.parent.field2_criteria1.value == "" \
+                and self.parent.field3_criteria1.value == "":  # check if all criteria1 fields are empty
+            pass
+
+        else:
+
+            self.criteria1_string += "("
+
+            if self.parent.field1_criteria1.value != "":
+                self.criteria1_string += "(" + self.parent.label_table.value + "." + self.parent.label_field1.value \
+                                         + " " + self.parent.field1_criteria1.value + ")"
+
+                if self.parent.field2_criteria1.value != "" or self.parent.field3_criteria1.value != "":
+                    self.criteria1_string += " AND "  # adds 'AND' operator if at least one other criteria1 value exists
+
+            if self.parent.field2_criteria1.value != "":
+                self.criteria1_string += "(" + self.parent.label_table.value + "." + self.parent.label_field2.value \
+                                         + " " + self.parent.field2_criteria1.value + ")"
+
+                if self.parent.field3_criteria1.value != "":
+                    self.criteria1_string += " AND "  # adds 'AND' operator if table 3 criteria1 value exists
+
+            if self.parent.field3_criteria1.value != "":
+                self.criteria1_string += "(" + self.parent.label_table.value + "." + self.parent.label_field3.value \
+                                         + " " + self.parent.field3_criteria1.value + ")"
+
+            self.criteria1_string += ")"
+
+        # build criteria 2 string
+
+        if self.parent.field1_criteria2.value == "" and self.parent.field2_criteria2.value == "" \
+                and self.parent.field3_criteria2.value == "":  # check if all criteria1 fields are empty
+            pass
+
+        else:
+
+            self.criteria2_string += "("
+
+            if self.parent.field1_criteria2.value != "":
+                self.criteria2_string += "(" + self.parent.label_table.value + "." + self.parent.label_field1.value \
+                                         + " " + self.parent.field1_criteria2.value + ")"
+
+                if self.parent.field2_criteria2.value != "" or self.parent.field3_criteria2.value != "":
+                    self.criteria2_string += " AND "  # adds 'AND' operator if at least one other criteria1 value exists
+
+            if self.parent.field2_criteria2.value != "":
+                self.criteria2_string += "(" + self.parent.label_table.value + "." + self.parent.label_field2.value \
+                                         + " " + self.parent.field2_criteria2.value + ")"
+
+                if self.parent.field3_criteria2.value != "":
+                    self.criteria2_string += " AND "  # adds 'AND' operator if table 3 criteria1 value exists
+
+            if self.parent.field3_criteria2.value != "":
+                self.criteria2_string += "(" + self.parent.label_table.value + "." + self.parent.label_field3.value \
+                                         + " " + self.parent.field3_criteria2.value + ")"
+
+            self.criteria2_string += ")"
+
+        # build criteria 3 string
+
+        if self.parent.field1_criteria3.value == "" and self.parent.field2_criteria3.value == "" \
+                and self.parent.field3_criteria3.value == "":  # check if all criteria1 fields are empty
+            pass
+
+        else:
+
+            self.criteria3_string += "("
+
+            if self.parent.field1_criteria3.value != "":
+                self.criteria3_string += "(" + self.parent.label_table.value + "." + self.parent.label_field1.value \
+                                         + " " + self.parent.field1_criteria3.value + ")"
+
+                if self.parent.field2_criteria3.value != "" or self.parent.field3_criteria3.value != "":
+                    self.criteria3_string += " AND "  # adds 'AND' operator if at least one other criteria1 value exists
+
+            if self.parent.field2_criteria3.value != "":
+                self.criteria3_string += "(" + self.parent.label_table.value + "." + self.parent.label_field2.value \
+                                         + " " + self.parent.field2_criteria3.value + ")"
+
+                if self.parent.field3_criteria3.value != "":
+                    self.criteria3_string += " AND "  # adds 'AND' operator if table 3 criteria1 value exists
+
+            if self.parent.field3_criteria3.value != "":
+                self.criteria3_string += "(" + self.parent.label_table.value + "." + self.parent.label_field3.value \
+                                         + " " + self.parent.field3_criteria3.value + ")"
+
+            self.criteria3_string += ")"
+
+        '''build cumulative SQL string'''
+
+        # check if no criteria fields are specified; if so, add
+        if self.criteria1_string == "" and self.criteria2_string == "" and self.criteria3_string == "":
+            npyscreen.notify_confirm("You haven't specified any criteria for deletion")
+            return
+
+        else:
+            self.sql_string += "\nWHERE "
+
+            if self.criteria1_string != "":
+                self.sql_string += self.criteria1_string
+
+                if self.criteria2_string != "":  # if criteria 2 exists
+
+                    # get condition1 value and add it and criteria 2
+                    self.sql_string += "\n" + self.parent.condition1.get_selected_objects()[0] + " " \
+                                       + self.criteria2_string
+
+                if self.criteria3_string != "":  # if criteria 3 exists
+
+                    # get condition2 value and add it and criteria 3
+                    self.sql_string += "\n " + self.parent.condition2.get_selected_objects()[0] + " " \
+                                       + self.criteria3_string
+
+            elif self.criteria2_string != "":
+                self.sql_string += self.criteria2_string
+
+                if self.criteria3_string != "":  # if criteria 3 exists
+
+                    # get condition2 value and add it and criteria 3
+                    self.sql_string += "\n" + self.parent.condition2.get_selected_objects()[0] + " " \
+                                       + self.criteria3_string
+
+            elif self.criteria3_string != "":
+                self.sql_string += self.criteria3_string
+
+        # npyscreen.notify_confirm("SQL string = " + self.sql_string)
+
+        self.results = self.parent.parentApp.dbms.execute_SQL(self.sql_string)
+
+        if self.results[0] == 'error':
+            npyscreen.notify_confirm(str(self.results[1]))
+            return
+
+        else:
+            npyscreen.notify_confirm("Delete operation completed successfully")
+
+'''QB NAV BUTTONS'''
+
+class QuerySelectBtn(npyscreen.ButtonPress):
+    def whenPressed(self):
+        self.parent.parentApp.switchForm("QueryWindow")
+        return
+
+
+class QueryInsertBtn(npyscreen.ButtonPress):
+    def whenPressed(self):
+        self.parent.parentApp.switchForm("QueryInsertWindow")
+        return
 
 
 class QueryUpdateBtn(npyscreen.ButtonPress):
