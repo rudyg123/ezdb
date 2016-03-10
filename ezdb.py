@@ -703,6 +703,9 @@ class QueryInsertWindow(npyscreen.ActionForm, npyscreen.SplitForm):
         self.add(QB_InsertTableBox, name="Select Table", values=self.parentApp.tableList, max_width=30, max_height=22,
                  relx=3, rely=6, scroll_exit=True)
 
+        self.label_table = self.add(npyscreen.FixedText, value="Unselected", relx=4,
+                                    rely=28, max_width=20, color="CURSOR_INVERSE", use_two_lines=False, editable=False)
+
         self.insertfield_box = self.add(QB_InsertFieldBox, w_id="wInsertField_list", name="Choose Fields: ",
                                         max_width=30, max_height=22,
                                         contained_widget_arguments={"values": ""},
@@ -1560,8 +1563,150 @@ class QB_InsertTableList(npyscreen.MultiLineAction):
     def actionHighlighted(self, act_on_this, key_press):
 
         field_list = []
+        self.parent.label_table.value = act_on_this
+        self.parent.label_table.display()
         self.parent.insertfield_box.value = None
         self.parent.insertfield_box.display()
+
+        self.parent.label_field01.hidden = True
+        self.parent.insertfield01.hidden = True
+        self.parent.label_field01.value = ""
+        self.parent.insertfield01.value = None
+        self.parent.label_field01.display()
+        self.parent.insertfield01.display()
+
+        self.parent.label_field02.hidden = True
+        self.parent.insertfield02.hidden = True
+        self.parent.label_field02.value = ""
+        self.parent.insertfield02.value = None
+        self.parent.label_field02.display()
+        self.parent.insertfield02.display()
+
+        self.parent.label_field03.hidden = True
+        self.parent.insertfield03.hidden = True
+        self.parent.label_field03.value = ""
+        self.parent.insertfield03.value = None
+        self.parent.label_field03.display()
+        self.parent.insertfield03.display()
+
+        self.parent.label_field04.hidden = True
+        self.parent.insertfield04.hidden = True
+        self.parent.label_field04.value = ""
+        self.parent.insertfield04.value = None
+        self.parent.label_field04.display()
+        self.parent.insertfield04.display()
+
+        self.parent.label_field05.hidden = True
+        self.parent.insertfield05.hidden = True
+        self.parent.label_field05.value = ""
+        self.parent.insertfield05.value = None
+        self.parent.label_field05.display()
+        self.parent.insertfield05.display()
+
+        self.parent.label_field06.hidden = True
+        self.parent.insertfield06.hidden = True
+        self.parent.label_field06.value = ""
+        self.parent.insertfield06.value = None
+        self.parent.label_field06.display()
+        self.parent.insertfield06.display()
+
+        self.parent.label_field07.hidden = True
+        self.parent.insertfield07.hidden = True
+        self.parent.label_field07.value = ""
+        self.parent.insertfield07.value = None
+        self.parent.label_field07.display()
+        self.parent.insertfield07.display()
+
+        self.parent.label_field08.hidden = True
+        self.parent.insertfield08.hidden = True
+        self.parent.label_field08.value = ""
+        self.parent.insertfield08.value = None
+        self.parent.label_field08.display()
+        self.parent.insertfield08.display()
+
+        self.parent.label_field09.hidden = True
+        self.parent.insertfield09.hidden = True
+        self.parent.label_field09.value = ""
+        self.parent.insertfield09.value = None
+        self.parent.label_field09.display()
+        self.parent.insertfield09.display()
+
+        self.parent.label_field10.hidden = True
+        self.parent.insertfield10.hidden = True
+        self.parent.label_field10.value = ""
+        self.parent.insertfield10.value = None
+        self.parent.label_field10.display()
+        self.parent.insertfield10.display()
+
+        self.parent.label_field11.hidden = True
+        self.parent.insertfield11.hidden = True
+        self.parent.label_field11.value = ""
+        self.parent.insertfield11.value = None
+        self.parent.label_field11.display()
+        self.parent.insertfield11.display()
+
+        self.parent.label_field12.hidden = True
+        self.parent.insertfield12.hidden = True
+        self.parent.label_field12.value = ""
+        self.parent.insertfield12.value = None
+        self.parent.label_field12.display()
+        self.parent.insertfield12.display()
+
+        self.parent.label_field13.hidden = True
+        self.parent.insertfield13.hidden = True
+        self.parent.label_field13.value = ""
+        self.parent.insertfield13.value = None
+        self.parent.label_field13.display()
+        self.parent.insertfield13.display()
+
+        self.parent.label_field14.hidden = True
+        self.parent.insertfield14.hidden = True
+        self.parent.label_field14.value = ""
+        self.parent.insertfield14.value = None
+        self.parent.label_field14.display()
+        self.parent.insertfield14.display()
+
+        self.parent.label_field15.hidden = True
+        self.parent.insertfield15.hidden = True
+        self.parent.label_field15.value = ""
+        self.parent.insertfield15.value = None
+        self.parent.label_field15.display()
+        self.parent.insertfield15.display()
+
+        self.parent.label_field16.hidden = True
+        self.parent.insertfield16.hidden = True
+        self.parent.label_field16.value = ""
+        self.parent.insertfield16.value = None
+        self.parent.label_field16.display()
+        self.parent.insertfield16.display()
+
+        self.parent.label_field17.hidden = True
+        self.parent.insertfield17.hidden = True
+        self.parent.label_field17.value = ""
+        self.parent.insertfield17.value = None
+        self.parent.label_field17.display()
+        self.parent.insertfield17.display()
+
+        self.parent.label_field18.hidden = True
+        self.parent.insertfield18.hidden = True
+        self.parent.label_field18.value = ""
+        self.parent.insertfield18.value = None
+        self.parent.label_field18.display()
+        self.parent.insertfield18.display()
+
+        self.parent.label_field19.hidden = True
+        self.parent.insertfield19.hidden = True
+        self.parent.label_field19.value = ""
+        self.parent.insertfield19.value = None
+        self.parent.label_field19.display()
+        self.parent.insertfield19.display()
+
+        self.parent.label_field20.hidden = True
+        self.parent.insertfield20.hidden = True
+        self.parent.label_field20.value = ""
+        self.parent.insertfield20.value = None
+        self.parent.label_field20.display()
+        self.parent.insertfield20.display()
 
         #run query
         results = self.parent.parentApp.dbms.get_table_fields(act_on_this)
@@ -1596,6 +1741,7 @@ class QBUpdate_TableList(npyscreen.MultiLineAction):
     def actionHighlighted(self, act_on_this, key_press):
 
         # reset form values on table switch
+
         field_list = []
         self.parent.label_table.value = act_on_this
         self.parent.label_table.display()
@@ -2933,6 +3079,11 @@ class QueryInsert_LoadFieldsButton(npyscreen.ButtonPress):
 
     def whenPressed(self):
 
+        # check to make sure a table is selected
+        if self.parent.label_table.value == "Unselected":
+            npyscreen.notify_confirm("You must select a table")
+            return
+
         field_select_list = self.parent.insertfield_box.entry_widget.get_selected_objects()
         field_list_control = [self.parent.insertfield01, self.parent.insertfield02, self.parent.insertfield03,
                               self.parent.insertfield04, self.parent.insertfield05, self.parent.insertfield06,
@@ -2980,6 +3131,11 @@ class QueryInsert_LoadFieldsButton(npyscreen.ButtonPress):
 class QueryInsertButton(npyscreen.ButtonPress):
 
     def whenPressed(self):
+
+        # check to make sure a table is selected
+        if self.parent.label_table.value == "Unselected":
+            npyscreen.notify_confirm("You must select a table")
+            return
 
         field_list_control = [self.parent.insertfield01, self.parent.insertfield02, self.parent.insertfield03,
                               self.parent.insertfield04, self.parent.insertfield05, self.parent.insertfield06,
@@ -3029,6 +3185,11 @@ class QueryUpdate_LoadFieldsButton(npyscreen.ButtonPress):
 
     def whenPressed(self):
 
+        # check to make sure a table is selected
+        if self.parent.label_table.value == "Unselected":
+            npyscreen.notify_confirm("You must select a table")
+            return
+
         field_select_list = self.parent.updatefield_box.entry_widget.get_selected_objects()
         field_list_control = [self.parent.updatefield01, self.parent.updatefield02, self.parent.updatefield03,
                               self.parent.updatefield04, self.parent.updatefield05, self.parent.updatefield06,
@@ -3048,6 +3209,11 @@ class QueryUpdate_LoadFieldsButton(npyscreen.ButtonPress):
         0
 
         fieldSelectlist_length = len(field_select_list)
+
+        # check to make sure a table is selected
+        if self.parent.label_table.value == "Unselected":
+            npyscreen.notify_confirm("You must select a table")
+            return
 
         if fieldSelectlist_length == 0 or fieldSelectlist_length > 20:
             npyscreen.notify_confirm("Please select at least 1 and no more than 20 fields for the update operation")
@@ -3073,9 +3239,7 @@ class QBUpdate_Button(npyscreen.ButtonPress):
 
     def whenPressed(self):
 
-        ''' table and paired field checks '''
-
-        # check to make sure at least one table selected
+        # check to make sure a table is selected
         if self.parent.label_table.value == "Unselected":
             npyscreen.notify_confirm("You must select a table")
             return
