@@ -973,8 +973,7 @@ class QueryUpdateWindow(npyscreen.ActionForm, npyscreen.SplitForm):
         self.field3_criteria3 = self.add(npyscreen.TitleText, relx=57, name="Criteria:", max_width=25,
                                          use_two_lines=False, begin_entry_at=10)
 
-        self.add(QueryUpdate_LoadFieldsButton, name="Load Fields", relx=84, rely=29, max_width=12)
-        self.add(QBUpdate_Button, relx=84, rely=31, max_width=12, name="Update Values")
+        self.add(QueryUpdate_LoadFieldsButton, name="Load Fields to Update", relx=86, rely=5, max_width=12)
 
         self.label_field01 = self.add(npyscreen.FixedText, value="", relx=79, rely=7, max_width=15, color="LABEL",
                                       hidden=True, editable=False)
@@ -1095,6 +1094,8 @@ class QueryUpdateWindow(npyscreen.ActionForm, npyscreen.SplitForm):
 
         self.updatefield20 = self.add(npyscreen.TitleText, name=" ", relx=96, rely=26, max_width=20, begin_entry_at=1,
                                       use_two_lines=False, hidden=True)
+
+        self.add(QBUpdate_Button, relx=89, rely=29, max_width=12, name="Update Values")
 
         # Help menu guidance
         self.nextrely = 34
@@ -3206,7 +3207,7 @@ class QueryUpdate_LoadFieldsButton(npyscreen.ButtonPress):
                               self.parent.label_field13, self.parent.label_field14, self.parent.label_field15,
                               self.parent.label_field16, self.parent.label_field17, self.parent.label_field18,
                               self.parent.label_field19, self.parent.label_field20]
-        0
+
 
         fieldSelectlist_length = len(field_select_list)
 
@@ -3248,14 +3249,49 @@ class QBUpdate_Button(npyscreen.ButtonPress):
         if self.parent.label_table.value != "Unselected" and self.parent.label_field1.value == "Unselected" and \
                         self.parent.label_field2.value == "Unselected" and \
                         self.parent.label_field3.value == "Unselected":
-            npyscreen.notify_confirm("Select at least 1 field for the {} table".format(self.parent.parentApp.table1))
+            npyscreen.notify_confirm("Select at least 1 field value to set for the {} table"
+                                     .format(self.parent.parentApp.table1))
             return
 
-        self.sql_string = "DELETE FROM {} ".format(self.parent.parentApp.table1)
-        #self.field_string = ""
-        self.criteria1_string = ""
-        self.criteria2_string = ""
-        self.criteria3_string = ""
+        self.sql_string = "UPDATE {} SET ".format(self.parent.parentApp.table1)
+
+        '''build field SET string'''
+
+        self.fieldset_string = ""
+
+        field_names = [self.parent.label_field01, self.parent.label_field02, self.parent.label_field03,
+                              self.parent.label_field04, self.parent.label_field05, self.parent.label_field06,
+                              self.parent.label_field07, self.parent.label_field08, self.parent.label_field09,
+                              self.parent.label_field10, self.parent.label_field11, self.parent.label_field12,
+                              self.parent.label_field13, self.parent.label_field14, self.parent.label_field15,
+                              self.parent.label_field16, self.parent.label_field17, self.parent.label_field18,
+                              self.parent.label_field19, self.parent.label_field20]
+
+        field_values = [self.parent.updatefield01, self.parent.updatefield02, self.parent.updatefield03,
+                              self.parent.updatefield04, self.parent.updatefield05, self.parent.updatefield06,
+                              self.parent.updatefield07, self.parent.updatefield08, self.parent.updatefield09,
+                              self.parent.updatefield10, self.parent.updatefield11, self.parent.updatefield12,
+                              self.parent.updatefield13, self.parent.updatefield14, self.parent.updatefield15,
+                              self.parent.updatefield16, self.parent.updatefield17, self.parent.updatefield18,
+                              self.parent.updatefield19, self.parent.updatefield20]
+
+        index = 0
+
+        for name in field_names:
+            npyscreen.notify_confirm("name.value =" + name.value)
+            if not name.value:
+                break
+
+            else:
+                self.fieldset_string += name.value[:-1] + " = '" + str(field_values[index].value) + "', "
+                npyscreen.notify_confirm("self.fieldset_string = " + self.fieldset_string)
+                index += 1
+
+        self.fieldset_string = self.fieldset_string[:-2]
+
+        self.sql_string += self.fieldset_string
+
+        '''build WHERE criteria strings'''
 
         if self.parent.label_field1.value == "[ALL]":
             self.parent.label_field1.value = "*"
@@ -3264,7 +3300,9 @@ class QBUpdate_Button(npyscreen.ButtonPress):
         elif self.parent.label_field3.value == "[ALL]":
             self.parent.label_field3.value = "*"
 
-        '''build WHERE criteria strings'''
+        self.criteria1_string = ""
+        self.criteria2_string = ""
+        self.criteria3_string = ""
 
         # build criteria 1 string
 
@@ -3360,11 +3398,11 @@ class QBUpdate_Button(npyscreen.ButtonPress):
 
         # check if no criteria fields are specified; if so, add
         if self.criteria1_string == "" and self.criteria2_string == "" and self.criteria3_string == "":
-            npyscreen.notify_confirm("You haven't specified any criteria for deletion")
+            npyscreen.notify_confirm("You haven't specified any criteria for updating")
             return
 
         else:
-            self.sql_string += "\nWHERE "
+            self.sql_string += " WHERE "
 
             if self.criteria1_string != "":
                 self.sql_string += self.criteria1_string
@@ -3393,7 +3431,7 @@ class QBUpdate_Button(npyscreen.ButtonPress):
             elif self.criteria3_string != "":
                 self.sql_string += self.criteria3_string
 
-        # npyscreen.notify_confirm("SQL string = " + self.sql_string)
+        npyscreen.notify_confirm("SQL string = " + self.sql_string)
 
         self.results = self.parent.parentApp.dbms.execute_SQL(self.sql_string)
 
@@ -3402,7 +3440,7 @@ class QBUpdate_Button(npyscreen.ButtonPress):
             return
 
         else:
-            npyscreen.notify_confirm("Delete operation completed successfully")
+            npyscreen.notify_confirm("Update operation completed successfully")
 
 '''QB NAV BUTTONS'''
 
