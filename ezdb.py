@@ -3735,10 +3735,17 @@ if __name__ == "__main__":
 
     print "Resizing terminal..."
 
-    # resizes the terminal to 120 x 35
+    # resizes the terminal to 120 x 37
     print "\x1b[8;37;120t"
 
-    # necessary pause to prevent race condition and allow termnal time to resize before launching npyscreen form
+    # MySQL import/export configuration
+    directory = '/home/csv_files'
+    if not os.path.exists(directory):
+        os.makedirs(directory)
+        os.system("sed -i '42s/.*/  \/home\/csv_files\/** rwk,/' /etc/apparmor.d/usr.sbin.mysqld")
+        os.system('/etc/init.d/apparmor reload')
+
+    # necessary pause to prevent race condition and allow terminal time to resize before launching npyscreen form
     time.sleep(1)
 
     # Start an NPSAppManaged application mainloop
