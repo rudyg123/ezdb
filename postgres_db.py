@@ -28,23 +28,24 @@ class Postgres_Database(object):
 
         self.dbname = None
 
-    def connect_DBMS(self, dbtype, host, port, user, password):
+    def connect_DBMS(self, dbtype, host, port, dbname, user, password):
         
         self.dbtype = dbtype
         self.host = host
         self.port = port
+        self.dbname = dbname
         self.user = user
         self.password = password
-
-        self.dbname = ''
 
         self.cur = ''
         self.conn = ''
 
         self.conn_config = {
+            'host': self.host,
+            'port': self.port,
+            'dbname': self.dbname,
             'user': self.user,
             'password': self.password,
-            'host': self.host,
         }
         
         try:
@@ -55,8 +56,7 @@ class Postgres_Database(object):
         except psycopg2.DatabaseError, err:
             return err
         
-    #connect to existing named database
-    #-still need to implement user db authentication
+    # connect to existing named database
     def connect_database(self, dbname):
 
         self.dbname = dbname
@@ -70,8 +70,6 @@ class Postgres_Database(object):
         except psycopg2.DatabaseError, err:
             self.conn.rollback()
             return "The following problem occurred during connection:\n" + str(err)
-
-        #print "Connected to database {}.".format(self.dbname)
 
     def list_databases(self):
 
@@ -123,6 +121,7 @@ class Postgres_Database(object):
             'user': self.user,
             'password': self.password,
             'host': self.host,
+            'dbname': 'postgres'
         }
 
         try:

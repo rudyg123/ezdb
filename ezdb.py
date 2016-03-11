@@ -57,31 +57,48 @@ class Initial(npyscreen.ActionForm, npyscreen.SplitForm):
 
 
 class ConnectDBMS(npyscreen.ActionForm, npyscreen.SplitForm):
-    storedConnections, result, dbtype = (None,)*3
+    result, dbtype, host, port, dbname, username, password = (None,)*7
 
     def create(self):
+
         # Set default DBMS connection values
-        # For debugging:
-        # npyscreen.notify_confirm("The value of dbtype in ConnectDBMS is " + str(dbtype))
         if self.parentApp.dbtype == 0:
             self.add(npyscreen.FixedText, value="Enter PostgreSQL Database System Connection Settings:", editable=False)
-            self.parentApp.port = '5432'
-            self.parentApp.username = 'postgres'
-            self.parentApp.password = 'password'
+            self.host = '127.0.0.1'
+            self.port = '5432'
+            self.dbname = 'postgres'
+            self.username = 'postgres'
+            self.password = 'password'
+
         elif self.parentApp.dbtype == 1:
             self.add(npyscreen.FixedText, value="Enter MySQL Database System Connection Settings:", editable=False)
-            self.parentApp.port = '3306'
-            self.parentApp.username = 'root'
-            self.parentApp.password = 'password'
+            self.host = '127.0.0.1'
+            self.port = '3306'
+            self.dbname = ''
+            self.username = 'root'
+            self.password = 'password'
 
         self.nextrely += 2  # Move down
-        self.parentApp.host = self.add(npyscreen.TitleText, name="Hostname:", value="127.0.0.1")
+        self.host = self.add(npyscreen.TitleText, name="Hostname:", value=self.host)
+
         self.nextrely += 1  # Move down
-        self.parentApp.port = self.add(npyscreen.TitleText, name="Port:", value=self.parentApp.port)
+        self.port = self.add(npyscreen.TitleText, name="Port:", value=self.port)
+
         self.nextrely += 1  # Move down
-        self.parentApp.username = self.add(npyscreen.TitleText, name="Username:", value=self.parentApp.username)
+
+        if self.parentApp.dbtype == 0:
+
+            self.dbname = self.add(npyscreen.TitleText, name="Database:", value=self.dbname)
+
+        elif self.parentApp.dbtype == 1:
+
+            self.dbname = self.add(npyscreen.TitleText, name="Database (optional for MySQL):", value=self.dbname)
+
         self.nextrely += 1  # Move down
-        self.parentApp.password = self.add(npyscreen.TitleText, name="Password:", value=self.parentApp.password)
+        self.username = self.add(npyscreen.TitleText, name="Username:", value=self.username)
+
+        self.nextrely += 1  # Move down
+        self.password = self.add(npyscreen.TitleText, name="Password:", value=self.password)
 
         # Help menu guidance
         self.nextrely = 34
@@ -100,23 +117,30 @@ class ConnectDBMS(npyscreen.ActionForm, npyscreen.SplitForm):
     def on_ok(self):
         self.result = None
 
+        self.parentApp.host = self.host.value
+        self.parentApp.port = self.port.value
+        self.parentApp.dbname = self.dbname.value
+        self.parentApp.username = self.username.value
+        self.parentApp.password = self.password.value
+
         # Connect to DBMS
         if self.parentApp.dbtype == 0:
             self.parentApp.dbms = pdb.Postgres_Database()
-            self.result = self.parentApp.dbms.connect_DBMS(self.parentApp.dbtype, self.parentApp.host.value,
-                                                           self.parentApp.port.value, self.parentApp.username.value,
-                                                           self.parentApp.password.value)
+            self.result = self.parentApp.dbms.connect_DBMS(self.parentApp.dbtype, self.parentApp.host,
+                                                           self.parentApp.port, self.parentApp.dbname,
+                                                           self.parentApp.username, self.parentApp.password)
 
         elif self.parentApp.dbtype == 1:
             self.parentApp.dbms = mdb.MySQL_Database()
-            self.result = self.parentApp.dbms.connect_DBMS(self.parentApp.dbtype, self.parentApp.host.value,
-                                                           self.parentApp.port.value, self.parentApp.username.value,
-                                                           self.parentApp.password.value)
-
+            self.result = self.parentApp.dbms.connect_DBMS(self.parentApp.dbtype, self.parentApp.host,
+                                                           self.parentApp.port, self.parentApp.dbname,
+                                                           self.parentApp.username, self.parentApp.password)
         if self.result is not None:
             npyscreen.notify_confirm("There was a problem connecting to the database system:\n" + str(self.result))
             self.result = None
-            npyscreen.blank_terminal() # clears the notification and just goes back to the original form
+
+            npyscreen.blank_terminal()  # clears the notification and just goes back to the original form
+
         else:
             self.parentApp.setNextForm("DatabaseWindow")
 
@@ -2029,9 +2053,6 @@ class ImportExportWindow(npyscreen.ActionForm, npyscreen.SplitForm):
 
         self.add(Export_Button, name="Export", relx=28, rely=23, color="CONTROL", scroll_exit=True)
 
-        #self.nextrely += 1  # Move down
-
-
         # Help menu guidance
         self.nextrely = 34
         self.nextrelx = 2
@@ -2043,14 +2064,12 @@ class ImportExportWindow(npyscreen.ActionForm, npyscreen.SplitForm):
     def open_file_dialog(self, code_of_key_pressed):
 
         self.selected_importfile = npyscreen.selectFile(starting_value="/home/csv_files")
-        #npyscreen.notify_yes_no('Are you sure you want to import {}'.format(self.selected_importfile) + "?",
-        #                        title='File Selected')
         self.import_filename.value = self.selected_importfile
         self.import_filename.display()
 
 
     @staticmethod
-    def display_help():
+    def display_help(self):
         help_msg = "Use this page to import or export contents between database tables and CSV files.\n\n" \
                    "In order to import data from a CSV file into a database, you must first create a table containing\n" \
                    "matching column field names and types matching the CSV file. Then, to import a CSV file, press the\n" \
@@ -2085,7 +2104,34 @@ class AdminWindow(npyscreen.ActionForm, npyscreen.SplitForm):
 
         self.add(NavExitButton, w_id="wNavExit", name="Exit", value="AdminWindow", rely=1, relx=109)
 
-        self.add(npyscreen.FixedText, value="Here is the ADMIN window", editable=False)
+        self.add(npyscreen.FixedText, value="Create New User", editable=False, relx=3, rely=3)
+
+        self.newusername = self.add(npyscreen.TitleText, name="Username:", value="", relx=3, rely=5, begin_entry_at=11,
+                                    use_two_lines=False)
+
+        self.newuserpassword = self.add(npyscreen.TitleText, name="Password:", value="", relx=3, rely=6, begin_entry_at=11,
+                                    use_two_lines=False)
+
+        self.perm_superuser = self.add(npyscreen.TitleSelectOne, max_height=3,
+                                       name="Make the person a superuser with all privileges?", value=[0],
+                                       values=["No", "Yes"], relx=3, rely=8, max_width=30, scroll_exit=True)
+
+        self.perm_createDB = self.add(npyscreen.TitleSelectOne, max_height=3,
+                                      name="Can the user create/delete databases and tables?", value=[0],
+                                      values=["No", "Yes"], relx=3, rely=13, max_width=30, scroll_exit=True)
+
+        self.perm_createOthers = self.add(npyscreen.TitleSelectOne, max_height=3,
+                                          name="Can the user create/delete other users?", value=[0],
+                                          values=["No", "Yes"], relx=3, rely=18, max_width=30, scroll_exit=True)
+
+        self.add(CreateUser_Button, name="Create", relx=3, rely=23, color="CONTROL", scroll_exit=True)
+
+        self.add(npyscreen.FixedText, value="Delete Existing User", editable=False, relx=3, rely=25)
+
+        self.delete_username = self.add(npyscreen.TitleText, name="Username:", value="", relx=3, rely=27,
+                                        begin_entry_at=11, use_two_lines=False)
+
+        self.add(DeleteUser_Button, name="Delete", relx=3, rely=28, color="CONTROL", scroll_exit=True)
 
         # Help menu guidance
         self.nextrely = 34
@@ -2097,8 +2143,7 @@ class AdminWindow(npyscreen.ActionForm, npyscreen.SplitForm):
 
     @staticmethod
     def display_help(self):
-        help_msg = "Use this screen to manage permissions for the currently selected database instance. You can add " \
-                   "user accounts and modify user read/write access from this page."
+        help_msg = "Use this screen to manage user creation with permissions and deletion."
         npyscreen.notify_confirm(help_msg, title='Help Menu', editw=1)
 
 '''DATABASE BUTTONS'''
@@ -2157,6 +2202,9 @@ class DeleteDBButton(npyscreen.ButtonPress):
                 servermsg = self.parent.parentApp.dbms.delete_database(selected_db)
 
                 npyscreen.notify_confirm(servermsg)
+
+                npyscreen.notify_confirm("username = " + str(self.parent.parentApp.username))
+
                 dblist = self.parent.parentApp.dbms.list_databases()
                 self.parent.db_box.value = None
                 self.parent.db_box.values = dblist
@@ -3552,8 +3600,155 @@ class Export_Button(npyscreen.ButtonPress):
 
             return
 
-'''PAGE BUTTONS'''
 
+'''ADMIN BUTTONS'''
+
+
+class CreateUser_Button(npyscreen.ButtonPress):
+
+    def whenPressed(self):
+
+        # check to make sure username and password values are entered
+        if self.parent.newusername.value == "":
+
+            npyscreen.notify_confirm("Please specify a username for the new user")
+            return
+
+        elif self.parent.newuserpassword.value == "":
+
+            npyscreen.notify_confirm("Please specify a password for the new user")
+            return
+
+        self.sql_string = ""
+
+        # check if superuser permissions requested
+        if self.parent.perm_superuser.get_selected_objects()[0] == "Yes":
+
+            confirm_superuser = npyscreen.notify_yes_no("Are you sure you want {} to have superuser privileges?"
+                                                        .format(self.parent.newusername.value))
+
+            if not confirm_superuser:
+                return
+
+            elif self.parent.parentApp.dbtype == 0:  # check if postgres
+                self.sql_string = "CREATE USER {} PASSWORD '{}' SUPERUSER".format(self.parent.newusername.value,
+                                                                                    self.parent.newuserpassword.value)
+
+                self.results = self.parent.parentApp.dbms.execute_SQL(self.sql_string)
+
+                if self.results[0] == 'error':
+                    npyscreen.notify_confirm(str(self.results[1]))
+                    return
+
+                else:
+                    npyscreen.notify_confirm("User successfully created ")
+
+            elif self.parent.parentApp.dbtype == 1:  # check if mysql
+
+                self.sql_string = "CREATE USER '{}'@'%' IDENTIFIED BY '{}'"\
+                    .format(self.parent.newusername.value, self.parent.newuserpassword.value)
+
+                self.results = self.parent.parentApp.dbms.execute_SQL(self.sql_string)
+
+                if self.results[0] == 'error':
+                    npyscreen.notify_confirm(str(self.results[1]))
+                    return
+
+                # add superuser privilege to the newly created user
+                self.sql_string = "GRANT ALL PRIVILEGES ON *.* TO '{}'@'%' " \
+                                  "WITH GRANT OPTION".format(self.parent.newusername.value)
+
+                self.results = self.parent.parentApp.dbms.execute_SQL(self.sql_string)
+
+                if self.results[0] == 'error':
+                    npyscreen.notify_confirm(str(self.results[1]))
+                    return
+
+                # add superuser privilege to the newly created user
+                self.sql_string = "FLUSH PRIVILEGES"
+
+                self.results = self.parent.parentApp.dbms.execute_SQL(self.sql_string)
+
+                if self.results[0] == 'error':
+                    npyscreen.notify_confirm(str(self.results[1]))
+                    return
+
+                else:
+                    npyscreen.notify_confirm("User successfully created ")
+
+        '''
+        else:
+
+            if self.parent.parentApp.dbtype == 0:  # check if postgres
+                self.sql_string = "CREATE ROLE '{}' PASSWORD '{}'".format(self.parent.newusername.value,
+                                                                                    self.parent.newuserpassword.value)
+
+            elif self.parent.parentApp.dbtype == 1:  # check if mysql
+                self.sql_string = "CREATE USER '{}'@'%' IDENTIFIED BY '{}'".format(self.parent.newusername.value,
+                                                                                    self.parent.newuserpassword.value)
+
+
+        npyscreen.notify_confirm("SQL string = " + self.sql_string)
+
+        self.results = self.parent.parentApp.dbms.execute_SQL(self.sql_string)
+
+        if self.results[0] == 'error':
+            npyscreen.notify_confirm(str(self.results[1]))
+            return
+
+        else:
+            npyscreen.notify_confirm("User successfully created ")
+        '''
+
+
+class DeleteUser_Button(npyscreen.ButtonPress):
+
+    def whenPressed(self):
+
+        # check to make sure username and password values are entered
+        if self.parent.delete_username.value == "":
+
+            npyscreen.notify_confirm("Please specify a username for deletion")
+            return
+
+        confirm_deletion = npyscreen.notify_yes_no("Are you sure you want to delete user {}?"
+                                                    .format(self.parent.delete_username.value))
+
+        if not confirm_deletion:
+            return
+
+        else:
+
+            self.sql_string = ""
+
+            if self.parent.parentApp.dbtype == 0:  # check if postgres
+
+                self.sql_string = "DROP USER IF EXISTS {}".format(self.parent.delete_username.value)
+
+                self.results = self.parent.parentApp.dbms.execute_SQL(self.sql_string)
+
+                if self.results[0] == 'error':
+                    npyscreen.notify_confirm(str(self.results[1]))
+                    return
+
+                else:
+                    npyscreen.notify_confirm("User successfully deleted ")
+
+            elif self.parent.parentApp.dbtype == 1:  # check if mysql
+
+                self.sql_string = "DROP USER '{}'@'%'".format(self.parent.delete_username.value)
+
+                self.results = self.parent.parentApp.dbms.execute_SQL(self.sql_string)
+
+                if self.results[0] == 'error':
+                    npyscreen.notify_confirm(str(self.results[1]))
+                    return
+
+                else:
+                    npyscreen.notify_confirm("User successfully deleted ")
+
+
+'''PAGE BUTTONS'''
 
 class PrevPage_Button(npyscreen.ButtonPress):
     def whenPressed(self):
@@ -3621,7 +3816,6 @@ class NavTablesButton(npyscreen.ButtonPress):
             return
 
         else:
-            #self.parent.parentApp.tableList = self.parent.parentApp.dbms.list_database_tables()
             self.parent.parentApp.switchForm("TablesWindow")
 
 
@@ -3674,7 +3868,7 @@ class NavExitButton(npyscreen.ButtonPress):
 # Manages the display of the various Forms we have created
 class App(npyscreen.NPSAppManaged):
 
-    dbtype, host, port, username, password, dbms, active_db, tableList, active_table = (None,)*9
+    dbtype, host, port, dbname, username, password, dbms, active_db, tableList, active_table = (None,)*10
 
     # Table creation global variables
     field_name, field_type, field_length_or_val, field_collation, field_attrib, field_default = (None,)*6

@@ -23,24 +23,24 @@ class MySQL_Database(object):
 
         self.dbname = None
 
-    def connect_DBMS(self, dbtype, host, port, user, password):
+    def connect_DBMS(self, dbtype, host, port, dbname, user, password):
         
         self.dbtype = dbtype
         self.host = host
         self.port = port
+        self.dbname = dbname
         self.user = user
         self.password = password
-
-        self.dbname = ''
 
         self.cur = ''
         self.conn = ''
 
         self.conn_config = {
+            'host': self.host,
+            'port': self.port,
+            'database': self.dbname,
             'user': self.user,
             'password': self.password,
-            'host': self.host,
-            'database': ''
         }
         
         try:
@@ -52,8 +52,8 @@ class MySQL_Database(object):
             return err
 
 
-    '''connect to existing named database
-    -still need to implement user db authentication'''
+    '''connect to existing named database'''
+
     def connect_database(self, dbname):
 
         self.dbname = dbname
@@ -69,7 +69,7 @@ class MySQL_Database(object):
 
     def list_databases(self):
 
-        #sql command to only show user created databases exlusive of system databases
+        # sql command to only show user created databases exlusive of system databases
         sql_string = "SELECT schema_name FROM INFORMATION_SCHEMA.SCHEMATA WHERE schema_name not in" \
                      "('information_schema','mysql','performance_schema');"
         try:
