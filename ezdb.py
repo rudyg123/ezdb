@@ -5,6 +5,7 @@ import postgres_db as pdb
 import mysql_db as mdb
 import time
 import math
+import os
 
 # ActionForm includes "Cancel" in addition to "OK"
 class Initial(npyscreen.ActionForm, npyscreen.SplitForm):
