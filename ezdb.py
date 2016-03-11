@@ -3740,9 +3740,8 @@ if __name__ == "__main__":
     print "\x1b[8;37;120t"
 
     # MySQL import/export configuration
-    directory = '/home/csv_files'
-    if not os.path.exists(directory):
-        os.makedirs(directory)
+    if not os.path.exists('/home/csv_files'):
+        os.system('mkdir -m 777 /home/csv_files')
         os.system("sed -i '42s/.*/  \/home\/csv_files\/** rwk,/' /etc/apparmor.d/usr.sbin.mysqld")
         os.system('/etc/init.d/apparmor reload')
 
