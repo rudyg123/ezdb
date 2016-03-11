@@ -239,7 +239,8 @@ class MySQL_Database(object):
         row_count = 0
 
         try:
-            if "select" in sql_string.lower() and "outfile" not in sql_string.lower():
+            if "select" in sql_string.lower() and "outfile" not in sql_string.lower() and "grant" \
+                    not in sql_string.lower():
 
                 self.cur.execute(sql_string + " LIMIT 0;")
                 self.conn.commit()
@@ -292,6 +293,34 @@ class MySQL_Database(object):
                     table_fields_results.append(row)
 
                 return "success", table_fields_results
+
+            except mysql.connector.Error, err:
+
+                self.conn.rollback()
+                return "error", err
+
+        except mysql.connector.Error, err:
+
+            self.conn.rollback()
+            return "error", err
+
+    def get_userlist(self, table):
+
+        sql_string = "SELECT user from mysql.user WHERE user != 'root' AND user != 'debian-sys-maint'"
+
+        try:
+
+            self.cur.execute(sql_string + ";")
+            self.conn.commit()
+
+            try:
+                user_results_data = self.cur.fetchall()
+                user_results = []
+
+                for row in user_results_data:
+                    user_results.append(row)
+
+                return "success", user_results
 
             except mysql.connector.Error, err:
 

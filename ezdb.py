@@ -3642,6 +3642,7 @@ class CreateUser_Button(npyscreen.ButtonPress):
 
                 else:
                     npyscreen.notify_confirm("User successfully created ")
+                    return
 
             elif self.parent.parentApp.dbtype == 1:  # check if mysql
 
@@ -3664,7 +3665,7 @@ class CreateUser_Button(npyscreen.ButtonPress):
                     npyscreen.notify_confirm(str(self.results[1]))
                     return
 
-                # add superuser privilege to the newly created user
+                # necessary command to activate permissions
                 self.sql_string = "FLUSH PRIVILEGES"
 
                 self.results = self.parent.parentApp.dbms.execute_SQL(self.sql_string)
@@ -3675,30 +3676,113 @@ class CreateUser_Button(npyscreen.ButtonPress):
 
                 else:
                     npyscreen.notify_confirm("User successfully created ")
+                    return
 
-        '''
+        # if not superuser, create new user with specified permissions
         else:
+
+            self.privilege_string = ""
 
             if self.parent.parentApp.dbtype == 0:  # check if postgres
-                self.sql_string = "CREATE ROLE '{}' PASSWORD '{}'".format(self.parent.newusername.value,
-                                                                                    self.parent.newuserpassword.value)
+
+                self.sql_string = "CREATE USER {} PASSWORD '{}'".format(self.parent.newusername.value,
+                                                                          self.parent.newuserpassword.value)
+
+                if self.parent.perm_createDB.get_selected_objects()[0] == "Yes":
+
+                    self.privilege_string += " CREATEDB"
+
+                if self.parent.perm_createOthers.get_selected_objects()[0] == "Yes":
+
+                    self.privilege_string += " CREATEROLE"
+
+
+                confirm_newuser = npyscreen.notify_yes_no("Are you sure you want {} to have the following "
+                                                          "privilege(s)?\n{}".format(self.parent.newusername.value,
+                                                                                     self.privilege_string))
+
+                if not confirm_newuser:
+                    return
+
+                else:
+
+                    self.sql_string += self.privilege_string
+
+                    self.results = self.parent.parentApp.dbms.execute_SQL(self.sql_string)
+
+                    if self.results[0] == 'error':
+                        npyscreen.notify_confirm(str(self.results[1]))
+                        return
+
+                    else:
+                        npyscreen.notify_confirm("User successfully created ")
+                        return
 
             elif self.parent.parentApp.dbtype == 1:  # check if mysql
+
                 self.sql_string = "CREATE USER '{}'@'%' IDENTIFIED BY '{}'".format(self.parent.newusername.value,
-                                                                                    self.parent.newuserpassword.value)
+                                                                                   self.parent.newuserpassword.value)
 
+                if self.parent.perm_createDB.get_selected_objects()[0] == "Yes":
 
-        npyscreen.notify_confirm("SQL string = " + self.sql_string)
+                    self.privilege_string += "SELECT, INSERT, UPDATE, DELETE, CREATE, DROP, "
 
-        self.results = self.parent.parentApp.dbms.execute_SQL(self.sql_string)
+                else:
+                    self.privilege_string += "SELECT, INSERT, UPDATE, DELETE, "
 
-        if self.results[0] == 'error':
-            npyscreen.notify_confirm(str(self.results[1]))
-            return
+                if self.parent.perm_createOthers.get_selected_objects()[0] == "Yes":
 
-        else:
-            npyscreen.notify_confirm("User successfully created ")
-        '''
+                    self.privilege_string += "CREATE USER, "
+
+                self.privilege_string = self.privilege_string[:-2]
+
+                confirm_newuser = npyscreen.notify_yes_no("Are you sure you want {} to have the following "
+                                                              "privilege(s)?\n{}".format(self.parent.newusername.value,
+                                                                                         self.privilege_string))
+
+                if not confirm_newuser:
+                    return
+
+                else:
+                    npyscreen.notify_confirm("self.sql_string = " + self.sql_string)
+                    # first create new user
+                    self.results = self.parent.parentApp.dbms.execute_SQL(self.sql_string)
+
+                    if self.results[0] == 'error':
+                        npyscreen.notify_confirm(str(self.results[1]))
+                        return
+
+                    # then add permission(s)
+
+                    if self.parent.perm_createOthers.get_selected_objects()[0] == "Yes":
+
+                        self.sql_string = "GRANT {} ON *.* TO '{}'@'%' " \
+                                          "WITH GRANT OPTION".format(self.privilege_string,
+                                                                     self.parent.newusername.value)
+
+                    else:
+
+                        self.sql_string = "GRANT {} ON *.* TO '{}'@'%'".format(self.privilege_string,
+                                                                     self.parent.newusername.value)
+                    npyscreen.notify_confirm("self.sql_string = " + self.sql_string)
+                    self.results = self.parent.parentApp.dbms.execute_SQL(self.sql_string)
+
+                    if self.results[0] == 'error':
+                        npyscreen.notify_confirm(str(self.results[1]))
+                        return
+
+                    # necessary command to activate permissions
+                    self.sql_string = "FLUSH PRIVILEGES"
+
+                    self.results = self.parent.parentApp.dbms.execute_SQL(self.sql_string)
+
+                    if self.results[0] == 'error':
+                        npyscreen.notify_confirm(str(self.results[1]))
+                        return
+
+                    else:
+                        npyscreen.notify_confirm("User successfully created ")
+                        return
 
 
 class DeleteUser_Button(npyscreen.ButtonPress):
@@ -3883,7 +3967,7 @@ class App(npyscreen.NPSAppManaged):
         tbl2_criteria3, tbl3_criteria1, tbl3_criteria2, tbl3_criteria3, table1, table2, table3, insertTable = (None,)*16
 
     tablefield_cols, query_results, col_titles, table_struct_results, field_string_array, field_list1, \
-    field_list2, field_list3, insertfield_list = ([],)*9
+    field_list2, field_list3, insertfield_list, userlist = ([],)*10
 
     page_num = 0
     num_pages, num_records = (0,)*2
