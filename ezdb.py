@@ -5,7 +5,6 @@ import postgres_db as pdb
 import mysql_db as mdb
 import time
 import math
-import os
 
 # ActionForm includes "Cancel" in addition to "OK"
 class Initial(npyscreen.ActionForm, npyscreen.SplitForm):
@@ -3738,12 +3737,6 @@ if __name__ == "__main__":
 
     # resizes the terminal to 120 x 37
     print "\x1b[8;37;120t"
-
-    # MySQL import/export configuration
-    if not os.path.exists('/home/csv_files'):
-        os.system('mkdir -m 777 /home/csv_files')
-        os.system("sed -i '42s/.*/  \/home\/csv_files\/** rwk,/' /etc/apparmor.d/usr.sbin.mysqld")
-        os.system('/etc/init.d/apparmor reload')
 
     # necessary pause to prevent race condition and allow terminal time to resize before launching npyscreen form
     time.sleep(1)
