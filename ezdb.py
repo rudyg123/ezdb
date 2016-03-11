@@ -2104,34 +2104,32 @@ class AdminWindow(npyscreen.ActionForm, npyscreen.SplitForm):
 
         self.add(NavExitButton, w_id="wNavExit", name="Exit", value="AdminWindow", rely=1, relx=109)
 
-        self.add(npyscreen.FixedText, value="Create New User", editable=False, relx=3, rely=3)
+        self.userbox = self.add(npyscreen.BoxTitle, name="Database Users", values=self.parentApp.userlist, relx=3,
+                                rely=3, max_width=25, max_height=26, scroll_exit=True)
 
-        self.newusername = self.add(npyscreen.TitleText, name="Username:", value="", relx=3, rely=5, begin_entry_at=11,
+        self.add(DeleteUser_Button, name="Delete Selected User", relx=3, rely=29, color="CONTROL", scroll_exit=True)
+
+        self.add(npyscreen.FixedText, value="Create New User", editable=False, relx=30, rely=4)
+
+        self.newusername = self.add(npyscreen.TitleText, name="Username:", value="", relx=30, rely=6, begin_entry_at=11,
                                     use_two_lines=False)
 
-        self.newuserpassword = self.add(npyscreen.TitleText, name="Password:", value="", relx=3, rely=6, begin_entry_at=11,
+        self.newuserpassword = self.add(npyscreen.TitleText, name="Password:", value="", relx=30, rely=7, begin_entry_at=11,
                                     use_two_lines=False)
 
         self.perm_superuser = self.add(npyscreen.TitleSelectOne, max_height=3,
                                        name="Make the person a superuser with all privileges?", value=[0],
-                                       values=["No", "Yes"], relx=3, rely=8, max_width=30, scroll_exit=True)
+                                       values=["No", "Yes"], relx=30, rely=9, max_width=30, scroll_exit=True)
 
         self.perm_createDB = self.add(npyscreen.TitleSelectOne, max_height=3,
                                       name="Can the user create/delete databases and tables?", value=[0],
-                                      values=["No", "Yes"], relx=3, rely=13, max_width=30, scroll_exit=True)
+                                      values=["No", "Yes"], relx=30, rely=14, max_width=30, scroll_exit=True)
 
         self.perm_createOthers = self.add(npyscreen.TitleSelectOne, max_height=3,
                                           name="Can the user create/delete other users?", value=[0],
-                                          values=["No", "Yes"], relx=3, rely=18, max_width=30, scroll_exit=True)
+                                          values=["No", "Yes"], relx=30, rely=19, max_width=30, scroll_exit=True)
 
-        self.add(CreateUser_Button, name="Create", relx=3, rely=23, color="CONTROL", scroll_exit=True)
-
-        self.add(npyscreen.FixedText, value="Delete Existing User", editable=False, relx=3, rely=25)
-
-        self.delete_username = self.add(npyscreen.TitleText, name="Username:", value="", relx=3, rely=27,
-                                        begin_entry_at=11, use_two_lines=False)
-
-        self.add(DeleteUser_Button, name="Delete", relx=3, rely=28, color="CONTROL", scroll_exit=True)
+        self.add(CreateUser_Button, name="Create", relx=30, rely=24, color="CONTROL", scroll_exit=True)
 
         # Help menu guidance
         self.nextrely = 34
@@ -2141,9 +2139,17 @@ class AdminWindow(npyscreen.ActionForm, npyscreen.SplitForm):
         # Register help key
         self.add_handlers({'^Q': self.display_help})
 
+    def beforeEditing(self):
+
+        self.parentApp.userlist = self.parentApp.dbms.get_userlist()
+        self.userbox.values = self.parentApp.userlist
+        self.userbox.display()
+
     @staticmethod
     def display_help(self):
-        help_msg = "Use this screen to manage user creation with permissions and deletion."
+        help_msg = "Use this screen to manage user creation with permissions and deletion. Note: root DBMS user name " \
+                   "is hidden to prevent accidental deletion or permission alteration."
+
         npyscreen.notify_confirm(help_msg, title='Help Menu', editw=1)
 
 '''DATABASE BUTTONS'''
@@ -3625,7 +3631,7 @@ class CreateUser_Button(npyscreen.ButtonPress):
         if self.parent.perm_superuser.get_selected_objects()[0] == "Yes":
 
             confirm_superuser = npyscreen.notify_yes_no("Are you sure you want {} to have superuser privileges?"
-                                                        .format(self.parent.newusername.value))
+                                                        .format(self.parent.newusername.value), editw=2)
 
             if not confirm_superuser:
                 return
@@ -3641,7 +3647,10 @@ class CreateUser_Button(npyscreen.ButtonPress):
                     return
 
                 else:
-                    npyscreen.notify_confirm("User successfully created ")
+                    npyscreen.notify_confirm("User successfully created", editw=1)
+                    self.parent.parentApp.userlist = self.parent.parentApp.dbms.get_userlist()
+                    self.parent.userbox.values = self.parent.parentApp.userlist
+                    self.parent.userbox.display()
                     return
 
             elif self.parent.parentApp.dbtype == 1:  # check if mysql
@@ -3675,7 +3684,11 @@ class CreateUser_Button(npyscreen.ButtonPress):
                     return
 
                 else:
-                    npyscreen.notify_confirm("User successfully created ")
+                    npyscreen.notify_confirm("User successfully created", editw=1)
+                    self.parent.parentApp.userlist = self.parent.parentApp.dbms.get_userlist()
+                    self.parent.userbox.values = self.parent.parentApp.userlist
+                    self.parent.userbox.display()
+
                     return
 
         # if not superuser, create new user with specified permissions
@@ -3699,7 +3712,7 @@ class CreateUser_Button(npyscreen.ButtonPress):
 
                 confirm_newuser = npyscreen.notify_yes_no("Are you sure you want {} to have the following "
                                                           "privilege(s)?\n{}".format(self.parent.newusername.value,
-                                                                                     self.privilege_string))
+                                                                                     self.privilege_string), editw=2)
 
                 if not confirm_newuser:
                     return
@@ -3715,7 +3728,10 @@ class CreateUser_Button(npyscreen.ButtonPress):
                         return
 
                     else:
-                        npyscreen.notify_confirm("User successfully created ")
+                        npyscreen.notify_confirm("User successfully created", editw=1)
+                        self.parent.parentApp.userlist = self.parent.parentApp.dbms.get_userlist()
+                        self.parent.userbox.values = self.parent.parentApp.userlist
+                        self.parent.userbox.display()
                         return
 
             elif self.parent.parentApp.dbtype == 1:  # check if mysql
@@ -3738,13 +3754,13 @@ class CreateUser_Button(npyscreen.ButtonPress):
 
                 confirm_newuser = npyscreen.notify_yes_no("Are you sure you want {} to have the following "
                                                               "privilege(s)?\n{}".format(self.parent.newusername.value,
-                                                                                         self.privilege_string))
+                                                                                         self.privilege_string), editw=2)
 
                 if not confirm_newuser:
                     return
 
                 else:
-                    npyscreen.notify_confirm("self.sql_string = " + self.sql_string)
+
                     # first create new user
                     self.results = self.parent.parentApp.dbms.execute_SQL(self.sql_string)
 
@@ -3764,7 +3780,7 @@ class CreateUser_Button(npyscreen.ButtonPress):
 
                         self.sql_string = "GRANT {} ON *.* TO '{}'@'%'".format(self.privilege_string,
                                                                      self.parent.newusername.value)
-                    npyscreen.notify_confirm("self.sql_string = " + self.sql_string)
+
                     self.results = self.parent.parentApp.dbms.execute_SQL(self.sql_string)
 
                     if self.results[0] == 'error':
@@ -3781,7 +3797,10 @@ class CreateUser_Button(npyscreen.ButtonPress):
                         return
 
                     else:
-                        npyscreen.notify_confirm("User successfully created ")
+                        npyscreen.notify_confirm("User successfully created", editw=1)
+                        self.parent.parentApp.userlist = self.parent.parentApp.dbms.get_userlist()
+                        self.parent.userbox.values = self.parent.parentApp.userlist
+                        self.parent.userbox.display()
                         return
 
 
@@ -3789,14 +3808,15 @@ class DeleteUser_Button(npyscreen.ButtonPress):
 
     def whenPressed(self):
 
-        # check to make sure username and password values are entered
-        if self.parent.delete_username.value == "":
-
-            npyscreen.notify_confirm("Please specify a username for deletion")
+        if self.parent.userbox.value is None:
+            npyscreen.notify_confirm("Please select a user in the box and highlight it by selecting the enter key",
+                                     editw=1)
             return
+        else:
+            self.selected_user = self.parent.parentApp.userlist[self.parent.userbox.value]
 
-        confirm_deletion = npyscreen.notify_yes_no("Are you sure you want to delete user {}?"
-                                                    .format(self.parent.delete_username.value))
+        confirm_deletion = npyscreen.notify_yes_no("Sure you want to delete user {}?".format(self.selected_user),
+                                                   editw=2)
 
         if not confirm_deletion:
             return
@@ -3807,7 +3827,7 @@ class DeleteUser_Button(npyscreen.ButtonPress):
 
             if self.parent.parentApp.dbtype == 0:  # check if postgres
 
-                self.sql_string = "DROP USER IF EXISTS {}".format(self.parent.delete_username.value)
+                self.sql_string = "DROP USER IF EXISTS {}".format(self.selected_user)
 
                 self.results = self.parent.parentApp.dbms.execute_SQL(self.sql_string)
 
@@ -3816,11 +3836,14 @@ class DeleteUser_Button(npyscreen.ButtonPress):
                     return
 
                 else:
-                    npyscreen.notify_confirm("User successfully deleted ")
+                    npyscreen.notify_confirm("User {} successfully deleted".format(self.selected_user), editw=1)
+                    self.parent.parentApp.userlist = self.parent.parentApp.dbms.get_userlist()
+                    self.parent.userbox.values = self.parent.parentApp.userlist
+                    self.parent.userbox.display()
 
             elif self.parent.parentApp.dbtype == 1:  # check if mysql
 
-                self.sql_string = "DROP USER '{}'@'%'".format(self.parent.delete_username.value)
+                self.sql_string = "DROP USER '{}'@'%'".format(self.selected_user)
 
                 self.results = self.parent.parentApp.dbms.execute_SQL(self.sql_string)
 
@@ -3829,7 +3852,10 @@ class DeleteUser_Button(npyscreen.ButtonPress):
                     return
 
                 else:
-                    npyscreen.notify_confirm("User successfully deleted ")
+                    npyscreen.notify_confirm("User {} successfully deleted".format(self.selected_user), editw=1)
+                    self.parent.parentApp.userlist = self.parent.parentApp.dbms.get_userlist()
+                    self.parent.userbox.values = self.parent.parentApp.userlist
+                    self.parent.userbox.display()
 
 
 '''PAGE BUTTONS'''

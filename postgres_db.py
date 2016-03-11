@@ -307,5 +307,29 @@ class Postgres_Database(object):
             self.conn.rollback()
             return "error", err
 
+    def get_userlist(self):
 
+        sql_string = "SELECT usename FROM pg_user WHERE usename != 'postgres'"
+
+        try:
+
+            self.cur.execute(sql_string + ";")
+            self.conn.commit()
+
+            try:
+                user_results_data = self.cur.fetchall()
+                user_results = []
+
+                for row in user_results_data:
+                    user_results.append(row[0])
+
+                return user_results
+
+            except psycopg2.DatabaseError, err:
+                self.conn.rollback()
+                return err
+
+        except psycopg2.DatabaseError, err:
+            self.conn.rollback()
+            return err
 

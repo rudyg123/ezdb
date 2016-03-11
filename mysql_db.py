@@ -304,7 +304,7 @@ class MySQL_Database(object):
             self.conn.rollback()
             return "error", err
 
-    def get_userlist(self, table):
+    def get_userlist(self):
 
         sql_string = "SELECT user from mysql.user WHERE user != 'root' AND user != 'debian-sys-maint'"
 
@@ -318,16 +318,16 @@ class MySQL_Database(object):
                 user_results = []
 
                 for row in user_results_data:
-                    user_results.append(row)
+                    user_results.append(row[0])
 
-                return "success", user_results
+                return user_results
 
             except mysql.connector.Error, err:
 
                 self.conn.rollback()
-                return "error", err
+                return err
 
         except mysql.connector.Error, err:
 
             self.conn.rollback()
-            return "error", err
+            return err
