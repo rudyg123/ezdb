@@ -2954,6 +2954,8 @@ class SQL_Send_Button(npyscreen.ButtonPress):
                 self.parent.nextpage.display()
 
                 return
+        else:
+            npyscreen.notify_confirm("The operation completed successfully")
 
 
 class QBDelete_Button(npyscreen.ButtonPress):

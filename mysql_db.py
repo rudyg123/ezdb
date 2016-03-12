@@ -239,12 +239,6 @@ class MySQL_Database(object):
         row_count = 0
 
         try:
-            if "select" in sql_string.lower() and "outfile" not in sql_string.lower() and "grant" \
-                    not in sql_string.lower():
-
-                self.cur.execute(sql_string + " LIMIT 0;")
-                self.conn.commit()
-                col_titles = [desc[0] for desc in self.cur.description]
 
             self.cur.execute(sql_string + ";")
             self.conn.commit()
@@ -261,6 +255,10 @@ class MySQL_Database(object):
                         sql_results.append(row)
                         row_count += 1
 
+                    self.cur.execute(sql_string + " LIMIT 0;")
+                    self.conn.commit()
+                    col_titles = [desc[0] for desc in self.cur.description]
+
                     return "success", sql_results, col_titles, row_count
 
                 else:
@@ -269,12 +267,13 @@ class MySQL_Database(object):
             except mysql.connector.Error, err:
 
                 if str(err) == "No result set to fetch from.":
-                    return "success", sql_results, col_titles, row_count
+                    return "noresult", "", "", ""
+
                 else:
                     return "error", err, "", ""
 
         except mysql.connector.Error, err:
-            return "error", err
+            return "error", err, "", ""
 
     def get_table_fields(self, table):
 

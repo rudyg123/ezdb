@@ -250,13 +250,10 @@ class Postgres_Database(object):
         row_count = 0
 
         try:
-            if "select" in sql_string.lower():
-
-                self.cur.execute(sql_string + " LIMIT 0;")
-                col_titles = [desc[0] for desc in self.cur.description]
 
             self.cur.execute(sql_string + ";")
             self.conn.commit()
+
             sql_results = []
 
             try:
@@ -268,20 +265,29 @@ class Postgres_Database(object):
                     for row in sql_results_data:
                         sql_results.append(row)
                         row_count += 1
+
+                    self.cur.execute(sql_string + " LIMIT 0;")
+                    self.conn.commit()
+                    col_titles = [desc[0] for desc in self.cur.description]
+
                     return "success", sql_results, col_titles, row_count
 
                 else:
                     return "success", sql_results, col_titles, row_count
 
             except psycopg2.DatabaseError, err:
+
                 if str(err) == "no results to fetch":
-                    return "success", sql_results, col_titles, row_count
+                    return "noresult", "", "", ""
+
                 else:
-                    return "error", err
+                    return "error", err, "", ""
 
         except psycopg2.DatabaseError, err:
             self.conn.rollback()
-            return "error", err
+            return "error", err, "", ""
+
+
 
     def get_table_fields(self, table):
 
