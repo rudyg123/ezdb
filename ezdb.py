@@ -568,14 +568,14 @@ class QueryWindow(npyscreen.ActionForm, npyscreen.SplitForm):
         self.add(QB_TableBox01, name="Tables", values=self.parentApp.tableList, max_width=22, max_height=7,
                  scroll_exit=True)
 
-        self.label_table1 = self.add(npyscreen.FixedText, w_id="wLabel_table1_selected", value="None",
+        self.label_table1 = self.add(npyscreen.FixedText, w_id="wLabel_table1_selected", value="Unselected",
                  relx=4, max_width=20, color="CURSOR_INVERSE", use_two_lines=False, editable=False)
 
         self.nextrely += 1  # Move down
         self.field_box1 = self.add(QB_FieldBox01, w_id="wField_list1", name="Fields", values=self.parentApp.field_list1,
                                    max_width=22, max_height=6, scroll_exit=True)
 
-        self.label_field1 = self.add(npyscreen.FixedText, w_id="wLabel_field1_selected", value="None",
+        self.label_field1 = self.add(npyscreen.FixedText, w_id="wLabel_field1_selected", value="Unselected",
                  relx=4, max_width=20, color="CURSOR_INVERSE", use_two_lines=False, editable=False)
 
         self.nextrely += 1  # Move down
@@ -604,14 +604,14 @@ class QueryWindow(npyscreen.ActionForm, npyscreen.SplitForm):
         self.add(QB_TableBox02, name="Tables", values=self.parentApp.tableList, relx=30, max_width=22, max_height=7,
                  scroll_exit=True)
 
-        self.label_table2 = self.add(npyscreen.FixedText, w_id="wLabel_table2_selected", value="None",
+        self.label_table2 = self.add(npyscreen.FixedText, w_id="wLabel_table2_selected", value="Unselected",
                  relx=31, max_width=20, color="CURSOR_INVERSE", use_two_lines=False, editable=False)
 
         self.nextrely += 1  # Move down
         self.field_box2 = self.add(QB_FieldBox02, w_id="wField_list2", name="Fields", values=self.parentApp.field_list2,
                                    relx=30, max_width=22, max_height=6, scroll_exit=True)
 
-        self.label_field2 = self.add(npyscreen.FixedText, w_id="wLabel_field2_selected", value="None",
+        self.label_field2 = self.add(npyscreen.FixedText, w_id="wLabel_field2_selected", value="Unselected",
                  relx=31, max_width=20, color="CURSOR_INVERSE", use_two_lines=False, editable=False)
 
         self.nextrely += 1  # Move down
@@ -638,14 +638,14 @@ class QueryWindow(npyscreen.ActionForm, npyscreen.SplitForm):
         self.add(QB_TableBox03, name="Tables", values=self.parentApp.tableList, relx=57, max_width=22, max_height=7,
                  scroll_exit=True)
 
-        self.label_table3 = self.add(npyscreen.FixedText, w_id="wLabel_table3_selected", value="None",
+        self.label_table3 = self.add(npyscreen.FixedText, w_id="wLabel_table3_selected", value="Unselected",
                  relx=58, max_width=20, color="CURSOR_INVERSE", use_two_lines=False, editable=False)
 
         self.nextrely += 1  # Move down
         self.field_box3 = self.add(QB_FieldBox03, w_id="wField_list3", name="Fields", values=self.parentApp.field_list3,
                                    relx=57, max_width=22, max_height=6, scroll_exit=True)
 
-        self.label_field3 = self.add(npyscreen.FixedText, w_id="wLabel_field3_selected", value="None",
+        self.label_field3 = self.add(npyscreen.FixedText, w_id="wLabel_field3_selected", value="Unselected",
                  relx=58, max_width=20, color="CURSOR_INVERSE", use_two_lines=False, editable=False)
 
         self.nextrely += 1  # Move down
@@ -1494,7 +1494,7 @@ class QB_TableList02(npyscreen.MultiLineAction):
         results = self.parent.parentApp.dbms.get_table_fields(act_on_this)
         if results[0] == "success":
             field_list.append('[ALL]')
-            #npyscreen.notify_confirm("the results returned are :" + str(results[1]))
+
             for field in results[1]:
                 field_list.append(field[0])
             self.parent.field_box2.values = field_list
@@ -1518,7 +1518,7 @@ class QB_TableList03(npyscreen.MultiLineAction):
         results = self.parent.parentApp.dbms.get_table_fields(act_on_this)
         if results[0] == "success":
             field_list.append('[ALL]')
-            #npyscreen.notify_confirm("the results returned are :" + str(results[1]))
+
             for field in results[1]:
                 field_list.append(field[0])
             self.parent.field_box3.values = field_list
@@ -2635,26 +2635,26 @@ class QB_SQL_Build_Button(npyscreen.ButtonPress):
         '''table and paired field checks'''
 
         # check to make sure at least one table selected
-        if self.parent.label_table1.value == "None" and self.parent.label_table2.value == "None" \
-                and self.parent.label_table3.value == "None":
+        if self.parent.label_table1.value == "Unselected" and self.parent.label_table2.value == "Unselected" \
+                and self.parent.label_table3.value == "Unselected":
             npyscreen.notify_confirm("You must select at least one table")
             return
 
         # check to make sure a selected table has field selected
-        if self.parent.label_table1.value != "None" and self.parent.label_field1.value == "None":
+        if self.parent.label_table1.value != "Unselected" and self.parent.label_field1.value == "Unselected":
             npyscreen.notify_confirm("Select a field for the {} table".format(self.parent.parentApp.table1))
             return
 
-        if self.parent.label_table2.value != "None" and self.parent.label_field2.value == "None":
+        if self.parent.label_table2.value != "Unselected" and self.parent.label_field2.value == "Unselected":
             npyscreen.notify_confirm("Select a field for the {} table".format(self.parent.parentApp.table2))
             return
 
-        if self.parent.label_table3.value != "None" and self.parent.label_field3.value == "None":
+        if self.parent.label_table3.value != "Unselected" and self.parent.label_field3.value == "Unselected":
             npyscreen.notify_confirm("Select a field for the {} table".format(self.parent.parentApp.table3))
             return
 
         '''build table and field_strings'''
-        if self.parent.label_table1.value != "None":
+        if self.parent.label_table1.value != "Unselected":
             if self.parent.label_field1.value == "[ALL]":
                 self.parent.label_field1.value = "*"
 
@@ -2666,7 +2666,7 @@ class QB_SQL_Build_Button(npyscreen.ButtonPress):
             else:
                 self.table_string += self.parent.label_table1.value + ", "
 
-        if self.parent.label_table2.value != "None":
+        if self.parent.label_table2.value != "Unselected":
             if self.parent.label_field2.value == "[ALL]":
                 self.parent.label_field2.value = "*"
 
@@ -2677,7 +2677,7 @@ class QB_SQL_Build_Button(npyscreen.ButtonPress):
             else:
                 self.table_string += self.parent.label_table2.value + ", "
 
-        if self.parent.label_table3.value != "None":
+        if self.parent.label_table3.value != "Unselected":
             if self.parent.label_field3.value == "[ALL]":
                 self.parent.label_field3.value = "*"
 
@@ -2788,19 +2788,19 @@ class QB_SQL_Build_Button(npyscreen.ButtonPress):
 
         else:
             # checks if table val and sor val is not 'No Sort' and the field val isn't '*'
-            if self.parent.label_table1.value != "None" and self.parent.tbl1_sort.get_selected_objects()[0] \
+            if self.parent.label_table1.value != "Unselected" and self.parent.tbl1_sort.get_selected_objects()[0] \
                     != "NO SORT" and self.parent.label_field1.value != "*":
 
                 self.orderby_string += self.parent.label_table1.value + "." + self.parent.label_field1.value \
                                        + " {}, ".format(self.parent.tbl1_sort.get_selected_objects()[0])
 
-            if self.parent.label_table2.value != "None" and self.parent.tbl2_sort.get_selected_objects()[0] \
+            if self.parent.label_table2.value != "Unselected" and self.parent.tbl2_sort.get_selected_objects()[0] \
                     != "NO SORT" and self.parent.label_field2.value != "*":
 
                 self.orderby_string += self.parent.label_table2.value + "." + self.parent.label_field2.value \
                                        + " {}, ".format(self.parent.tbl2_sort.get_selected_objects()[0])
 
-            if self.parent.label_table3.value != "None" and self.parent.tbl3_sort.get_selected_objects()[0] \
+            if self.parent.label_table3.value != "Unselected" and self.parent.tbl3_sort.get_selected_objects()[0] \
                     != "NO SORT" and self.parent.label_field3.value != "*":
 
                 self.orderby_string += self.parent.label_table3.value + "." + self.parent.label_field3.value \
@@ -2852,9 +2852,6 @@ class QB_SQL_Build_Button(npyscreen.ButtonPress):
 
         else:
             self.sql_string += "\nORDER BY " + self.orderby_string
-
-
-        #npyscreen.notify_confirm("SQL string = " + self.sql_string)
 
         self.parent.query_box.entry_widget.value = self.sql_string
         self.parent.query_box.display()
