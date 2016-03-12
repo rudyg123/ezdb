@@ -3243,7 +3243,7 @@ class QueryInsertButton(npyscreen.ButtonPress):
             npyscreen.notify_confirm(str(self.results[1]))
             return
 
-        elif self.results[0] == 'success':
+        elif self.results[0] == 'noresult':
 
             npyscreen.notify_confirm("The insert operation completed successfully")
             return
