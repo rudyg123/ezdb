@@ -2865,6 +2865,7 @@ class QB_SQL_Send_Button(npyscreen.ButtonPress):
         #clear results
         self.parent.parentApp.query_results = []
         self.parent.parentApp.col_titles = []
+        self.parent.parentApp.num_records = 0
 
         self.sql_query = self.parent.get_widget("wSQL_query").value
         self.results = self.parent.parentApp.dbms.execute_SQL(self.sql_query)
