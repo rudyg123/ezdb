@@ -3083,40 +3083,53 @@ class QBDelete_Button(npyscreen.ButtonPress):
 
         '''build cumulative SQL string'''
 
-        # check if no criteria fields are specified; if so, add
+        # check if no criteria fields are specified; if so, warns user of table data deletion
         if self.criteria1_string == "" and self.criteria2_string == "" and self.criteria3_string == "":
-            npyscreen.notify_confirm("You haven't specified any criteria for deletion")
-            return
+            confirm_delete = npyscreen.notify_yes_no("You haven't specified any criteria for deletion. "
+                                                     "Are you sure you want to delete all data from the table?")
 
-        else:
-            self.sql_string += "\nWHERE "
+            if not confirm_delete:
+                return
 
-            if self.criteria1_string != "":
-                self.sql_string += self.criteria1_string
+            else:
+                self.results = self.parent.parentApp.dbms.execute_SQL(self.sql_string)
 
-                if self.criteria2_string != "":  # if criteria 2 exists
+                if self.results[0] == 'error':
+                    npyscreen.notify_confirm(str(self.results[1]))
+                    return
 
-                    # get condition1 value and add it and criteria 2
-                    self.sql_string += "\n" + self.parent.condition1.get_selected_objects()[0] + " " \
-                                       + self.criteria2_string
+                else:
+                    npyscreen.notify_confirm("Delete operation completed successfully")
+                    return
 
-                if self.criteria3_string != "":  # if criteria 3 exists
+        self.sql_string += "\nWHERE "
 
-                    # get condition2 value and add it and criteria 3
-                    self.sql_string += "\n " + self.parent.condition2.get_selected_objects()[0] + " " \
-                                       + self.criteria3_string
+        if self.criteria1_string != "":
+            self.sql_string += self.criteria1_string
 
-            elif self.criteria2_string != "":
-                self.sql_string += self.criteria2_string
+            if self.criteria2_string != "":  # if criteria 2 exists
 
-                if self.criteria3_string != "":  # if criteria 3 exists
+                # get condition1 value and add it and criteria 2
+                self.sql_string += "\n" + self.parent.condition1.get_selected_objects()[0] + " " \
+                                   + self.criteria2_string
 
-                    # get condition2 value and add it and criteria 3
-                    self.sql_string += "\n" + self.parent.condition2.get_selected_objects()[0] + " " \
-                                       + self.criteria3_string
+            if self.criteria3_string != "":  # if criteria 3 exists
 
-            elif self.criteria3_string != "":
-                self.sql_string += self.criteria3_string
+                # get condition2 value and add it and criteria 3
+                self.sql_string += "\n " + self.parent.condition2.get_selected_objects()[0] + " " \
+                                   + self.criteria3_string
+
+        elif self.criteria2_string != "":
+            self.sql_string += self.criteria2_string
+
+            if self.criteria3_string != "":  # if criteria 3 exists
+
+                # get condition2 value and add it and criteria 3
+                self.sql_string += "\n" + self.parent.condition2.get_selected_objects()[0] + " " \
+                                   + self.criteria3_string
+
+        elif self.criteria3_string != "":
+            self.sql_string += self.criteria3_string
 
         # npyscreen.notify_confirm("SQL string = " + self.sql_string)
 
@@ -3332,13 +3345,12 @@ class QBUpdate_Button(npyscreen.ButtonPress):
         index = 0
 
         for name in field_names:
-            npyscreen.notify_confirm("name.value =" + name.value)
+
             if not name.value:
                 break
 
             else:
                 self.fieldset_string += name.value[:-1] + " = '" + str(field_values[index].value) + "', "
-                npyscreen.notify_confirm("self.fieldset_string = " + self.fieldset_string)
                 index += 1
 
         self.fieldset_string = self.fieldset_string[:-2]
@@ -3485,8 +3497,6 @@ class QBUpdate_Button(npyscreen.ButtonPress):
             elif self.criteria3_string != "":
                 self.sql_string += self.criteria3_string
 
-        npyscreen.notify_confirm("SQL string = " + self.sql_string)
-
         self.results = self.parent.parentApp.dbms.execute_SQL(self.sql_string)
 
         if self.results[0] == 'error':
@@ -3548,17 +3558,19 @@ class Import_Button(npyscreen.ButtonPress):
 
         elif self.parent.parentApp.dbtype == 1: # if mysql
 
-            sql_string = "LOAD DATA INFILE '{}' INTO TABLE {} FIELDS TERMINATED BY ',' LINES TERMINATED BY '\\r\\n' " \
-                         "IGNORE 1 LINES".format(self.parent.selected_importfile, self.selected_table)
+            sql_string = "LOAD DATA INFILE '{}' INTO TABLE {} FIELDS TERMINATED BY ',' ENCLOSED BY '\"' " \
+                         "LINES TERMINATED BY '\\r' IGNORE 1 LINES"\
+                .format(self.parent.selected_importfile, self.selected_table)
             npyscreen.notify_confirm(sql_string)
 
         self.results = self.parent.parentApp.dbms.execute_SQL(sql_string)
 
         if self.results[0] == 'error':
+
             npyscreen.notify_confirm(str(self.results[1]))
             return
 
-        elif self.results[0] == 'success':
+        elif self.results[0] == 'noresult':
 
             npyscreen.notify_confirm("File imported successfully")
 
