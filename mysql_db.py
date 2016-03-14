@@ -1,10 +1,9 @@
 #!/usr/bin/env python
 # encoding: utf-8
 
-'''
-CS419 mysql_db.py file
-Group 15: Rudy Gonzalez, Bobby Hines
-'''
+# CS419 - ezdb Curses-based PostgreSQL and MySQL Database Tool
+# Group 15 - Rudy Gonzalez & Bobby Hines
+# mysql_db.py supplemental file implementing MySQL-specific backend functions
 
 import mysql.connector
 from mysql.connector import errorcode
@@ -13,7 +12,7 @@ import urllib2
 class MySQL_Database(object):
 
     '''initializes database class variables and connect to root dbms'''
-    #def __init__(self, dbtype='MySQL', host='localhost', port='', user='root', password='password', activedb=False):
+
     def __init__(self):
         self.dbtype = None
         self.host = None
@@ -50,7 +49,6 @@ class MySQL_Database(object):
 
         except mysql.connector.Error, err:
             return err
-
 
     '''connect to existing named database'''
 
@@ -100,7 +98,6 @@ class MySQL_Database(object):
 
         except mysql.connector.Error, err:
             return "The following problem occurred during creation:\n" + str(err)
-
 
     def delete_database(self, dbname):
 

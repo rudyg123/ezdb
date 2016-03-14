@@ -1,11 +1,9 @@
 #!/usr/bin/env python
 # encoding: utf-8
 
-'''
-CS419 postgres_db.py file
-Group 15: Rudy Gonzalez, Bobby Hines
-'''
-
+# CS419 - ezdb Curses-based PostgreSQL and MySQL Database Tool
+# Group 15 - Rudy Gonzalez & Bobby Hines
+# postgres_db.py supplemental file implementing PostgreSQL-specific backend functions
 
 import psycopg2
 import psycopg2.errorcodes
@@ -17,7 +15,7 @@ import psycopg2.extras
 class Postgres_Database(object):
         
     '''initializes database class variables and connect to root dbms'''
-    #def __init__(self, dbtype='postgreSQL', host='localhost', port='', user='postgres', password='password'):
+
     def __init__(self):
  
         self.dbtype = None
@@ -286,8 +284,6 @@ class Postgres_Database(object):
         except psycopg2.DatabaseError, err:
             self.conn.rollback()
             return "error", err, "", ""
-
-
 
     def get_table_fields(self, table):
 

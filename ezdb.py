@@ -1,4 +1,8 @@
-#!/usr/bin/env python
+# !/usr/bin/env python
+
+# CS419 - ezdb Curses-based PostgreSQL and MySQL Database Tool
+# Group 15 - Rudy Gonzalez & Bobby Hines
+# ezdby.py main program file implementing npyscreen frontend interface
 
 import npyscreen
 import postgres_db as pdb
@@ -40,7 +44,7 @@ class Initial(npyscreen.ActionForm, npyscreen.SplitForm):
     def display_help(self):
         help_msg = "Select the database type with which you'd like to interact this session. This application " \
                    "supports MySQL and PostgreSQL database systems."
-        npyscreen.notify_confirm(help_msg, title='Help Menu', editw=1)
+        npyscreen.notify_confirm(help_msg, title='Help Tips', editw=1)
 
     def on_ok(self):
         # For debugging:
@@ -112,7 +116,7 @@ class ConnectDBMS(npyscreen.ActionForm, npyscreen.SplitForm):
     def display_help(self):
         help_msg = "Enter the connection settings for the database system with which you'd like to interact. The " \
                    "initial settings are the default settings for local databases."
-        npyscreen.notify_confirm(help_msg, title='Help Menu', editw=1)
+        npyscreen.notify_confirm(help_msg, title='Help Tips', editw=1)
 
     def on_ok(self):
         self.result = None
@@ -180,20 +184,19 @@ class DatabaseWindow(npyscreen.ActionForm, npyscreen.SplitForm):
             self.dbtype_str = "MySQL"
 
         self.db_box = self.add(npyscreen.BoxTitle, w_id="wDatabases_box", name="{} Databases".format(self.dbtype_str),
-                 values=self.parentApp.dbms.list_databases(), max_width=30, max_height=17, scroll_exit=True)
+                 values=self.parentApp.dbms.list_databases(), max_width=30, max_height=24, relx=3, rely=5,
+                               scroll_exit=True)
 
         # Database button options
-        self.nextrely += 1  # Move down
-        self.add(OpenDBButton, name="Open Database")
 
-        self.nextrely += 1  # Move down
-        self.add(npyscreen.TitleText, w_id="wNewDB_name", name="New Database Name:", relx=4,
+        self.add(OpenDBButton, name="Open Database", relx=35, rely=7)
+
+        self.add(npyscreen.TitleText, w_id="wNewDB_name", name="New Database Name:", relx=37, rely=9,
                  begin_entry_at=22, use_two_lines=False)
 
-        self.add(CreateDBButton, name="Create")
+        self.add(CreateDBButton, name="Create", relx=35, rely=10)
 
-        self.nextrely += 1  # Move down
-        self.add(DeleteDBButton, name="Delete Database")
+        self.add(DeleteDBButton, name="Delete Database", relx=35, rely=12)
 
         # Help menu guidance
         self.nextrely = 34
@@ -207,7 +210,7 @@ class DatabaseWindow(npyscreen.ActionForm, npyscreen.SplitForm):
     def display_help(self):
         help_msg = "Select an available database instance from the list, and choose \"Open Database\" to begin " \
                    "interaction. If no instances are available, create a new one or contact your database administer."
-        npyscreen.notify_confirm(help_msg, title='Help Menu', editw=1)
+        npyscreen.notify_confirm(help_msg, title='Help Tips', editw=1)
 
     def on_cancel(self):
         self.parentApp.setNextForm("MAIN")
@@ -292,7 +295,7 @@ class TablesWindow(npyscreen.ActionForm, npyscreen.SplitForm):
                    "current database instance, specify a name for the new table and choose \"Build\". Choosing " \
                    "\"Delete Table\" will permanently remove the currently selected table and all of its contents " \
                    "from the database instance."
-        npyscreen.notify_confirm(help_msg, title='Help Menu')
+        npyscreen.notify_confirm(help_msg, title='Help Tips')
 
     # PEP8 Ignore (external library naming convention)
     def beforeEditing(self):
@@ -387,7 +390,7 @@ class TableCreatePostgreSQLForm(npyscreen.ActionForm, npyscreen.SplitForm):
                    "additional fields as needed before creating the table, or if you're ready to create, choose " \
                    "\"CREATE TABLE\"."
 
-        npyscreen.notify_confirm(help_msg, title='Help Menu')
+        npyscreen.notify_confirm(help_msg, title='Help Tips')
 
     def on_ok(self):
         self.parentApp.field_string_array = []
@@ -507,7 +510,7 @@ class TableCreateMySQLForm(npyscreen.ActionForm, npyscreen.SplitForm):
                    "the data in this field as the primary key for references to this table. Finally, you can add " \
                    "additional fields as needed before creating the table, or if you're ready to create, choose " \
                    "\"CREATE TABLE\"."
-        npyscreen.notify_confirm(help_msg, title='Help Menu')
+        npyscreen.notify_confirm(help_msg, title='Help Tips')
 
     def on_ok(self):
         self.parentApp.field_string_array = []
@@ -686,7 +689,7 @@ class QueryWindow(npyscreen.ActionForm, npyscreen.SplitForm):
     @staticmethod
     def display_help(self):
         help_msg = "Use the SELECT form to query the database for stored data."
-        npyscreen.notify_confirm(help_msg, title='Help Menu')
+        npyscreen.notify_confirm(help_msg, title='Help Tips')
 
 
 class QueryInsertWindow(npyscreen.ActionForm, npyscreen.SplitForm):
@@ -874,7 +877,7 @@ class QueryInsertWindow(npyscreen.ActionForm, npyscreen.SplitForm):
     @staticmethod
     def display_help(self):
         help_msg = "Use the INSERT form to add rows to the database."
-        npyscreen.notify_confirm(help_msg, title='Help Menu')
+        npyscreen.notify_confirm(help_msg, title='Help Tips')
 
 
 class QueryUpdateWindow(npyscreen.ActionForm, npyscreen.SplitForm):
@@ -924,7 +927,7 @@ class QueryUpdateWindow(npyscreen.ActionForm, npyscreen.SplitForm):
 
 
         ''' FIELD CHOOSER BOX '''
-        self.updatefield_box = self.add(QB_UpdateFieldBox, name="Choose Fields",
+        self.updatefield_box = self.add(QB_UpdateFieldBox, name="Fields to Update",
                                         max_width=25, max_height=8,
                                         contained_widget_arguments={"values": ""},
                                         relx=41, rely=5, scroll_exit=True)
@@ -1059,64 +1062,64 @@ class QueryUpdateWindow(npyscreen.ActionForm, npyscreen.SplitForm):
         self.label_field20 = self.add(npyscreen.FixedText, value="", relx=79, rely=26, max_width=15, color="LABEL",
                                       hidden=True, editable=False)
 
-        self.updatefield01 = self.add(npyscreen.TitleText, name=" ", relx=96, rely=7, max_width=20, begin_entry_at=1,
+        self.updatefield01 = self.add(npyscreen.TitleText, name=" ", relx=95, rely=7, max_width=20, begin_entry_at=1,
                                       use_two_lines=False, hidden=True)
 
-        self.updatefield02 = self.add(npyscreen.TitleText, name=" ", relx=96, rely=8, max_width=20, begin_entry_at=1,
+        self.updatefield02 = self.add(npyscreen.TitleText, name=" ", relx=95, rely=8, max_width=20, begin_entry_at=1,
                                       use_two_lines=False, hidden=True)
 
-        self.updatefield03 = self.add(npyscreen.TitleText, name=" ", relx=96, rely=9, max_width=20, begin_entry_at=1,
+        self.updatefield03 = self.add(npyscreen.TitleText, name=" ", relx=95, rely=9, max_width=20, begin_entry_at=1,
                                       use_two_lines=False, hidden=True)
 
-        self.updatefield04 = self.add(npyscreen.TitleText, name=" ", relx=96, rely=10, max_width=20, begin_entry_at=1,
+        self.updatefield04 = self.add(npyscreen.TitleText, name=" ", relx=95, rely=10, max_width=20, begin_entry_at=1,
                                       use_two_lines=False, hidden=True)
 
-        self.updatefield05 = self.add(npyscreen.TitleText, name=" ", relx=96, rely=11, max_width=20, begin_entry_at=1,
+        self.updatefield05 = self.add(npyscreen.TitleText, name=" ", relx=95, rely=11, max_width=20, begin_entry_at=1,
                                       use_two_lines=False, hidden=True)
 
-        self.updatefield06 = self.add(npyscreen.TitleText, name=" ", relx=96, rely=12, max_width=20, begin_entry_at=1,
+        self.updatefield06 = self.add(npyscreen.TitleText, name=" ", relx=95, rely=12, max_width=20, begin_entry_at=1,
                                       use_two_lines=False, hidden=True)
 
-        self.updatefield07 = self.add(npyscreen.TitleText, name=" ", relx=96, rely=13, max_width=20, begin_entry_at=1,
+        self.updatefield07 = self.add(npyscreen.TitleText, name=" ", relx=95, rely=13, max_width=20, begin_entry_at=1,
                                       use_two_lines=False, hidden=True)
 
-        self.updatefield08 = self.add(npyscreen.TitleText, name=" ", relx=96, rely=14, max_width=20, begin_entry_at=1,
+        self.updatefield08 = self.add(npyscreen.TitleText, name=" ", relx=95, rely=14, max_width=20, begin_entry_at=1,
                                       use_two_lines=False, hidden=True)
 
-        self.updatefield09 = self.add(npyscreen.TitleText, name=" ", relx=96, rely=15, max_width=20, begin_entry_at=1,
+        self.updatefield09 = self.add(npyscreen.TitleText, name=" ", relx=95, rely=15, max_width=20, begin_entry_at=1,
                                       use_two_lines=False, hidden=True)
 
-        self.updatefield10 = self.add(npyscreen.TitleText, name=" ", relx=96, rely=16, max_width=20, begin_entry_at=1,
+        self.updatefield10 = self.add(npyscreen.TitleText, name=" ", relx=95, rely=16, max_width=20, begin_entry_at=1,
                                       use_two_lines=False, hidden=True)
 
-        self.updatefield11 = self.add(npyscreen.TitleText, name=" ", relx=96, rely=17, max_width=20, begin_entry_at=1,
+        self.updatefield11 = self.add(npyscreen.TitleText, name=" ", relx=95, rely=17, max_width=20, begin_entry_at=1,
                                       use_two_lines=False, hidden=True)
 
-        self.updatefield12 = self.add(npyscreen.TitleText, name=" ", relx=96, rely=18, max_width=20, begin_entry_at=1,
+        self.updatefield12 = self.add(npyscreen.TitleText, name=" ", relx=95, rely=18, max_width=20, begin_entry_at=1,
                                       use_two_lines=False, hidden=True)
 
-        self.updatefield13 = self.add(npyscreen.TitleText, name=" ", relx=96, rely=19, max_width=20, begin_entry_at=1,
+        self.updatefield13 = self.add(npyscreen.TitleText, name=" ", relx=95, rely=19, max_width=20, begin_entry_at=1,
                                       use_two_lines=False, hidden=True)
 
-        self.updatefield14 = self.add(npyscreen.TitleText, name=" ", relx=96, rely=20, max_width=20, begin_entry_at=1,
+        self.updatefield14 = self.add(npyscreen.TitleText, name=" ", relx=95, rely=20, max_width=20, begin_entry_at=1,
                                       use_two_lines=False, hidden=True)
 
-        self.updatefield15 = self.add(npyscreen.TitleText, name=" ", relx=96, rely=21, max_width=20, begin_entry_at=1,
+        self.updatefield15 = self.add(npyscreen.TitleText, name=" ", relx=95, rely=21, max_width=20, begin_entry_at=1,
                                       use_two_lines=False, hidden=True)
 
-        self.updatefield16 = self.add(npyscreen.TitleText, name=" ", relx=96, rely=22, max_width=20, begin_entry_at=1,
+        self.updatefield16 = self.add(npyscreen.TitleText, name=" ", relx=95, rely=22, max_width=20, begin_entry_at=1,
                                       use_two_lines=False, hidden=True)
 
-        self.updatefield17 = self.add(npyscreen.TitleText, name=" ", relx=96, rely=23, max_width=20, begin_entry_at=1,
+        self.updatefield17 = self.add(npyscreen.TitleText, name=" ", relx=95, rely=23, max_width=20, begin_entry_at=1,
                                       use_two_lines=False, hidden=True)
 
-        self.updatefield18 = self.add(npyscreen.TitleText, name=" ", relx=96, rely=24, max_width=20, begin_entry_at=1,
+        self.updatefield18 = self.add(npyscreen.TitleText, name=" ", relx=95, rely=24, max_width=20, begin_entry_at=1,
                                       use_two_lines=False, hidden=True)
 
-        self.updatefield19 = self.add(npyscreen.TitleText, name=" ", relx=96, rely=25, max_width=20, begin_entry_at=1,
+        self.updatefield19 = self.add(npyscreen.TitleText, name=" ", relx=95, rely=25, max_width=20, begin_entry_at=1,
                                       use_two_lines=False, hidden=True)
 
-        self.updatefield20 = self.add(npyscreen.TitleText, name=" ", relx=96, rely=26, max_width=20, begin_entry_at=1,
+        self.updatefield20 = self.add(npyscreen.TitleText, name=" ", relx=95, rely=26, max_width=20, begin_entry_at=1,
                                       use_two_lines=False, hidden=True)
 
         self.add(QBUpdate_Button, relx=89, rely=29, max_width=12, name="Update Values")
@@ -1132,7 +1135,7 @@ class QueryUpdateWindow(npyscreen.ActionForm, npyscreen.SplitForm):
     @staticmethod
     def display_help(self):
         help_msg = "Use the UPDATE form to update a row in the database."
-        npyscreen.notify_confirm(help_msg, title='Help Menu')
+        npyscreen.notify_confirm(help_msg, title='Help Tips')
 
 
 class QueryDeleteWindow(npyscreen.ActionForm, npyscreen.SplitForm):
@@ -1272,7 +1275,7 @@ class QueryDeleteWindow(npyscreen.ActionForm, npyscreen.SplitForm):
                    "the full delete query.\n\n" \
                    "Note: You must enclose criteria values within single quotes (e.g. LIKE '%Bi' or ='Tom')\n" \
                    "Also, criteria values are case sensitive."
-        npyscreen.notify_confirm(help_msg, title='Help Menu')
+        npyscreen.notify_confirm(help_msg, title='Help Tips')
 
 
 class QueryResultsWindow(npyscreen.ActionFormMinimal, npyscreen.SplitForm):
@@ -1307,7 +1310,7 @@ class QueryResultsWindow(npyscreen.ActionFormMinimal, npyscreen.SplitForm):
     def display_help(self):
         help_msg = "Query Builder results page. Select page navigation for viewing complete result. Scroll right to see" \
                    "extended columns."
-        npyscreen.notify_confirm(help_msg, title='Help Menu', editw=1)
+        npyscreen.notify_confirm(help_msg, title='Help Tips', editw=1)
 
     def beforeEditing(self):
 
@@ -1417,7 +1420,7 @@ class RawSQLWindow(npyscreen.ActionForm, npyscreen.SplitForm):
         help_msg = "Use this page to enter and submit a raw SQL query without any of form assistance from the " \
                    "Query Builder or Tables pages. Entering raw SQL provides none of the protections that the " \
                    "aforementioned forms offer, and should only be performed by experienced users."
-        npyscreen.notify_confirm(help_msg, title='Help Menu', editw=1)
+        npyscreen.notify_confirm(help_msg, title='Help Tips', editw=1)
 
     def beforeEditing(self):
 
@@ -2079,7 +2082,7 @@ class ImportExportWindow(npyscreen.ActionForm, npyscreen.SplitForm):
                    "been modified to provide import file visibility in the top level '/tmp' directory. Because of this,\n" \
                    "be sure to place any file you wish to import using MySQL into the '/tmp' directory."
 
-        npyscreen.notify_confirm(help_msg, title='Help Menu', editw=1)
+        npyscreen.notify_confirm(help_msg, title='Help Tips', editw=1)
 
 
 class AdminWindow(npyscreen.ActionForm, npyscreen.SplitForm):
@@ -2150,7 +2153,7 @@ class AdminWindow(npyscreen.ActionForm, npyscreen.SplitForm):
         help_msg = "Use this screen to manage user creation with permissions and deletion. Note: root DBMS user name " \
                    "is hidden to prevent accidental deletion or permission alteration."
 
-        npyscreen.notify_confirm(help_msg, title='Help Menu', editw=1)
+        npyscreen.notify_confirm(help_msg, title='Help Tips', editw=1)
 
 '''DATABASE BUTTONS'''
 
@@ -2208,8 +2211,6 @@ class DeleteDBButton(npyscreen.ButtonPress):
                 servermsg = self.parent.parentApp.dbms.delete_database(selected_db)
 
                 npyscreen.notify_confirm(servermsg)
-
-                npyscreen.notify_confirm("username = " + str(self.parent.parentApp.username))
 
                 dblist = self.parent.parentApp.dbms.list_databases()
                 self.parent.db_box.value = None
