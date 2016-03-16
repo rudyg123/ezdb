@@ -10,7 +10,13 @@ import mysql_db as mdb
 import time
 import math
 
-# ActionForm includes "Cancel" in addition to "OK"
+# main reference: http://npyscreen.readthedocs.org/index.html
+
+
+'''FORM PAGES'''
+
+
+# Initial launch screen called from Main form initialized in App class
 class Initial(npyscreen.ActionForm, npyscreen.SplitForm):
     sessionType, db = None, None
 
@@ -32,7 +38,6 @@ class Initial(npyscreen.ActionForm, npyscreen.SplitForm):
         self.db = self.add(npyscreen.SelectOne, max_height=2, value=[0], values=["postgreSQL", "MySQL"],
                            scroll_exit=True)
 
-        # Help menu guidance
         self.nextrely = 34
         self.nextrelx = 2
         self.add(npyscreen.FixedText, value=" Press ^Q for Help ", editable=False)
@@ -40,6 +45,7 @@ class Initial(npyscreen.ActionForm, npyscreen.SplitForm):
         # Register help key
         self.add_handlers({'^Q': self.display_help})
 
+    # help tips popup message
     @staticmethod
     def display_help(self):
         help_msg = "Select the database type with which you'd like to interact this session. This application " \
@@ -47,26 +53,27 @@ class Initial(npyscreen.ActionForm, npyscreen.SplitForm):
         npyscreen.notify_confirm(help_msg, title='Help Tips', editw=1)
 
     def on_ok(self):
-        # For debugging:
-        # npyscreen.notify_confirm("You selected " + str(self.db.value[0]))
+
         self.parentApp.dbtype = self.db.value[0]
         self.parentApp.setNextForm("ConnectDBMS")
 
     def on_cancel(self):
+
         exiting = npyscreen.notify_yes_no("Are you sure you want to quit?", "Are you sure?", editw=2)
         if exiting:
             self.parentApp.setNextForm(None)
         else:
-            npyscreen.blank_terminal() # clears the notification and just goes back to the original form
+            npyscreen.blank_terminal()  # clears the notification and just goes back to the original form
 
 
+# DBMS connection page
 class ConnectDBMS(npyscreen.ActionForm, npyscreen.SplitForm):
     result, dbtype, host, port, dbname, username, password = (None,)*7
 
     def create(self):
 
         # Set default DBMS connection values
-        if self.parentApp.dbtype == 0:
+        if self.parentApp.dbtype == 0:  # if postgresql
             self.add(npyscreen.FixedText, value="Enter PostgreSQL Database System Connection Settings:", editable=False)
             self.host = '127.0.0.1'
             self.port = '5432'
@@ -74,7 +81,7 @@ class ConnectDBMS(npyscreen.ActionForm, npyscreen.SplitForm):
             self.username = 'postgres'
             self.password = 'password'
 
-        elif self.parentApp.dbtype == 1:
+        elif self.parentApp.dbtype == 1:  # if mysql
             self.add(npyscreen.FixedText, value="Enter MySQL Database System Connection Settings:", editable=False)
             self.host = '127.0.0.1'
             self.port = '3306'
@@ -104,7 +111,6 @@ class ConnectDBMS(npyscreen.ActionForm, npyscreen.SplitForm):
         self.nextrely += 1  # Move down
         self.password = self.add(npyscreen.TitleText, name="Password:", value=self.password)
 
-        # Help menu guidance
         self.nextrely = 34
         self.nextrelx = 2
         self.add(npyscreen.FixedText, value=" Press ^Q for Help ", editable=False)
@@ -112,6 +118,7 @@ class ConnectDBMS(npyscreen.ActionForm, npyscreen.SplitForm):
         # Register help key
         self.add_handlers({'^Q': self.display_help})
 
+    # help tips popup message
     @staticmethod
     def display_help(self):
         help_msg = "Enter the connection settings for the database system with which you'd like to interact. The " \
@@ -152,11 +159,13 @@ class ConnectDBMS(npyscreen.ActionForm, npyscreen.SplitForm):
         self.parentApp.setNextForm("MAIN")
 
 
+# Databases page
 class DatabaseWindow(npyscreen.ActionForm, npyscreen.SplitForm):
 
     def create(self):
 
         # main navigation menu buttons
+
         self.add(NavMainButton, w_id="wNavMain", name="Main", value="Main",rely=1, scroll_exit=True)
 
         self.add(NavDatabaseButton, w_id="wNavDatabase", name="Databases", value="DatabaseWindow", rely=1, relx=14,
@@ -172,7 +181,7 @@ class DatabaseWindow(npyscreen.ActionForm, npyscreen.SplitForm):
 
         self.add(NavAdminButton, w_id="wNavAdmin", name="Admin", value="AdminWindow", rely=1, relx=96)
 
-        self.add(NavExitButton, w_id="wNavExit", name="Exit", value="AdminWindow", rely=1, relx=109)
+        self.add(NavExitButton, w_id="wNavExit", name="Exit", value="Exit", rely=1, relx=109)
 
         self.dbList = self.parentApp.dbms.list_databases()
 
@@ -198,7 +207,6 @@ class DatabaseWindow(npyscreen.ActionForm, npyscreen.SplitForm):
 
         self.add(DeleteDBButton, name="Delete Database", relx=35, rely=12)
 
-        # Help menu guidance
         self.nextrely = 34
         self.nextrelx = 2
         self.add(npyscreen.FixedText, value=" Press ^Q for Help ", editable=False)
@@ -206,6 +214,7 @@ class DatabaseWindow(npyscreen.ActionForm, npyscreen.SplitForm):
         # Register help key
         self.add_handlers({'^Q': self.display_help})
 
+    # help tips popup message
     @staticmethod
     def display_help(self):
         help_msg = "Select an available database instance from the list, and choose \"Open Database\" to begin " \
@@ -216,11 +225,13 @@ class DatabaseWindow(npyscreen.ActionForm, npyscreen.SplitForm):
         self.parentApp.setNextForm("MAIN")
 
 
+# Tables page
 class TablesWindow(npyscreen.ActionForm, npyscreen.SplitForm):
 
     def create(self):
 
         # main navigation menu buttons
+
         self.add(NavMainButton, w_id="wNavMain", name="Main", value="Main",rely=1, scroll_exit=True)
 
         self.add(NavDatabaseButton, w_id="wNavDatabase", name="Databases", value="DatabaseWindow", rely=1, relx=14,
@@ -237,7 +248,9 @@ class TablesWindow(npyscreen.ActionForm, npyscreen.SplitForm):
 
         self.add(NavAdminButton, w_id="wNavAdmin", name="Admin", value="AdminWindow", rely=1, relx=96)
 
-        self.add(NavExitButton, w_id="wNavExit", name="Exit", value="AdminWindow", rely=1, relx=109)
+        self.add(NavExitButton, w_id="wNavExit", name="Exit", value="Exit", rely=1, relx=109)
+
+        # page widget controls
 
         self.nextrely += 1  # Move down
         self.add(npyscreen.FixedText, value="Database: {}".format(self.parentApp.active_db), relx=3, color="VERYGOOD",
@@ -264,6 +277,7 @@ class TablesWindow(npyscreen.ActionForm, npyscreen.SplitForm):
 
         self.nextrely += 3  # Move down
 
+        # table results window
         self.gridbox_results = self.add(Grid_Box_Results, max_height=14, values=self.parentApp.query_results,
                                         default_column_number=10, w_id="wGrid_Box_Results",
                                         contained_widget_arguments = {"col_titles": self.parentApp.col_titles},
@@ -279,7 +293,6 @@ class TablesWindow(npyscreen.ActionForm, npyscreen.SplitForm):
         self.prevpage = self.add(PrevPage_Button, name="Prev Page", rely=31, relx=90, max_width=9, hidden=True)
         self.nextpage = self.add(NextPage_Button, name="Next Page", rely=31, relx=103, max_width=9, hidden=True)
 
-        # Help menu guidance
         self.nextrely = 34
         self.nextrelx = 2
         self.add(npyscreen.FixedText, value=" Press ^Q for Help ", editable=False)
@@ -287,6 +300,7 @@ class TablesWindow(npyscreen.ActionForm, npyscreen.SplitForm):
         # Register help key
         self.add_handlers({'^Q': self.display_help})
 
+    # help tips popup message
     @staticmethod
     def display_help(self):
         help_msg = "Select an available table from the list and choose \"View Table Structure\" to view the table's " \
@@ -297,7 +311,7 @@ class TablesWindow(npyscreen.ActionForm, npyscreen.SplitForm):
                    "from the database instance."
         npyscreen.notify_confirm(help_msg, title='Help Tips')
 
-    # PEP8 Ignore (external library naming convention)
+    # load settings before page loads
     def beforeEditing(self):
 
         # init page values
@@ -325,6 +339,7 @@ class TablesWindow(npyscreen.ActionForm, npyscreen.SplitForm):
         self.parentApp.setNextForm("MAIN")
 
 
+# PostgreSQL table builder page
 class TableCreatePostgreSQLForm(npyscreen.ActionForm, npyscreen.SplitForm):
 
     def create(self):
@@ -364,7 +379,6 @@ class TableCreatePostgreSQLForm(npyscreen.ActionForm, npyscreen.SplitForm):
         self.add(npyscreen.SelectOne, w_id="wNot_null", values=["Not Required", "Required"], value=[0],
                  max_width=20, max_height=4, relx=40)
 
-        # self.add(npyscreen.Checkbox, w_id="wAuto_increment", name="Auto Increment?", relx=40)
         self.nextrely += 1  # Move down
         self.add(npyscreen.TitleText, w_id="wDefault", name="Default: ", max_width=35, relx=40)
 
@@ -372,7 +386,6 @@ class TableCreatePostgreSQLForm(npyscreen.ActionForm, npyscreen.SplitForm):
         self.add(AddFieldButton, name="Add Field", relx=40, max_width=13)
         self.add(CreateTableButton, name="Create Table", relx=40, max_width=13)
 
-        # Help menu guidance
         self.nextrely = 34
         self.nextrelx = 2
         self.add(npyscreen.FixedText, value=" Press ^Q for Help ", editable=False)
@@ -380,6 +393,7 @@ class TableCreatePostgreSQLForm(npyscreen.ActionForm, npyscreen.SplitForm):
         # Register help key
         self.add_handlers({'^Q': self.display_help})
 
+    # help tips popup message
     @staticmethod
     def display_help(self):
         help_msg = "Enter in a name for a field (column) you would like to add to the new table. Choose a field " \
@@ -403,6 +417,7 @@ class TableCreatePostgreSQLForm(npyscreen.ActionForm, npyscreen.SplitForm):
         self.parentApp.setNextForm("TablesWindow")
 
 
+# MySQL table builder page
 class TableCreateMySQLForm(npyscreen.ActionForm, npyscreen.SplitForm):
 
     def create(self):
@@ -493,12 +508,11 @@ class TableCreateMySQLForm(npyscreen.ActionForm, npyscreen.SplitForm):
         self.add(AddFieldButton, name="Add Field", relx=40, max_width=13)
         self.add(CreateTableButton, name="Create Table", relx=40, max_width=13)
 
-        # Help menu guidance
         self.nextrely = 34
         self.nextrelx = 2
         self.add(npyscreen.FixedText, value=" Press ^Q for Help ", editable=False)
 
-        # Register help key
+        # help tips popup message
         self.add_handlers({'^Q': self.display_help})
 
     @staticmethod
@@ -523,13 +537,13 @@ class TableCreateMySQLForm(npyscreen.ActionForm, npyscreen.SplitForm):
         self.parentApp.setNextForm("TablesWindow")
 
 
+# Query Builder Select page
 class QueryWindow(npyscreen.ActionForm, npyscreen.SplitForm):
-
-    # Data structure for managing user input for each table column
 
     def create(self):
 
         # main navigation menu buttons
+
         self.add(NavMainButton, w_id="wNavMain", name="Main", value="Main",rely=1, scroll_exit=True)
 
         self.add(NavDatabaseButton, w_id="wNavDatabase", name="Databases", value="DatabaseWindow", rely=1, relx=14,
@@ -545,7 +559,7 @@ class QueryWindow(npyscreen.ActionForm, npyscreen.SplitForm):
 
         self.add(NavAdminButton, w_id="wNavAdmin", name="Admin", value="AdminWindow", rely=1, relx=96)
 
-        self.add(NavExitButton, w_id="wNavExit", name="Exit", value="AdminWindow", rely=1, relx=109)
+        self.add(NavExitButton, w_id="wNavExit", name="Exit", value="Exit", rely=1, relx=109)
 
         self.add(npyscreen.FixedText, value="Database: {}".format(self.parentApp.active_db), rely=3, relx=3,
                  color="LABEL", editable=False)
@@ -560,9 +574,11 @@ class QueryWindow(npyscreen.ActionForm, npyscreen.SplitForm):
 
         self.add(QueryDeleteBtn, name="DELETE", value="QueryDeleteWindow", rely=3, relx=73)
 
-        #label variables for selected table/fields
+        # label variables for selected table/fields
         self.table1_selected, self.table2_selected, self.table3_selected, self.field1_selected, \
         self.field2_selected, self.field3_selected = (None,)*6
+
+        # Page widget controls
 
         self.nextrely += 1  # Move down
 
@@ -678,7 +694,6 @@ class QueryWindow(npyscreen.ActionForm, npyscreen.SplitForm):
         self.nextrely += 1
         self.add(QB_SQL_Send_Button, w_id="wSQL_Send_Button", relx=93, max_width=12, name="Send Query")
 
-        # Help menu guidance
         self.nextrely = 34
         self.nextrelx = 2
         self.add(npyscreen.FixedText, value=" Press ^Q for Help ", editable=False)
@@ -686,12 +701,14 @@ class QueryWindow(npyscreen.ActionForm, npyscreen.SplitForm):
         # Register help key
         self.add_handlers({'^Q': self.display_help})
 
+    # help tips popup message
     @staticmethod
     def display_help(self):
         help_msg = "Use the SELECT form to query the database for stored data."
         npyscreen.notify_confirm(help_msg, title='Help Tips')
 
 
+# Query Builder Insert page
 class QueryInsertWindow(npyscreen.ActionForm, npyscreen.SplitForm):
 
     def create(self):
@@ -712,7 +729,7 @@ class QueryInsertWindow(npyscreen.ActionForm, npyscreen.SplitForm):
 
         self.add(NavAdminButton, w_id="wNavAdmin", name="Admin", value="AdminWindow", rely=1, relx=96)
 
-        self.add(NavExitButton, w_id="wNavExit", name="Exit", value="AdminWindow", rely=1, relx=109)
+        self.add(NavExitButton, w_id="wNavExit", name="Exit", value="Exitw", rely=1, relx=109)
 
         self.add(npyscreen.FixedText, value="Database: {}".format(self.parentApp.active_db), rely=3, relx=3,
                  color="LABEL", editable=False)
@@ -726,6 +743,8 @@ class QueryInsertWindow(npyscreen.ActionForm, npyscreen.SplitForm):
         self.add(QueryUpdateBtn, name="UPDATE", value="QueryUpdateWindow", rely=3, relx=61)
 
         self.add(QueryDeleteBtn, name="DELETE", value="QueryDeleteWindow", rely=3, relx=73)
+
+        # Page widget controls
 
         self.add(QB_InsertTableBox, name="Select Table", values=self.parentApp.tableList, max_width=30, max_height=22,
                  relx=3, rely=6, scroll_exit=True)
@@ -862,11 +881,11 @@ class QueryInsertWindow(npyscreen.ActionForm, npyscreen.SplitForm):
 
         self.add(QueryInsertButton, name="Insert Values", relx=84, rely=29, max_width=12)
 
+    # load table list before page loads
     def beforeEditing(self):
 
         self.parentApp.tableList = self.parentApp.dbms.list_database_tables()
 
-        # Help menu guidance
         self.nextrely = 34
         self.nextrelx = 2
         self.add(npyscreen.FixedText, value=" Press ^Q for Help ", editable=False)
@@ -874,17 +893,20 @@ class QueryInsertWindow(npyscreen.ActionForm, npyscreen.SplitForm):
         # Register help key
         self.add_handlers({'^Q': self.display_help})
 
+    # help tips popup message
     @staticmethod
     def display_help(self):
         help_msg = "Use the INSERT form to add rows to the database."
         npyscreen.notify_confirm(help_msg, title='Help Tips')
 
 
+# Query Builder Update page
 class QueryUpdateWindow(npyscreen.ActionForm, npyscreen.SplitForm):
 
     def create(self):
 
         # main navigation menu buttons
+
         self.add(NavMainButton, w_id="wNavMain", name="Main", value="Main",rely=1, scroll_exit=True)
 
         self.add(NavDatabaseButton, w_id="wNavDatabase", name="Databases", value="DatabaseWindow", rely=1, relx=14,
@@ -900,7 +922,7 @@ class QueryUpdateWindow(npyscreen.ActionForm, npyscreen.SplitForm):
 
         self.add(NavAdminButton, w_id="wNavAdmin", name="Admin", value="AdminWindow", rely=1, relx=96)
 
-        self.add(NavExitButton, w_id="wNavExit", name="Exit", value="AdminWindow", rely=1, relx=109)
+        self.add(NavExitButton, w_id="wNavExit", name="Exit", value="Exit", rely=1, relx=109)
 
         self.add(npyscreen.FixedText, value="Database: {}".format(self.parentApp.active_db), rely=3, relx=3,
                  color="LABEL", editable=False)
@@ -914,6 +936,8 @@ class QueryUpdateWindow(npyscreen.ActionForm, npyscreen.SplitForm):
         self.add(QueryUpdateBtn, name="UPDATE", value="QueryUpdateWindow", rely=3, relx=61, color="VERYGOOD")
 
         self.add(QueryDeleteBtn, name="DELETE", value="QueryDeleteWindow", rely=3, relx=73)
+
+        # page widget controls
 
         self.nextrely += 1  # Move down
 
@@ -1124,7 +1148,6 @@ class QueryUpdateWindow(npyscreen.ActionForm, npyscreen.SplitForm):
 
         self.add(QBUpdate_Button, relx=89, rely=29, max_width=12, name="Update Values")
 
-        # Help menu guidance
         self.nextrely = 34
         self.nextrelx = 2
         self.add(npyscreen.FixedText, value=" Press ^Q for Help ", editable=False)
@@ -1132,17 +1155,20 @@ class QueryUpdateWindow(npyscreen.ActionForm, npyscreen.SplitForm):
         # Register help key
         self.add_handlers({'^Q': self.display_help})
 
+    # help tips popup message
     @staticmethod
     def display_help(self):
         help_msg = "Use the UPDATE form to update a row in the database."
         npyscreen.notify_confirm(help_msg, title='Help Tips')
 
 
+# Query Builder Delete page
 class QueryDeleteWindow(npyscreen.ActionForm, npyscreen.SplitForm):
 
     def create(self):
 
         # main navigation menu buttons
+
         self.add(NavMainButton, w_id="wNavMain", name="Main", value="Main",rely=1, scroll_exit=True)
 
         self.add(NavDatabaseButton, w_id="wNavDatabase", name="Databases", value="DatabaseWindow", rely=1, relx=14,
@@ -1158,7 +1184,7 @@ class QueryDeleteWindow(npyscreen.ActionForm, npyscreen.SplitForm):
 
         self.add(NavAdminButton, w_id="wNavAdmin", name="Admin", value="AdminWindow", rely=1, relx=96)
 
-        self.add(NavExitButton, w_id="wNavExit", name="Exit", value="AdminWindow", rely=1, relx=109)
+        self.add(NavExitButton, w_id="wNavExit", name="Exit", value="Exit", rely=1, relx=109)
 
         self.add(npyscreen.FixedText, value="Database: {}".format(self.parentApp.active_db), rely=3, relx=3,
                  color="LABEL", editable=False)
@@ -1173,9 +1199,11 @@ class QueryDeleteWindow(npyscreen.ActionForm, npyscreen.SplitForm):
 
         self.add(QueryDeleteBtn, name="DELETE", value="QueryDeleteWindow", color="VERYGOOD", rely=3, relx=73)
 
-        #label variables for selected table/fields
+        # label variables for selected table/fields
         self.table1_selected, self.table2_selected, self.table3_selected, self.field1_selected, \
         self.field2_selected, self.field3_selected = (None,)*6
+
+        # page widget controls
 
         self.nextrely += 1  # Move down
 
@@ -1259,7 +1287,6 @@ class QueryDeleteWindow(npyscreen.ActionForm, npyscreen.SplitForm):
         self.nextrely += 1  # Move down
         self.add(QBDelete_Button, w_id="wDelete_Button", relx=55, max_width=12, name="Delete")
 
-        # Help menu guidance
         self.nextrely = 34
         self.nextrelx = 2
         self.add(npyscreen.FixedText, value=" Press ^Q for Help ", editable=False)
@@ -1267,6 +1294,7 @@ class QueryDeleteWindow(npyscreen.ActionForm, npyscreen.SplitForm):
         # Register help key
         self.add_handlers({'^Q': self.display_help})
 
+    # help tips popup message
     @staticmethod
     def display_help(self):
         help_msg = "Use the DELETE form to delete rows from the database using the specified criteria.\n" \
@@ -1278,6 +1306,7 @@ class QueryDeleteWindow(npyscreen.ActionForm, npyscreen.SplitForm):
         npyscreen.notify_confirm(help_msg, title='Help Tips')
 
 
+# Query Builder Select Results page
 class QueryResultsWindow(npyscreen.ActionFormMinimal, npyscreen.SplitForm):
 
     def create(self):
@@ -1298,7 +1327,6 @@ class QueryResultsWindow(npyscreen.ActionFormMinimal, npyscreen.SplitForm):
         self.prevpage = self.add(PrevPage_Button, name="Prev Page", rely=31, relx=90, max_width=9, hidden=True)
         self.nextpage = self.add(NextPage_Button, name="Next Page", rely=31, relx=103, max_width=9, hidden=True)
 
-        # Help menu guidance
         self.nextrely = 34
         self.nextrelx = 2
         self.add(npyscreen.FixedText, value=" Press ^Q for Help ", editable=False)
@@ -1306,12 +1334,14 @@ class QueryResultsWindow(npyscreen.ActionFormMinimal, npyscreen.SplitForm):
         # Register help key
         self.add_handlers({'^Q': self.display_help})
 
+    # help tips popup message
     @staticmethod
     def display_help(self):
         help_msg = "Query Builder results page. Select page navigation for viewing complete result. Scroll right to see" \
                    "extended columns."
         npyscreen.notify_confirm(help_msg, title='Help Tips', editw=1)
 
+    # load default settings before page loads
     def beforeEditing(self):
 
         # init page values
@@ -1357,11 +1387,13 @@ class QueryResultsWindow(npyscreen.ActionFormMinimal, npyscreen.SplitForm):
         self.parentApp.switchForm("QueryWindow")
 
 
+# Raw SQL page - for entering free-form custom queries
 class RawSQLWindow(npyscreen.ActionForm, npyscreen.SplitForm):
 
     def create(self):
 
         # main navigation menu buttons
+
         self.add(NavMainButton, w_id="wNavMain", name="Main", value="Main",rely=1, scroll_exit=True)
 
         self.add(NavDatabaseButton, w_id="wNavDatabase", name="Databases", value="DatabaseWindow", rely=1, relx=14,
@@ -1378,7 +1410,9 @@ class RawSQLWindow(npyscreen.ActionForm, npyscreen.SplitForm):
 
         self.add(NavAdminButton, w_id="wNavAdmin", name="Admin", value="AdminWindow", rely=1, relx=96)
 
-        self.add(NavExitButton, w_id="wNavExit", name="Exit", value="AdminWindow", rely=1, relx=109)
+        self.add(NavExitButton, w_id="wNavExit", name="Exit", value="Exit", rely=1, relx=109)
+
+        # page widget controls
 
         self.nextrely += 1  # Move down
 
@@ -1391,10 +1425,9 @@ class RawSQLWindow(npyscreen.ActionForm, npyscreen.SplitForm):
 
         self.gridbox_results = self.add(Grid_Box_Results, max_height=19, values=self.parentApp.query_results,
                                         default_column_number=10,
-                                        contained_widget_arguments={"col_titles":self.parentApp.col_titles},
+                                        contained_widget_arguments={"col_titles": self.parentApp.col_titles},
                                         col_margin=1, column_width=12,
                                         name="SQL Results")
-
 
         self.numrecords = self.add(npyscreen.FixedText, value="{} Records Found".format(self.parentApp.num_records),
                                    relx=4, rely=32, max_width=20, editable=False)
@@ -1406,8 +1439,6 @@ class RawSQLWindow(npyscreen.ActionForm, npyscreen.SplitForm):
         self.prevpage = self.add(PrevPage_Button, name="Prev Page", rely=32, relx=90, max_width=9, hidden=True)
         self.nextpage = self.add(NextPage_Button, name="Next Page", rely=32, relx=103, max_width=9, hidden=True)
 
-
-        # Help menu guidance
         self.nextrely = 34
         self.nextrelx = 2
         self.add(npyscreen.FixedText, value=" Press ^Q for Help ", editable=False)
@@ -1415,6 +1446,7 @@ class RawSQLWindow(npyscreen.ActionForm, npyscreen.SplitForm):
         # Register help key
         self.add_handlers({'^Q': self.display_help})
 
+    # help tips popup message
     @staticmethod
     def display_help(self):
         help_msg = "Use this page to enter and submit a raw SQL query without any of form assistance from the " \
@@ -1438,6 +1470,182 @@ class RawSQLWindow(npyscreen.ActionForm, npyscreen.SplitForm):
     def on_ok(self):
         self.parentApp.query_results = None
         self.parentApp.num_records = 0
+
+
+# Import/Export page - for importing and exporting csv table data
+class ImportExportWindow(npyscreen.ActionForm, npyscreen.SplitForm):
+
+    def create(self):
+
+        # main navigation menu buttons
+
+        self.add(NavMainButton, w_id="wNavMain", name="Main", value="Main",rely=1, scroll_exit=True)
+
+        self.add(NavDatabaseButton, w_id="wNavDatabase", name="Databases", value="DatabaseWindow", rely=1, relx=14,
+                 scroll_exit=True)
+
+        self.add(NavTablesButton, w_id="wNavTables", name="Tables", value="TablesWindow", rely=1, relx=31)
+
+        self.add(NavQueryButton, w_id="wNavQuery", name="Query", value="QueryWindow", rely=1, relx=45)
+
+        self.add(NavRawSQLButton, w_id="wNavRawSQL", name="Raw SQL", value="RawSQLWindow", rely=1, relx=58)
+
+        self.add(NavImportExportButton, w_id="wNavExport", name="Import/Export", value="ExportWindow", rely=1, relx=74,
+                 color="VERYGOOD")
+
+        self.add(NavAdminButton, w_id="wNavAdmin", name="Admin", value="AdminWindow", rely=1, relx=96)
+
+        self.add(NavExitButton, w_id="wNavExit", name="Exit", value="Exit", rely=1, relx=109)
+
+        # page control widgets
+
+        # adds handler to open file selection dialog when 'f' is pressed
+        self.selectfile_key = '+'
+        self.add_handlers({self.selectfile_key: self.open_file_dialog})
+
+        self.nextrely += 1  # Move down
+
+        self.add(npyscreen.FixedText, value="Database: {}".format(self.parentApp.active_db), color="VERYGOOD",
+                 relx=3, editable=False)
+
+        self.add(npyscreen.FixedText, value="Select a table to import",
+                 relx=3, rely=5, max_width=33, color="CONTROL",editable=False)
+
+        self.add(npyscreen.FixedText, value="into or to export to an",
+                 relx=3, rely=6, max_width=33, color="CONTROL",editable=False)
+
+        self.add(npyscreen.FixedText, value="external CSV file",
+                 relx=3, rely=7, max_width=33, color="CONTROL",editable=False)
+
+        self.tablebox = self.add(npyscreen.BoxTitle, w_id="wTables_box", name="Tables", values=self.parentApp.tableList,
+                                 rely=9, max_width=25, max_height=20, scroll_exit=True)
+
+        self.add(npyscreen.FixedText, value="IMPORT CSV Table Data", color="LABEL", relx=30, rely=10, editable=False)
+
+        self.add(npyscreen.FixedText, value="Press '+' to select CSV file to import", relx=30, rely=12, max_width=45,
+                 color="CONTROL")
+
+        self.import_filename = self.add(npyscreen.TitleFixedText, name="Import File/Path: ", value="", relx=30, rely=13,
+                                        max_width=80, begin_entry_at=7, editable=False)
+
+        self.add(Import_Button, name="Import", relx=28, rely=15, color="CONTROL", scroll_exit=True)
+
+        self.add(npyscreen.FixedText, value="---------------------------------------", relx=30, rely=17, max_width=45,
+                 color="CONTROL")
+
+        self.add(npyscreen.FixedText, value="EXPORT Table to CSV File", color="LABEL", relx=30, rely=19, editable=False)
+
+        self.export_filename = self.add(npyscreen.TitleText, name="CSV Path/Filename: ", value="", relx=30,
+                                        rely=21, max_width=80, begin_entry_at=20, use_two_lines=False)
+
+        self.add(Export_Button, name="Export", relx=28, rely=23, color="CONTROL", scroll_exit=True)
+
+        self.nextrely = 34
+        self.nextrelx = 2
+        self.add(npyscreen.FixedText, value=" Press ^Q for Help ", editable=False)
+
+        # Register help key
+        self.add_handlers({'^Q': self.display_help})
+
+    # file chooser dialog screen handler
+    def open_file_dialog(self, code_of_key_pressed):
+
+        self.selected_importfile = npyscreen.selectFile(starting_value="/home/csv_files")
+        self.import_filename.value = self.selected_importfile
+        self.import_filename.display()
+
+    # help tips popup message
+    @staticmethod
+    def display_help(self):
+        help_msg = "Use this page to import or export contents between database tables and CSV files.\n\n" \
+                   "In order to import data from a CSV file into a database, you must first create a table containing\n" \
+                   "matching column field names and types matching the CSV file. Then, to import a CSV file, press the\n" \
+                   "'+' key to select the file. Select the table in the list and then choose the 'Import' button.\n\n" \
+                   "A note regarding MySQL file import: Linux AppArmor access control limits visibility to files to be\n" \
+                   "imported by MySQL's LOAD DATA functionality. To workaround this in ezdb, AppArmor's config file has\n" \
+                   "been modified to provide import file visibility in the top level '/tmp' directory. Because of this,\n" \
+                   "be sure to place any file you wish to import using MySQL into the '/tmp' directory."
+
+        npyscreen.notify_confirm(help_msg, title='Help Tips', editw=1)
+
+
+# Admin page
+class AdminWindow(npyscreen.ActionForm, npyscreen.SplitForm):
+
+    def create(self):
+
+        # main navigation menu buttons
+
+        self.add(NavMainButton, w_id="wNavMain", name="Main", value="Main",rely=1, scroll_exit=True)
+
+        self.add(NavDatabaseButton, w_id="wNavDatabase", name="Databases", value="DatabaseWindow", rely=1, relx=14,
+                 scroll_exit=True)
+
+        self.add(NavTablesButton, w_id="wNavTables", name="Tables", value="TablesWindow", rely=1, relx=31)
+
+        self.add(NavQueryButton, w_id="wNavQuery", name="Query", value="QueryWindow", rely=1, relx=45)
+
+        self.add(NavRawSQLButton, w_id="wNavRawSQL", name="Raw SQL", value="RawSQLWindow", rely=1, relx=58)
+
+        self.add(NavImportExportButton, w_id="wNavExport", name="Import/Export", value="ExportWindow", rely=1, relx=74)
+
+        self.add(NavAdminButton, w_id="wNavAdmin", name="Admin", value="AdminWindow", rely=1, relx=96, color="VERYGOOD")
+
+        self.add(NavExitButton, w_id="wNavExit", name="Exit", value="Exit", rely=1, relx=109)
+
+        # page widget controls
+
+        self.userbox = self.add(npyscreen.BoxTitle, name="Database Users", values=self.parentApp.userlist, relx=3,
+                                rely=3, max_width=25, max_height=26, scroll_exit=True)
+
+        self.add(DeleteUser_Button, name="Delete Selected User", relx=3, rely=29, color="CONTROL", scroll_exit=True)
+
+        self.add(npyscreen.FixedText, value="Create New User", editable=False, relx=30, rely=4)
+
+        self.newusername = self.add(npyscreen.TitleText, name="Username:", value="", relx=30, rely=6, begin_entry_at=11,
+                                    use_two_lines=False)
+
+        self.newuserpassword = self.add(npyscreen.TitleText, name="Password:", value="", relx=30, rely=7, begin_entry_at=11,
+                                    use_two_lines=False)
+
+        self.perm_superuser = self.add(npyscreen.TitleSelectOne, max_height=3,
+                                       name="Make the person a superuser with all privileges?", value=[0],
+                                       values=["No", "Yes"], relx=30, rely=9, max_width=30, scroll_exit=True)
+
+        self.perm_createDB = self.add(npyscreen.TitleSelectOne, max_height=3,
+                                      name="Can the user create/delete databases and tables?", value=[0],
+                                      values=["No", "Yes"], relx=30, rely=14, max_width=30, scroll_exit=True)
+
+        self.perm_createOthers = self.add(npyscreen.TitleSelectOne, max_height=3,
+                                          name="Can the user create/delete other users?", value=[0],
+                                          values=["No", "Yes"], relx=30, rely=19, max_width=30, scroll_exit=True)
+
+        self.add(CreateUser_Button, name="Create", relx=30, rely=24, color="CONTROL", scroll_exit=True)
+
+        self.nextrely = 34
+        self.nextrelx = 2
+        self.add(npyscreen.FixedText, value=" Press ^Q for Help ", editable=False)
+
+        # Register help key
+        self.add_handlers({'^Q': self.display_help})
+
+    # preload user list
+    def beforeEditing(self):
+
+        self.parentApp.userlist = self.parentApp.dbms.get_userlist()
+        self.userbox.values = self.parentApp.userlist
+        self.userbox.display()
+
+    # help tips popup message
+    @staticmethod
+    def display_help(self):
+        help_msg = "Use this screen to manage user creation with permissions and deletion. Note: root DBMS user name " \
+                   "is hidden to prevent accidental deletion or permission alteration."
+
+        npyscreen.notify_confirm(help_msg, title='Help Tips', editw=1)
+
+
+'''CUSTOM FORM WIDGET'''
 
 
 class SQL_Query(npyscreen.MultiLineEdit):
@@ -1469,7 +1677,6 @@ class QB_TableList01(npyscreen.MultiLineAction):
 
         field_list = []
 
-        #run query
         results = self.parent.parentApp.dbms.get_table_fields(act_on_this)
         if results[0] == "success":
             field_list.append('[ALL]')
@@ -1493,7 +1700,6 @@ class QB_TableList02(npyscreen.MultiLineAction):
 
         field_list = []
 
-        #run query
         results = self.parent.parentApp.dbms.get_table_fields(act_on_this)
         if results[0] == "success":
             field_list.append('[ALL]')
@@ -1517,7 +1723,6 @@ class QB_TableList03(npyscreen.MultiLineAction):
 
         field_list = []
 
-        #run query
         results = self.parent.parentApp.dbms.get_table_fields(act_on_this)
         if results[0] == "success":
             field_list.append('[ALL]')
@@ -1736,7 +1941,6 @@ class QB_InsertTableList(npyscreen.MultiLineAction):
         self.parent.label_field20.display()
         self.parent.insertfield20.display()
 
-        #run query
         results = self.parent.parentApp.dbms.get_table_fields(act_on_this)
         if results[0] == "success":
             field_list.append('[ALL]')
@@ -1968,7 +2172,6 @@ class QBDelete_TableList(npyscreen.MultiLineAction):
 
         field_list = []
 
-        #run query
         results = self.parent.parentApp.dbms.get_table_fields(act_on_this)
         if results[0] == "success":
             field_list.append('[ALL]')
@@ -1992,170 +2195,8 @@ class QBDelete_TableBox(npyscreen.BoxTitle):
     _contained_widget = QBDelete_TableList
 
 
-class ImportExportWindow(npyscreen.ActionForm, npyscreen.SplitForm):
-
-    def create(self):
-
-        # main navigation menu buttons
-        self.add(NavMainButton, w_id="wNavMain", name="Main", value="Main",rely=1, scroll_exit=True)
-
-        self.add(NavDatabaseButton, w_id="wNavDatabase", name="Databases", value="DatabaseWindow", rely=1, relx=14,
-                 scroll_exit=True)
-
-        self.add(NavTablesButton, w_id="wNavTables", name="Tables", value="TablesWindow", rely=1, relx=31)
-
-        self.add(NavQueryButton, w_id="wNavQuery", name="Query", value="QueryWindow", rely=1, relx=45)
-
-        self.add(NavRawSQLButton, w_id="wNavRawSQL", name="Raw SQL", value="RawSQLWindow", rely=1, relx=58)
-
-        self.add(NavImportExportButton, w_id="wNavExport", name="Import/Export", value="ExportWindow", rely=1, relx=74,
-                 color="VERYGOOD")
-
-        self.add(NavAdminButton, w_id="wNavAdmin", name="Admin", value="AdminWindow", rely=1, relx=96)
-
-        self.add(NavExitButton, w_id="wNavExit", name="Exit", value="AdminWindow", rely=1, relx=109)
-
-        # adds handler to open file selection dialog when 'f' is pressed
-        self.selectfile_key = '+'
-        self.add_handlers({self.selectfile_key: self.open_file_dialog})
-
-        self.nextrely += 1  # Move down
-
-        self.add(npyscreen.FixedText, value="Database: {}".format(self.parentApp.active_db), color="VERYGOOD",
-                 relx=3, editable=False)
-
-        self.add(npyscreen.FixedText, value="Select a table to import",
-                 relx=3, rely=5, max_width=33, color="CONTROL",editable=False)
-
-        self.add(npyscreen.FixedText, value="into or to export to an",
-                 relx=3, rely=6, max_width=33, color="CONTROL",editable=False)
-
-        self.add(npyscreen.FixedText, value="external CSV file",
-                 relx=3, rely=7, max_width=33, color="CONTROL",editable=False)
-
-        self.tablebox = self.add(npyscreen.BoxTitle, w_id="wTables_box", name="Tables", values=self.parentApp.tableList,
-                                 rely=9, max_width=25, max_height=20, scroll_exit=True)
-
-        self.add(npyscreen.FixedText, value="IMPORT CSV Table Data", color="LABEL", relx=30, rely=10, editable=False)
-
-        self.add(npyscreen.FixedText, value="Press '+' to select CSV file to import", relx=30, rely=12, max_width=45,
-                 color="CONTROL")
-
-        self.import_filename = self.add(npyscreen.TitleFixedText, name="Import File/Path: ", value="", relx=30, rely=13,
-                                        max_width=80, begin_entry_at=7, editable=False)
-
-        self.add(Import_Button, name="Import", relx=28, rely=15, color="CONTROL", scroll_exit=True)
-
-        self.add(npyscreen.FixedText, value="---------------------------------------", relx=30, rely=17, max_width=45,
-                 color="CONTROL")
-
-        self.add(npyscreen.FixedText, value="EXPORT Table to CSV File", color="LABEL", relx=30, rely=19, editable=False)
-
-        self.export_filename = self.add(npyscreen.TitleText, name="CSV Path/Filename: ", value="", relx=30,
-                                        rely=21, max_width=80, begin_entry_at=20, use_two_lines=False)
-
-        self.add(Export_Button, name="Export", relx=28, rely=23, color="CONTROL", scroll_exit=True)
-
-        # Help menu guidance
-        self.nextrely = 34
-        self.nextrelx = 2
-        self.add(npyscreen.FixedText, value=" Press ^Q for Help ", editable=False)
-
-        # Register help key
-        self.add_handlers({'^Q': self.display_help})
-
-    def open_file_dialog(self, code_of_key_pressed):
-
-        self.selected_importfile = npyscreen.selectFile(starting_value="/home/csv_files")
-        self.import_filename.value = self.selected_importfile
-        self.import_filename.display()
-
-
-    @staticmethod
-    def display_help(self):
-        help_msg = "Use this page to import or export contents between database tables and CSV files.\n\n" \
-                   "In order to import data from a CSV file into a database, you must first create a table containing\n" \
-                   "matching column field names and types matching the CSV file. Then, to import a CSV file, press the\n" \
-                   "'+' key to select the file. Select the table in the list and then choose the 'Import' button.\n\n" \
-                   "A note regarding MySQL file import: Linux AppArmor access control limits visibility to files to be\n" \
-                   "imported by MySQL's LOAD DATA functionality. To workaround this in ezdb, AppArmor's config file has\n" \
-                   "been modified to provide import file visibility in the top level '/tmp' directory. Because of this,\n" \
-                   "be sure to place any file you wish to import using MySQL into the '/tmp' directory."
-
-        npyscreen.notify_confirm(help_msg, title='Help Tips', editw=1)
-
-
-class AdminWindow(npyscreen.ActionForm, npyscreen.SplitForm):
-
-    def create(self):
-
-        # main navigation menu buttons
-        self.add(NavMainButton, w_id="wNavMain", name="Main", value="Main",rely=1, scroll_exit=True)
-
-        self.add(NavDatabaseButton, w_id="wNavDatabase", name="Databases", value="DatabaseWindow", rely=1, relx=14,
-                 scroll_exit=True)
-
-        self.add(NavTablesButton, w_id="wNavTables", name="Tables", value="TablesWindow", rely=1, relx=31)
-
-        self.add(NavQueryButton, w_id="wNavQuery", name="Query", value="QueryWindow", rely=1, relx=45)
-
-        self.add(NavRawSQLButton, w_id="wNavRawSQL", name="Raw SQL", value="RawSQLWindow", rely=1, relx=58)
-
-        self.add(NavImportExportButton, w_id="wNavExport", name="Import/Export", value="ExportWindow", rely=1, relx=74)
-
-        self.add(NavAdminButton, w_id="wNavAdmin", name="Admin", value="AdminWindow", rely=1, relx=96, color="VERYGOOD")
-
-        self.add(NavExitButton, w_id="wNavExit", name="Exit", value="AdminWindow", rely=1, relx=109)
-
-        self.userbox = self.add(npyscreen.BoxTitle, name="Database Users", values=self.parentApp.userlist, relx=3,
-                                rely=3, max_width=25, max_height=26, scroll_exit=True)
-
-        self.add(DeleteUser_Button, name="Delete Selected User", relx=3, rely=29, color="CONTROL", scroll_exit=True)
-
-        self.add(npyscreen.FixedText, value="Create New User", editable=False, relx=30, rely=4)
-
-        self.newusername = self.add(npyscreen.TitleText, name="Username:", value="", relx=30, rely=6, begin_entry_at=11,
-                                    use_two_lines=False)
-
-        self.newuserpassword = self.add(npyscreen.TitleText, name="Password:", value="", relx=30, rely=7, begin_entry_at=11,
-                                    use_two_lines=False)
-
-        self.perm_superuser = self.add(npyscreen.TitleSelectOne, max_height=3,
-                                       name="Make the person a superuser with all privileges?", value=[0],
-                                       values=["No", "Yes"], relx=30, rely=9, max_width=30, scroll_exit=True)
-
-        self.perm_createDB = self.add(npyscreen.TitleSelectOne, max_height=3,
-                                      name="Can the user create/delete databases and tables?", value=[0],
-                                      values=["No", "Yes"], relx=30, rely=14, max_width=30, scroll_exit=True)
-
-        self.perm_createOthers = self.add(npyscreen.TitleSelectOne, max_height=3,
-                                          name="Can the user create/delete other users?", value=[0],
-                                          values=["No", "Yes"], relx=30, rely=19, max_width=30, scroll_exit=True)
-
-        self.add(CreateUser_Button, name="Create", relx=30, rely=24, color="CONTROL", scroll_exit=True)
-
-        # Help menu guidance
-        self.nextrely = 34
-        self.nextrelx = 2
-        self.add(npyscreen.FixedText, value=" Press ^Q for Help ", editable=False)
-
-        # Register help key
-        self.add_handlers({'^Q': self.display_help})
-
-    def beforeEditing(self):
-
-        self.parentApp.userlist = self.parentApp.dbms.get_userlist()
-        self.userbox.values = self.parentApp.userlist
-        self.userbox.display()
-
-    @staticmethod
-    def display_help(self):
-        help_msg = "Use this screen to manage user creation with permissions and deletion. Note: root DBMS user name " \
-                   "is hidden to prevent accidental deletion or permission alteration."
-
-        npyscreen.notify_confirm(help_msg, title='Help Tips', editw=1)
-
 '''DATABASE BUTTONS'''
+
 
 class OpenDBButton(npyscreen.ButtonPress):
     def whenPressed(self):
@@ -2190,13 +2231,11 @@ class CreateDBButton(npyscreen.ButtonPress):
             return
 
         else:
-            npyscreen.blank_terminal() # clears the notification and just goes back to the original form
+            npyscreen.blank_terminal()  # clears the notification and just goes back to the original form
 
 
 class DeleteDBButton(npyscreen.ButtonPress):
     def whenPressed(self):
-
-        #npyscreen.notify_confirm("self.parent.db_box.value = " + str(self.parent.db_box.value))
 
         if self.parent.db_box.value is None:
             npyscreen.notify_confirm("Please select a database by highlighting it and enter")
@@ -2219,9 +2258,10 @@ class DeleteDBButton(npyscreen.ButtonPress):
                 return
 
             else:
-                npyscreen.blank_terminal() # clears the notification and just goes back to the original form
+                npyscreen.blank_terminal()  # clears the notification and just goes back to the original form
 
 '''TABLE BUTTONS'''
+
 
 class ViewTableStructButton(npyscreen.ButtonPress):
 
@@ -2391,6 +2431,7 @@ class BrowseTableButton(npyscreen.ButtonPress):
 
 
 class BuildTableButton(npyscreen.ButtonPress):
+
     def whenPressed(self):
 
         if self.parent.get_widget("wNewTable_name").value == '':
@@ -2470,7 +2511,7 @@ class AddFieldButton(npyscreen.ButtonPress):
                     return
 
                 else:
-                    #if postgreSQ, collation name needs double quotesL
+
                     self.collation = "COLLATE \"" + str(self.parent.get_widget("wCollation").get_selected_objects()[0])\
                                      + "\""
 
@@ -2482,7 +2523,7 @@ class AddFieldButton(npyscreen.ButtonPress):
                     return
 
                 else:
-                    #if MySQL
+                    # if MySQL
                     self.collation = "COLLATE " + str(self.parent.get_widget("wCollation").get_selected_objects()[0])
 
             self.field_string += (" " + self.collation)
@@ -2619,7 +2660,9 @@ class DeleteTableButton(npyscreen.ButtonPress):
         else:
             npyscreen.blank_terminal() # clears the notification and just goes back to the original form
 
+
 '''QUERY BUILDER BUTTONS'''
+
 
 class QB_SQL_Build_Button(npyscreen.ButtonPress):
 
@@ -2978,7 +3021,7 @@ class QBDelete_Button(npyscreen.ButtonPress):
             return
 
         self.sql_string = "DELETE FROM {} ".format(self.parent.parentApp.table1)
-        #self.field_string = ""
+
         self.criteria1_string = ""
         self.criteria2_string = ""
         self.criteria3_string = ""
@@ -3131,8 +3174,6 @@ class QBDelete_Button(npyscreen.ButtonPress):
 
         elif self.criteria3_string != "":
             self.sql_string += self.criteria3_string
-
-        # npyscreen.notify_confirm("SQL string = " + self.sql_string)
 
         self.results = self.parent.parentApp.dbms.execute_SQL(self.sql_string)
 
@@ -3507,7 +3548,9 @@ class QBUpdate_Button(npyscreen.ButtonPress):
         else:
             npyscreen.notify_confirm("Update operation completed successfully")
 
+
 '''QB NAV BUTTONS'''
+
 
 class QuerySelectBtn(npyscreen.ButtonPress):
     def whenPressed(self):
@@ -3531,6 +3574,7 @@ class QueryDeleteBtn(npyscreen.ButtonPress):
     def whenPressed(self):
         self.parent.parentApp.switchForm("QueryDeleteWindow")
         return
+
 
 '''IMPORT/EXPORT BUTTONS'''
 
@@ -3562,7 +3606,6 @@ class Import_Button(npyscreen.ButtonPress):
             sql_string = "LOAD DATA INFILE '{}' INTO TABLE {} FIELDS TERMINATED BY ',' ENCLOSED BY '\"' " \
                          "LINES TERMINATED BY '\\r' IGNORE 1 LINES"\
                 .format(self.parent.selected_importfile, self.selected_table)
-            npyscreen.notify_confirm(sql_string)
 
         self.results = self.parent.parentApp.dbms.execute_SQL(sql_string)
 
@@ -3603,18 +3646,17 @@ class Export_Button(npyscreen.ButtonPress):
         elif self.parent.parentApp.dbtype == 1: # if mysql
 
             sql_string = "SELECT * INTO OUTFILE '{}' FIELDS TERMINATED BY ',' ENCLOSED BY '\"' " \
-                         "LINES TERMINATED BY '\\r\\n' FROM {}".format(self.parent.export_filename.value, self.selected_table)
+                         "LINES TERMINATED BY '\\r\\n' FROM {}".format("/home/csv_files/" +
+                                                                       self.parent.export_filename.value,
+                                                                       self.selected_table)
 
-        npyscreen.notify_confirm(sql_string)
         self.results = self.parent.parentApp.dbms.execute_SQL(sql_string)
 
         if self.results[0] == 'error':
             npyscreen.notify_confirm(str(self.results[1]))
             return
 
-        elif self.results[0] == 'success':
-            #os.chmod(self.parent.export_filename.value, 0o777)
-            #os.chown(self.parent.export_filename.value, os.getuid(), os.getgid())
+        elif self.results[0] == 'noresult':
             npyscreen.notify_confirm("File exported successfully")
 
             return
@@ -3873,10 +3915,10 @@ class DeleteUser_Button(npyscreen.ButtonPress):
 
 '''PAGE BUTTONS'''
 
+
 class PrevPage_Button(npyscreen.ButtonPress):
+
     def whenPressed(self):
-        # npyscreen.notify_confirm("self.parent.parentApp.row_start = " + str(self.parent.parentApp.row_start) +
-        #                          "\nself.parent.parentApp.row_end = " + str(self.parent.parentApp.row_end))
 
         if self.parent.parentApp.page_num > 1:
             self.parent.parentApp.page_num -= 1
@@ -3896,9 +3938,9 @@ class PrevPage_Button(npyscreen.ButtonPress):
 
 
 class NextPage_Button(npyscreen.ButtonPress):
+
     def whenPressed(self):
-        # npyscreen.notify_confirm("self.parent.parentApp.row_start = " + str(self.parent.parentApp.row_start) +
-        #                         "\nself.parent.parentApp.row_end = " + str(self.parent.parentApp.row_end))
+
         if self.parent.parentApp.page_num < self.parent.parentApp.num_pages:
 
             self.parent.parentApp.page_num += 1
@@ -3916,22 +3958,26 @@ class NextPage_Button(npyscreen.ButtonPress):
 
             return
 
+
 '''NAV BAR BUTTONS'''
 
 
 class NavMainButton(npyscreen.ButtonPress):
+
     def whenPressed(self):
         self.parent.parentApp.switchForm("MAIN")
         return
 
 
 class NavDatabaseButton(npyscreen.ButtonPress):
+
     def whenPressed(self):
         self.parent.parentApp.switchForm("DatabaseWindow")
         return
 
 
 class NavTablesButton(npyscreen.ButtonPress):
+
     def whenPressed(self):
 
         if self.parent.parentApp.active_db is None:
@@ -3943,6 +3989,7 @@ class NavTablesButton(npyscreen.ButtonPress):
 
 
 class NavQueryButton(npyscreen.ButtonPress):
+
     def whenPressed(self):
 
         if self.parent.parentApp.active_db is None:
@@ -3954,12 +4001,14 @@ class NavQueryButton(npyscreen.ButtonPress):
 
 
 class NavRawSQLButton(npyscreen.ButtonPress):
+
     def whenPressed(self):
         self.parent.parentApp.switchForm("RawSQLWindow")
         return
 
 
 class NavImportExportButton(npyscreen.ButtonPress):
+
     def whenPressed(self):
 
         if self.parent.parentApp.active_db is None:
@@ -3971,12 +4020,14 @@ class NavImportExportButton(npyscreen.ButtonPress):
 
 
 class NavAdminButton(npyscreen.ButtonPress):
+
     def whenPressed(self):
         self.parent.parentApp.switchForm("AdminWindow")
         return
 
 
 class NavExitButton(npyscreen.ButtonPress):
+
     def whenPressed(self):
         exiting = npyscreen.notify_yes_no("Are you sure you want to quit?", "Are you sure?", editw=2)
         if exiting:
@@ -3991,9 +4042,11 @@ class NavExitButton(npyscreen.ButtonPress):
 # Manages the display of the various Forms we have created
 class App(npyscreen.NPSAppManaged):
 
+    # this section declares all the variables that are available globally within the program
+
     dbtype, host, port, dbname, username, password, dbms, active_db, tableList, active_table = (None,)*10
 
-    # Table creation global variables
+    # Table creation variables
     field_name, field_type, field_length_or_val, field_collation, field_attrib, field_default = (None,)*6
 
     engine = "InnoDB"  # sets default MySQL engine type
@@ -4002,12 +4055,14 @@ class App(npyscreen.NPSAppManaged):
 
     field_optional = True  # User friendly way of saying if Null is okay for this field
 
+    # Query Builder variables uses in query statement creation
     field1, field2, field3, tbl1_criteria1, tbl1_criteria2, tbl1_criteria3, tbl2_criteria1, tbl2_criteria2, \
         tbl2_criteria3, tbl3_criteria1, tbl3_criteria2, tbl3_criteria3, table1, table2, table3, insertTable = (None,)*16
 
     tablefield_cols, query_results, col_titles, table_struct_results, field_string_array, field_list1, \
     field_list2, field_list3, insertfield_list, userlist = ([],)*10
 
+    # pagination control and records display variables
     page_num = 0
     num_pages, num_records = (0,)*2
     row_start = 0
@@ -4045,14 +4100,12 @@ class App(npyscreen.NPSAppManaged):
                           draw_line_at=34, minimum_lines=37, minimum_columns=120, ALLOW_RESIZE=False)
         self.addFormClass("TableCreateMySQLForm", TableCreateMySQLForm, name="ezdb >> Build/Create Table",
                           draw_line_at=34, minimum_lines=37, minimum_columns=120, ALLOW_RESIZE=False)
-        # for testing:
-        # self.addForm("Nav_Bar", Nav_Bar)
 
 if __name__ == "__main__":
 
     print "Resizing terminal..."
 
-    # resizes the terminal to 120 x 37
+    # resizes the terminal to 120 x 37 to allow room for widget placement
     print "\x1b[8;37;120t"
 
     # necessary pause to prevent race condition and allow terminal time to resize before launching npyscreen form

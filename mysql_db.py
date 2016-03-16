@@ -6,8 +6,9 @@
 # mysql_db.py supplemental file implementing MySQL-specific backend functions
 
 import mysql.connector
-from mysql.connector import errorcode
-import urllib2
+
+# main reference: https://www.mysql.com/products/connector/
+
 
 class MySQL_Database(object):
 
@@ -22,6 +23,7 @@ class MySQL_Database(object):
 
         self.dbname = None
 
+    # connect to MySQL database management system
     def connect_DBMS(self, dbtype, host, port, dbname, user, password):
         
         self.dbtype = dbtype
@@ -50,8 +52,7 @@ class MySQL_Database(object):
         except mysql.connector.Error, err:
             return err
 
-    '''connect to existing named database'''
-
+    # connect to existing named database
     def connect_database(self, dbname):
 
         self.dbname = dbname
@@ -67,7 +68,7 @@ class MySQL_Database(object):
 
     def list_databases(self):
 
-        # sql command to only show user created databases exlusive of system databases
+        # sql command to only show user created databases exclusive of system databases
         sql_string = "SELECT schema_name FROM INFORMATION_SCHEMA.SCHEMATA WHERE schema_name not in" \
                      "('information_schema','mysql','performance_schema');"
         try:
@@ -104,9 +105,9 @@ class MySQL_Database(object):
         self.dbname = dbname
 
         if self.conn:
-            self.conn.close() #close db connection
+            self.conn.close()  # close db connection prior to database deletion
 
-        #connect to dbms as root
+        # connect to dbms as root first for deleting database
         self.conn_config.clear()
         self.conn_config = {
             'user': self.user,

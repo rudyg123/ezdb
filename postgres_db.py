@@ -9,8 +9,8 @@ import psycopg2
 import psycopg2.errorcodes
 import psycopg2.extras
 
-#http://initd.org/psycopg/docs/usage.html
-#required editing pg_hba.conf file in path etc/postgresql/9.3/main from peer to trust
+# main reference: http://initd.org/psycopg/docs/usage.html
+
 
 class Postgres_Database(object):
         
@@ -26,6 +26,7 @@ class Postgres_Database(object):
 
         self.dbname = None
 
+    # connect to PostgreSQL database management system
     def connect_DBMS(self, dbtype, host, port, dbname, user, password):
         
         self.dbtype = dbtype
@@ -71,6 +72,7 @@ class Postgres_Database(object):
 
     def list_databases(self):
 
+        # sql command to only show user created databases exclusive of system databases
         sql_string = "SELECT datname FROM pg_database WHERE datistemplate = false AND datname != 'postgres';"
 
         try:
@@ -111,9 +113,9 @@ class Postgres_Database(object):
         self.dbname = dbname
 
         if self.conn:
-            self.conn.close() #close db connection
+            self.conn.close()  # close db connection prior to database deletion
 
-        #connect to dbms as root
+        # connect to dbms as root first for deleting database
         self.conn_config.clear()
         self.conn_config = {
             'user': self.user,
