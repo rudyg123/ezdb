@@ -3604,7 +3604,7 @@ class Import_Button(npyscreen.ButtonPress):
         elif self.parent.parentApp.dbtype == 1: # if mysql
 
             sql_string = "LOAD DATA INFILE '{}' INTO TABLE {} FIELDS TERMINATED BY ',' ENCLOSED BY '\"' " \
-                         "LINES TERMINATED BY '\\r' IGNORE 1 LINES"\
+                         "LINES TERMINATED BY '\\n' IGNORE 1 LINES"\
                 .format(self.parent.selected_importfile, self.selected_table)
 
         self.results = self.parent.parentApp.dbms.execute_SQL(sql_string)
@@ -3640,13 +3640,13 @@ class Export_Button(npyscreen.ButtonPress):
 
         if self.parent.parentApp.dbtype == 0: # if postgresql
 
-            sql_string = "COPY {} TO '{}' DELIMITER ',' CSV HEADER".format(self.selected_table,
+            sql_string = "COPY {} TO '{}' DELIMITER ',' CSV HEADER".format(self.selected_table, "/home/csv_files/" +
                                                                            self.parent.export_filename.value)
 
         elif self.parent.parentApp.dbtype == 1: # if mysql
 
             sql_string = "SELECT * INTO OUTFILE '{}' FIELDS TERMINATED BY ',' ENCLOSED BY '\"' " \
-                         "LINES TERMINATED BY '\\r\\n' FROM {}".format("/home/csv_files/" +
+                         "LINES TERMINATED BY '\\n' FROM {}".format("/home/csv_files/" +
                                                                        self.parent.export_filename.value,
                                                                        self.selected_table)
 
